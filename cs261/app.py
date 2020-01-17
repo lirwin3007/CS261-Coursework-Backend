@@ -9,4 +9,4 @@ class Blueprint:
     def run():
         app = Flask(__name__)
         app.register_blueprint(DerivativeManagementBlueprint)
-        app.run(debug=True, host='0.0.0.0')
+        app.run(host='127.0.0.1')
