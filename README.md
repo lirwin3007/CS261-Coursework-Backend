@@ -1,4 +1,4 @@
-https://github.com/lirwin3007/CS261-Coursework/workflows/Run%20Lint/badge.svg
+![](https://github.com/lirwin3007/CS261-Coursework/workflows/Run%20Lint/badge.svg)
 
 ## Quick Start
 \\TODO: Write quick start
