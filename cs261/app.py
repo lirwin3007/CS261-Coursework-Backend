@@ -6,7 +6,17 @@ from cs261.blueprints.DerivativeManagement import DerivativeManagementBlueprint
 class Blueprint:
 
     @staticmethod
-    def run():
+    def setup():
         app = Flask(__name__)
         app.register_blueprint(DerivativeManagementBlueprint)
-        app.run(host='127.0.0.1')
+        return app
+
+    @staticmethod
+    def run():
+        app = Blueprint.setup()
+        app.run()
+
+    @staticmethod
+    def get_app():
+        app = Blueprint.setup()
+        return app
