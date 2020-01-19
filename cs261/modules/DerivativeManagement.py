@@ -6,4 +6,4 @@ class DerivativeManagement:
         return {'id': 1, 'name': 'test'}
 
     def getDerviative(self, derivativeId):
-        return {'id': derivativeId, 'name': 'test', 'message': 'Im on dev!'}
+        return {'id': derivativeId, 'name': 'test', 'message': 'I want to be on master though...'}
