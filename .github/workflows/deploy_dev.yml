@@ -1,0 +1,30 @@
+name: Deploy Dev
+
+on:
+    push:
+        branches:
+            - dev
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup SSH Keys and known_hosts
+      env:
+        SSH_AUTH_SOCK: /tmp/ssh_agent.sock
+      run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan 167.71.131.205 >> ~/.ssh/known_hosts
+          ssh-agent -a $SSH_AUTH_SOCK > /dev/null
+          ssh-add - <<< "${{ secrets.SSH_PRIVATE_KEY }}"
+    - name: Push to the production server
+      env:
+        SSH_AUTH_SOCK: /tmp/ssh_agent.sock
+      run: |
+          git fetch --unshallow origin
+          git config --global user.name 'Github Action'
+          git config --global user.email 'github@action.com'
+          git push root@167.71.131.205:/root/backend/repo dev
