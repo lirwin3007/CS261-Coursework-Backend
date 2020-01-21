@@ -1,1 +1,1 @@
-from .app import Blueprint  # noqa: F401
+from .app import Application  # noqa: F401
