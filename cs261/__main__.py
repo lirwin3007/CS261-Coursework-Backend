@@ -1,4 +1,4 @@
-from .app import Application
+from cs261.application import app
 
 if __name__ == '__main__':
-    Application.run()
+    app.run()

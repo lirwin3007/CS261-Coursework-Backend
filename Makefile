@@ -12,6 +12,22 @@ TAG := $(shell git describe --tags --always --dirty)
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
+install:
+	@echo "TODO: create derivatex installer"
+
+# Run as root
+init:
+	# Install Application dependencies
+	@apt update
+	@apt install python3 python3-pip
+	@pip3 install -r requirements.txt
+	# Install database dependencies
+	@apt install mysql-server python-mysqldb
+	# Initialise database
+	@systemctl start mysql
+	# Config database
+	@mysql < database_script.sql
+
 run:
 	@python3 -m $(MODULE)
 
