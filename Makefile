@@ -12,43 +12,48 @@ TAG := $(shell git describe --tags --always --dirty)
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-install:
-	@echo "TODO: create derivatex installer"
+# Suppress console spam
+.SILENT:
 
 # Run as root
 init:
 	# Install Application dependencies
-	@apt update
-	@apt install python3 python3-pip
-	@pip3 install -r requirements.txt
+	apt update
+	apt install python3 python3-pip
+	pip3 install -r requirements.txt
 	# Install database dependencies
-	@apt install mysql-server python-mysqldb
-	# Initialise database
-	@systemctl start mysql
+	apt install mysql-server python-mysqldb
+	#
+	apt install flake8 bandit
+
+
+sql:
+	# Start MySQL server
+	systemctl start mysql
 	# Config database
-	@mysql < database_script.sql
+	mysql < database_script.sql
 
 run:
-	@python3 -m $(MODULE)
+	python3 -m $(MODULE)
 
 test:
-	@pytest
+	pytest
 
 lint:
-	@echo "\n${BLUE}Running Pylint against source and test files...${NC}\n"
-	@pylint --rcfile=setup.cfg **/*.py
-	@echo "\n${BLUE}Running Flake8 against source and test files...${NC}\n"
-	@flake8
-	@echo "\n${BLUE}Running Bandit against source files...${NC}\n"
-	@bandit -r --ini setup.cfg
+	echo "\n${BLUE}Running Pylint against source and test files...${NC}\n"
+	pylint --rcfile=setup.cfg **/*.py
+	echo "\n${BLUE}Running Flake8 against source and test files...${NC}\n"
+	flake8
+	echo "\n${BLUE}Running Bandit against source files...${NC}\n"
+	bandit -r --ini setup.cfg
 
 # Example: make push VERSION=0.0.2
 push: build-prod
-	@echo "\n${BLUE}Pushing image to GitHub Docker Registry...${NC}\n"
-	@docker push $(IMAGE):$(VERSION)
+	echo "\n${BLUE}Pushing image to GitHub Docker Registry...${NC}\n"
+	docker push $(IMAGE):$(VERSION)
 
 version:
-	@echo $(TAG)
+	echo $(TAG)
 
 .PHONY: clean image-clean build-prod push test
 
