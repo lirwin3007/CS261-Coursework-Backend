@@ -1,6 +1,3 @@
-# Ignore dummy data dir
-res/dummy/
-
 # Python gitignore
 
 # Byte-compiled / optimized / DLL files

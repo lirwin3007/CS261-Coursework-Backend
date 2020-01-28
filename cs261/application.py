@@ -1,6 +1,5 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
-import json
 
 # Create flask web-app
 app = Flask(__name__)
@@ -18,7 +17,5 @@ app.register_blueprint(DerivativeManagementBlueprint)
 
 
 
-# Drop all tables from the database
-db.drop_all()
 # Create new tables for all ORM classes inheriting the base Model
 db.create_all()

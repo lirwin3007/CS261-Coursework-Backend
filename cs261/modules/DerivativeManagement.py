@@ -1,5 +1,6 @@
 from cs261.application import db
 from cs261.modules.UserManagement import User
+from cs261.modules.ExternalModels import Currency
 import datetime
 
 def getDerviative(derivativeId):
@@ -32,12 +33,12 @@ class Derivative(db.Model):
     id = db.Column(db.String(16), primary_key=True)
     buying_party = db.Column(db.String(6), nullable=False)
     selling_party = db.Column(db.String(6), nullable=False)
-    product = db.Column(db.String(128), nullable=False)
+    asset = db.Column(db.String(128), nullable=False)
     quantity = db.Column(db.Integer, nullable=False)
     strike_price = db.Column(db.Float, nullable=False)
-    currency = db.Column(db.CHAR(3), nullable=False)
-    maturity_date = db.Column(db.Date)
-    modified = db.Column(db.Boolean, default=False)
+    currency_code = db.Column(db.CHAR(3), db.ForeignKey('currency.code'))
+    maturity_date = db.Column(db.Date, nullable=False)
+    modified = db.Column(db.Boolean, nullable=False, default=False)
 
     def as_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
