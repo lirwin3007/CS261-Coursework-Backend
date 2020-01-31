@@ -1,42 +1,47 @@
 from cs261.application import db
-from cs261.modules.UserManagement import User
-from cs261.modules.ExternalModels import Currency
-import datetime
+from cs261.modules.ActionManagement import Action
+
 
 def getDerviative(derivativeId):
     return Derivative.query.filter_by(id=derivativeId).first()
 
-def getDerviatives(filter):
-    return Derivative.query.filter(filter)
-
-def addDerivative(derivative_json):
+def addDerivative(derivative_json, userId):
     # Create derivative object
     derivative = Derivative(**derivative_json)
 
     # Validate the derivative
     if True:
         # Register the user creating the derivative
-        # Action(derivativeId, uid, "ADD")
+        action = Action(derivative_id=derivative.id, user_id=userId, type="ADD")
+
+        db.session.add(derivative)
+        db.session.add(action)
         db.session.commit()
-    else:
-        db.session.rollback()
 
-def deleteDerivative(derivativeId):
-    # Delete the derivative
-    Derivative.query.filter_by(id=derivativeId).delete()
+        return derivative
 
-    # Register the user deleting the derivative
-    # Action(derivativeId, uid, "DELETE")
+def deleteDerivative(derivativeId, userId):
+    # Select the derivative
+    derivative = getDerviative(derivativeId)
 
-# ...
+    if derivative is not None:
+        # Delete the derivative
+        derivative.delete()
+
+        # Register the user deleting the derivative
+        Action(derivativeId, userId, "DELETE")
+        db.session.commit()
+
+
 class Derivative(db.Model):
     id = db.Column(db.String(16), primary_key=True)
-    buying_party = db.Column(db.String(6), nullable=False)
-    selling_party = db.Column(db.String(6), nullable=False)
+    buying_party = db.Column(db.String(6), db.ForeignKey('company.id'))
+    selling_party = db.Column(db.String(6), db.ForeignKey('company.id'))
     asset = db.Column(db.String(128), nullable=False)
     quantity = db.Column(db.Integer, nullable=False)
     strike_price = db.Column(db.Float, nullable=False)
     currency_code = db.Column(db.CHAR(3), db.ForeignKey('currency.code'))
+    date_of_trade = db.Column(db.Date, nullable=False)
     maturity_date = db.Column(db.Date, nullable=False)
     modified = db.Column(db.Boolean, nullable=False, default=False)
 
@@ -45,20 +50,3 @@ class Derivative(db.Model):
 
     def __str__(self):
         return '<Derivative : {}>'.format(self.id)
-
-# ...
-class Action(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    trade_id = db.Column(db.String(16), db.ForeignKey('derivative.id'))
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    type = db.Column(db.String(16), nullable=False)
-    timestamp = db.Column(db.DateTime, nullable=False)
-
-    def __init_(self, trade_id, user_id, type):
-        self.trade_id = trade_id
-        self.user_id = user_id
-        self.type = type
-        self.timestamp = datetime.datetime.utcnow()
-
-    def __str__(self):
-        return '<Action : {}>'.format(self.id)

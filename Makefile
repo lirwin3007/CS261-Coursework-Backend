@@ -23,13 +23,11 @@ init:
 	pip3 install -r requirements.txt
 	# Install database dependencies
 	apt install mysql-server python-mysqldb
+	# Install tools
+	apt install flake8 bandit
 
-# Run as root
-sql:
-	# Start MySQL server
-	systemctl start mysql
-	# Config database
-	mysql < ./res/scripts/setup_database.sql
+db:
+	sudo ./setup_db.sh
 
 run:
 	python3 -m $(MODULE)

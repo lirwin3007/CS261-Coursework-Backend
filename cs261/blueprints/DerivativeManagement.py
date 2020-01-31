@@ -1,5 +1,5 @@
 # Third party imports
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, abort
 
 # Local application imports
 from cs261.modules import DerivativeManagement
@@ -15,20 +15,38 @@ def getDerviative(derivativeId):
     # Retreive derivative with the Id
     derivative = DerivativeManagement.getDerviative(derivativeId)
 
-    return {} if derivative is None else derivative.as_dict()
+    # The given derivative does not exist, return a 404
+    if derivative is None:
+        return abort(404)
 
-@DerivativeManagementBlueprint.route('/get-derivatives')
-def getDerviatives():
-    # Retreive all derivatives from the database
-    derivatives = DerivativeManagement.getDerviatives(True)
+    # Construct dictionary from derivative attributes
+    request = derivative.as_dict()
 
-    return {"derivatives" : [d.as_dict() for d in derivatives]}
+    # Append underlying price, notional value and action history
+    underlying_price = 0.0
+    request['underlying_price'] = underlying_price
+    request['notional_value'] = underlying_price * derivative.quantity
+    request['actions'] = []
+
+    # Return request
+    return request
 
 @DerivativeManagementBlueprint.route('/add-derivative', methods=['POST'])
 def addDerivative():
-    if request.is_json:
-        # Extract json body from request
-        derivative_json = request.get_json()
-        print(derivative_json)
-        # Create a new derivative using the json data
-        DerivativeManagement.addDerivative(derivative_json)
+    if not request.is_json:
+        return abort(400)
+
+    # Extract json body from reques
+    body = request.get_json()
+
+    # TODO: if incomplete json body: return flask.abort(400)
+
+    # Create a new derivative using the json data
+    derivative = DerivativeManagement.addDerivative(body['derivative'], body['user_id'])
+
+    # Return the id of the new derivative to the client
+    return {'id' : derivative.id}
+
+@DerivativeManagementBlueprint.route('/delete-derivative/<derivativeId>')
+def deleteDerviative(derivativeId):
+    pass
