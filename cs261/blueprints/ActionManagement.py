@@ -1,8 +1,8 @@
 # Third party imports
-from flask import Blueprint, request, jsonify, abort
+from flask import Blueprint, abort
 
 # Local application imports
-from cs261.modules import ActionManagement
+from cs261 import DerivatexModels
 
 # Instantiate new blueprint
 ActionManagementBlueprint = Blueprint('actionManagement',
@@ -13,9 +13,9 @@ ActionManagementBlueprint = Blueprint('actionManagement',
 @ActionManagementBlueprint.route('/get-action/<actionId>')
 def getAction(actionId):
     # Retreive action with the Id
-    action = ActionManagement.getAction(actionId)
+    action = DerivatexModels.Action.query.get(actionId)
 
-    # The given action does not exist, return a 404
+    # The given action does not exist, respond with a 404
     if action is None:
         return abort(404)
 

@@ -40,7 +40,7 @@ mysql -e "
     (product_name, company_id);"
 
 echo "populating currency table"
-for p in res/dummy/currencyValues/**/*.csv; do
+for p in res/dummy/currencyValues/2019/**/*.csv; do
   mysql -e "
      LOAD DATA LOCAL INFILE '${p}'
      INTO TABLE derivatex.currency
@@ -51,7 +51,7 @@ for p in res/dummy/currencyValues/**/*.csv; do
 done
 
 echo "populating company_share table"
-for p in res/dummy/stockPrices/**/*.csv; do
+for p in res/dummy/stockPrices/2019/**/*.csv; do
   mysql -e "
      LOAD DATA LOCAL INFILE '${p}'
      INTO TABLE derivatex.company_share
@@ -62,7 +62,7 @@ for p in res/dummy/stockPrices/**/*.csv; do
 done
 
 echo "populating product table"
-for p in res/dummy/productPrices/**/*.csv; do
+for p in res/dummy/productPrices/2019/**/*.csv; do
   mysql -e "
      LOAD DATA LOCAL INFILE '${p}'
      INTO TABLE derivatex.product
@@ -73,16 +73,32 @@ for p in res/dummy/productPrices/**/*.csv; do
 done
 
 echo "populating derivative table"
-for p in res/dummy/derivativeTrades/**/*.csv; do
+for p in res/dummy/derivativeTrades/2019/April/**/*.csv; do
   mysql -e "
      LOAD DATA LOCAL INFILE '${p}'
      INTO TABLE derivatex.derivative
      FIELDS TERMINATED BY ',' ENCLOSED BY '\"' LINES TERMINATED BY '\n'
      IGNORE 1 ROWS
-     (@date_of_trade, id, asset, buying_party, selling_party, @dummy, currency_code, quantity, @maturity_date, @dummy, @dummy, strike_price)
+     (@date_of_trade, @dummy, asset, buying_party, selling_party, @dummy, currency_code, quantity, @maturity_date, @dummy, @dummy, strike_price)
      SET date_of_trade = STR_TO_DATE(@date_of_trade, '%d/%m/%Y'), maturity_date = STR_TO_DATE(@maturity_date, '%d/%m/%Y');"
 done
 
+echo "creating users"
+mysql -e "
+  INSERT INTO derivatex.user (f_name, l_name, email)
+  VALUES
+    ('Joe', 'Bloggs', 'joe.bloggs@gmail.com'),
+    ('John', 'Doe', 'john.doe@gmail.com'),
+    ('Jane', 'Doe', 'jane.doe@gmail.com');
+"
+echo "creating historical actions"
+mysql -e "
+  INSERT INTO derivatex.action
+  (derivative_id, user_id, type, timestamp)
+  SELECT id,
+    (SELECT id FROM derivatex.user ORDER BY RAND () LIMIT 1),
+  'ADD', date_of_trade FROM derivatex.derivative;
+"
 # Restart mysql server
 echo "restarting mysql server"
 systemctl restart mysql
