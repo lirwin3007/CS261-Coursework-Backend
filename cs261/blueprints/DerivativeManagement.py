@@ -3,7 +3,7 @@ from flask import Blueprint, request, abort
 
 # Local application imports
 from cs261.DerivatexModels import Derivative, Action, ActionType
-from cs261.application import db
+from cs261.Models import db
 
 # Instantiate new blueprint
 DerivativeManagementBlueprint = Blueprint('derivativeManagement',

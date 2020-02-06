@@ -1,5 +1,5 @@
 # Local application imports
-from cs261.application import db
+from cs261.Models import db
 
 
 class Company(db.Model):
