@@ -3,7 +3,7 @@ from datetime import datetime
 import enum
 
 # Local application imports
-from cs261.application import db
+from cs261.Models import db
 
 
 class Derivative(db.Model):
