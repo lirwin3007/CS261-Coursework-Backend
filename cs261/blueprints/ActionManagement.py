@@ -2,7 +2,7 @@
 from flask import Blueprint, abort
 
 # Local application imports
-from cs261 import DerivatexModels
+from cs261.DerivatexModels import *
 
 # Instantiate new blueprint
 ActionManagementBlueprint = Blueprint('actionManagement',
@@ -13,7 +13,7 @@ ActionManagementBlueprint = Blueprint('actionManagement',
 @ActionManagementBlueprint.route('/get-action/<actionId>')
 def getAction(actionId):
     # Retreive action with the Id
-    action = DerivatexModels.Action.query.get(actionId)
+    action = Action.query.get(actionId)
 
     # The given action does not exist, respond with a 404
     if action is None:

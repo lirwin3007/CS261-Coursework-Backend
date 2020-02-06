@@ -10,8 +10,11 @@ mysql -e "
   drop user if exists 'derivatex_backend'@'localhost';
   create user 'derivatex_backend'@'localhost' identified by 'qwerty123';
   drop database if exists derivatex;
-  create database if not exists derivatex;
+  create database derivatex;
   grant all privileges on derivatex.* to 'derivatex_backend'@'localhost';
+  drop database if exists external;
+  create database external;
+  grant all privileges on external.* to 'derivatex_backend'@'localhost';
   flush privileges;
 "
 echo "database initialised"
@@ -25,16 +28,18 @@ shopt -s globstar
 
 echo "populating company table"
 mysql -e "
+   USE external;
    LOAD DATA LOCAL INFILE 'res/dummy/companyCodes.csv'
-   INTO TABLE derivatex.company
+   INTO TABLE company
    FIELDS TERMINATED BY ',' ENCLOSED BY '\"' LINES TERMINATED BY '\n'
    IGNORE 1 ROWS
    (name, id);"
 
  echo "populating product_seller table"
  mysql -e "
+    USE external;
     LOAD DATA LOCAL INFILE 'res/dummy/productSellers.csv'
-    INTO TABLE derivatex.product_seller
+    INTO TABLE product_seller
     FIELDS TERMINATED BY ',' ENCLOSED BY '\"' LINES TERMINATED BY '\n'
     IGNORE 1 ROWS
     (product_name, company_id);"
@@ -42,41 +47,45 @@ mysql -e "
 echo "populating currency table"
 for p in res/dummy/currencyValues/2019/**/*.csv; do
   mysql -e "
+     USE external;
      LOAD DATA LOCAL INFILE '${p}'
-     INTO TABLE derivatex.currency
+     INTO TABLE currency
      FIELDS TERMINATED BY ',' ENCLOSED BY '\"' LINES TERMINATED BY '\n'
      IGNORE 1 ROWS
      (@valuation_date, code, usd_exchange_rate)
      SET valuation_date = STR_TO_DATE(@valuation_date, '%d/%m/%Y');"
 done
 
-echo "populating company_share table"
+echo "populating company_stock table"
 for p in res/dummy/stockPrices/2019/**/*.csv; do
   mysql -e "
+     USE external;
      LOAD DATA LOCAL INFILE '${p}'
-     INTO TABLE derivatex.company_share
+     INTO TABLE company_stock
      FIELDS TERMINATED BY ',' ENCLOSED BY '\"' LINES TERMINATED BY '\n'
      IGNORE 1 ROWS
-     (@valuation_date, company_id, share_price_usd)
-     SET valuation_date = STR_TO_DATE(@valuation_date, '%d/%m/%Y');"
+     (@valuation_date, company_id, stock_price)
+     SET valuation_date = STR_TO_DATE(@valuation_date, '%d/%m/%Y'), currency_code = 'USD';"
 done
 
 echo "populating product table"
 for p in res/dummy/productPrices/2019/**/*.csv; do
   mysql -e "
+     USE external;
      LOAD DATA LOCAL INFILE '${p}'
-     INTO TABLE derivatex.product
+     INTO TABLE product
      FIELDS TERMINATED BY ',' ENCLOSED BY '\"' LINES TERMINATED BY '\n'
      IGNORE 1 ROWS
-     (@valuation_date, name, market_price_usd)
-     SET valuation_date = STR_TO_DATE(@valuation_date, '%d/%m/%Y');"
+     (@valuation_date, name, market_price)
+     SET valuation_date = STR_TO_DATE(@valuation_date, '%d/%m/%Y'), currency_code = 'USD';"
 done
 
 echo "populating derivative table"
 for p in res/dummy/derivativeTrades/2019/April/**/*.csv; do
   mysql -e "
+     USE derivatex;
      LOAD DATA LOCAL INFILE '${p}'
-     INTO TABLE derivatex.derivative
+     INTO TABLE derivative
      FIELDS TERMINATED BY ',' ENCLOSED BY '\"' LINES TERMINATED BY '\n'
      IGNORE 1 ROWS
      (@date_of_trade, @dummy, asset, buying_party, selling_party, @dummy, currency_code, quantity, @maturity_date, @dummy, @dummy, strike_price)
@@ -85,19 +94,21 @@ done
 
 echo "creating users"
 mysql -e "
-  INSERT INTO derivatex.user (f_name, l_name, email)
+  USE derivatex;
+  INSERT INTO user (f_name, l_name, email, password)
   VALUES
-    ('Joe', 'Bloggs', 'joe.bloggs@gmail.com'),
-    ('John', 'Doe', 'john.doe@gmail.com'),
-    ('Jane', 'Doe', 'jane.doe@gmail.com');
+    ('Joe', 'Bloggs', 'joe.bloggs@gmail.com', 'password123'),
+    ('John', 'Doe', 'john.doe@gmail.com', 'qwerty123'),
+    ('Jane', 'Doe', 'jane.doe@gmail.com', '321ytrewq');
 "
 echo "creating historical actions"
 mysql -e "
-  INSERT INTO derivatex.action
+  USE derivatex;
+  INSERT INTO action
   (derivative_id, user_id, type, timestamp)
   SELECT id,
-    (SELECT id FROM derivatex.user ORDER BY RAND () LIMIT 1),
-  'ADD', date_of_trade FROM derivatex.derivative;
+    (SELECT id FROM user ORDER BY RAND () LIMIT 1),
+  'ADD', date_of_trade FROM derivative;
 "
 # Restart mysql server
 echo "restarting mysql server"

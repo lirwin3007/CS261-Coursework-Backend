@@ -2,7 +2,7 @@
 from flask import Blueprint, request, abort
 
 # Local application imports
-from cs261 import DerivatexModels
+from cs261.DerivatexModels import *
 from cs261.application import db
 
 # Instantiate new blueprint
@@ -13,9 +13,9 @@ DerivativeManagementBlueprint = Blueprint('derivativeManagement',
 
 # Routes
 @DerivativeManagementBlueprint.route('/get-derivative/<derivativeId>')
-def getDerviative(derivativeId):
+def getDerivative(derivativeId):
     # Retreive the specified derivative
-    derivative = DerivatexModels.Derivative.query.get(derivativeId)
+    derivative = Derivative.query.get(derivativeId)
 
     # The given derivative does not exist, respond with a 404
     if derivative is None:
@@ -26,7 +26,7 @@ def getDerviative(derivativeId):
 
     # Append underlying price, notional value and action history
     underlying_price = 0.0
-    action_history = DerivatexModels.Action.query.filter_by(derivative_id=derivativeId).all()
+    action_history = Action.query.filter_by(derivative_id=derivativeId).all()
 
     request['underlying_price'] = underlying_price
     request['notional_value'] = underlying_price * derivative.quantity
@@ -37,22 +37,27 @@ def getDerviative(derivativeId):
 
 @DerivativeManagementBlueprint.route('/add-derivative', methods=['POST'])
 def addDerivative():
+    # Verify request type
     if not request.is_json:
         return abort(400)
 
-    # Extract json body from reques
+    # Extract json body from request
     body = request.get_json()
 
+    # Validate the body
+    # if invalid body:
+    #     return flask.abort(400)
+
     # Extract user_id and create derivative object
-    user_id = body['user_id']
-    derivative = DerivatexModels.Derivative(**body['derivative'])
+    user_id = body.get('user_id')
+    derivative = Derivative(**body.get('derivative'))
 
     # Validate the derivative
     # if invalid derivative:
     #     return flask.abort(400)
 
     # Add the derivative and corrosponding user action to the database
-    action = DerivatexModels.Action(derivative_id=derivative.id, user_id=user_id, type="ADD")
+    action = Action(derivative_id=derivative.id, user_id=user_id, type="ADD")
     db.session.add(action)
     db.session.add(derivative)
     db.session.commit()
@@ -61,24 +66,70 @@ def addDerivative():
     return {'id' : derivative.id}
 
 
-@DerivativeManagementBlueprint.route('/update-derivative', methods=['POST'])
-def updateDerivative():
-    return ('', 204)
+@DerivativeManagementBlueprint.route('/update-derivative/<derivativeId>', methods=['POST'])
+def updateDerivative(derivativeId):
+    # Verify request type
+    if not request.is_json:
+        return abort(400)
 
-@DerivativeManagementBlueprint.route('/delete-derivative/<derivativeId>')
-def deleteDerviative(derivativeId):
+    # Extract json body from request
+    body = request.get_json()
+
+    # Validate the body
+    # if invalid body:
+    #     return flask.abort(400)
+
     # Retreive the specified derivative
-    derivative = DerivatexModels.Derivative.query.get(derivativeId)
+    derivative = Derivative.query.get(derivativeId)
 
     # The given derivative does not exist, respond with a 404
     if derivative is None:
         return abort(404)
 
-    # Delete the derivative
-    # db.session.delete(derivative)
+    # Extract user_id and create derivative object
+    user_id = body.get('user_id')
+    updates = body.get('updates')
+
+    # Apply and log all updates to the derivative
+    update_log = []
+    for attribute, new_value in updates.items():
+        old_value = getattr(derivative, attribute)
+
+        # Perform update
+        setattr(derivative, attribute, new_value)
+
+        # Log update
+        update_log.append({
+            "attribute": attribute,
+            "old_value": old_value,
+            "new_value": new_value
+        })
+
+    # Validate the updated derivative
+    # if invalid derivative:
+    #     return flask.abort(400)
+
+    # Register the derivative updates and corrosponding user action to the database
+    action = Action(derivative_id=derivativeId, user_id=user_id, type="UPDATE", update_log=update_log)
+    db.session.add(action)
+    db.session.add(derivative)
+    db.session.commit()
+
+    return {"updates": update_log}
+
+@DerivativeManagementBlueprint.route('/delete-derivative/<derivativeId>')
+def deleteDerivative(derivativeId):
+    # Retreive the specified derivative
+    derivative = Derivative.query.get(derivativeId)
+
+    # The given derivative does not exist, respond with a 404
+    if derivative is None:
+        return abort(404)
+
+    # TODO: potentially set deleted derivative flag
 
     # Register the user deleting the derivative
-    action = DerivatexModels.Action(derivative_id=derivativeId, user_id=1, type="DELETE")
+    action = Action(derivative_id=derivativeId, user_id=1, type="DELETE")
     db.session.add(action)
 
     # Commit changes to the database
@@ -88,44 +139,66 @@ def deleteDerviative(derivativeId):
     return ('', 204)
 
 @DerivativeManagementBlueprint.route('/index-derivatives')
-def indexDerviatives():
+def indexDerivatives():
     data_form = request.form.to_dict()
-    filters = set()
 
-    # Determine filters
+    # Determine query filters
+    query_filters = set()
     if 'buying_party' in data_form:
-        filters.add(DerivatexModels.Derivative.buying_party == data_form["buying_party"])
+        query_filters.add(Derivative.buying_party == data_form["buying_party"])
     if 'selling_party' in data_form:
-        filters.add(DerivatexModels.Derivative.selling_party == data_form["selling_party"])
+        query_filters.add(Derivative.selling_party == data_form["selling_party"])
     if 'asset' in data_form:
-        filters.add(DerivatexModels.Derivative.asset == data_form["asset"])
+        query_filters.add(Derivative.asset == data_form["asset"])
     if 'min_strike_price' in data_form:
-        filters.add(DerivatexModels.Derivative.strike_price >= data_form["min_strike_price"])
+        query_filters.add(Derivative.strike_price >= data_form["min_strike_price"])
     if 'max_strike_price' in data_form:
-        filters.add(DerivatexModels.Derivative.strike_price <= data_form["max_strike_price"])
-    if 'min_notional_value' in data_form:
-        filters.add(DerivatexModels.Derivative.notional_value >= data_form["min_notional_value"])
-    if 'max_notional_value' in data_form:
-        filters.add(DerivatexModels.Derivative.notional_value <= data_form["max_notional_value"])
+        query_filters.add(Derivative.strike_price <= data_form["max_strike_price"])
+
+    # Determine order key
+    order_key = None
+    if 'order_key' in data_form:
+        if data_form.get('order_key') == 'buying_party':
+            order_key = Derivative.buying_party   # Note: this will sort by company ID not company name
+        elif data_form.get('order_key') == 'selling_party':
+            order_key = Derivative.selling_party
+        elif data_form.get('order_key') == 'strike_price':
+            order_key = Derivative.strike_price
 
     # Create base query
-    query = DerivatexModels.Derivative.query
+    query = Derivative.query
 
-    # Apply all the filters
-    for filter in filters:
+    # Apply all query filters
+    for filter in query_filters:
         query = query.filter(filter)
 
     # Order the query
-    query = query.order_by(DerivatexModels.Derivative.id)
+    if order_key is not None:
+        query = query.order_by(order_key)
 
     # Paginate the query
-    page_size = 10
-    page_number = 2
+    page_size = data_form.get('page_size') or 15
+    page_number = data_form.get('page_number') or 0
     page_count = query.count() // page_size + 1
     query = query.limit(page_size).offset(page_size * page_number)
 
     # Execute query
     derivatives = query.all()
 
+    # Post-query filters
+    # if 'min_strike_price' in data_form:
+    #     pass # derivatives.filter()
+    # if 'max_strike_price' in data_form:
+    #     pass
+    # if 'search_term' in data_form:
+    #     pass
+
+    # Post-query ordering
+    # if 'order_key' in data_form and order_key is None:
+    #     pass # derivatives.sort()
+
     # Return JSON response
-    return {"ids":[d.id for d in derivatives]}
+    return {
+        "page_count" : page_count,
+        "ids" : [d.id for d in derivatives]
+    }

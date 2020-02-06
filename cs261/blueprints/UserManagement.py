@@ -2,7 +2,7 @@
 from flask import Blueprint
 
 # Local application imports
-from cs261 import DerivatexModels
+from cs261.DerivatexModels import *
 
 # Instantiate new blueprint
 UserManagementBlueprint = Blueprint('userManagement',

@@ -7,9 +7,9 @@ app = Flask(__name__)
 # Initialise database engine
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://derivatex_backend:qwerty123@localhost/derivatex'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-# app.config['SQLALCHEMY_BINDS'] = {
-#     'external':'mysql+mysqlconnector://derivatex_backend:qwerty123@localhost/external'
-# }
+app.config['SQLALCHEMY_BINDS'] = {
+    'external':'mysql+mysqlconnector://derivatex_backend:qwerty123@localhost/external'
+}
 db = SQLAlchemy(app)
 
 
