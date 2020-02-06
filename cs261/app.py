@@ -2,6 +2,8 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 
 from cs261.Models import db
+from cs261.ExternalModels import *
+from cs261.DerivatexModels import *
 from cs261.blueprints.DerivativeManagement import DerivativeManagementBlueprint
 from cs261.blueprints.UserManagement import UserManagementBlueprint
 from cs261.blueprints.ActionManagement import ActionManagementBlueprint
