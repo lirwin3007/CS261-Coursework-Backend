@@ -1,5 +1,6 @@
 import json
-from flask import abort
+# You can use 'from flask import abort' and then 'abort(http_code)' to abort requests
+
 
 class UserManagement:
     def __init__(self):

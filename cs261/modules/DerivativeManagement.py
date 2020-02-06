@@ -1,5 +1,6 @@
 import json
-from flask import abort
+# You can use 'from flask import abort' and then 'abort(http_code)' to abort requests
+
 
 class DerivativeManagement:
     def __init__(self):
