@@ -2,22 +2,18 @@
 from flask import Blueprint, abort
 
 # Local application imports
-from cs261.DerivatexModels import Action
+from cs261.DerivatexModels import *
+from cs261.modules.ActionManagement import ActionManagement
 
 # Instantiate new blueprint
 ActionManagementBlueprint = Blueprint('actionManagement',
                                       __name__,
                                       url_prefix='/action-management')
 
+# Instantiate module
+ActionManagementModule = ActionManagement()
+
 # Routes
-@ActionManagementBlueprint.route('/get-action/<actionId>')
-def getAction(actionId):
-    # Retreive action with the Id
-    action = Action.query.get(actionId)
-
-    # The given action does not exist, respond with a 404
-    if action is None:
-        return abort(404)
-
-    # Return action attributes as dictionary
-    return action.as_dict()
+@ActionManagementBlueprint.route('/example-route/<exampleParam>')
+def exampleRoute(exampleParam):
+    return ActionManagementModule.exampleFunction(exampleParam)
