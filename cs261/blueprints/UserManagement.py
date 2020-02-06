@@ -1,8 +1,8 @@
 # Third party imports
-from flask import Blueprint, abort
+from flask import Blueprint
 
 # Local application imports
-from cs261.DerivatexModels import *
+# You can import database models with 'from cs261.DerivatexModels import Derivative, User, Action'
 from cs261.modules.UserManagement import UserManagement
 
 # Instantiate new blueprint

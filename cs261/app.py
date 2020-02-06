@@ -1,9 +1,6 @@
 from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
 
 from cs261.Models import db
-from cs261.ExternalModels import *
-from cs261.DerivatexModels import *
 from cs261.blueprints.DerivativeManagement import DerivativeManagementBlueprint
 from cs261.blueprints.UserManagement import UserManagementBlueprint
 from cs261.blueprints.ActionManagement import ActionManagementBlueprint
@@ -18,7 +15,8 @@ class Application:
 
         app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://derivatex_backend:qwerty123@localhost/derivatex'
         app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-        app.config['SQLALCHEMY_BINDS'] = {'external': 'mysql+mysqlconnector://derivatex_backend:qwerty123@localhost/external'}
+        app.config['SQLALCHEMY_BINDS'] = {'external':
+                                          'mysql+mysqlconnector://derivatex_backend:qwerty123@localhost/external'}
         app.config['SQLALCHEMY_POOL_SIZE'] = 100
         app.config['SQLALCHEMY_POOL_RECYCLE'] = 1
 
