@@ -2,14 +2,13 @@
 from flask import Blueprint, request, abort
 
 # Local application imports
-from cs261.DerivatexModels import *
+from cs261.DerivatexModels import Derivative, Action, ActionType
 from cs261.application import db
 
 # Instantiate new blueprint
 DerivativeManagementBlueprint = Blueprint('derivativeManagement',
                                           __name__,
                                           url_prefix='/derivative-management')
-
 
 # Routes
 @DerivativeManagementBlueprint.route('/get-derivative/<derivativeId>')
@@ -24,10 +23,11 @@ def getDerivative(derivativeId):
     # Construct dictionary from derivative attributes
     request = derivative.as_dict()
 
-    # Append underlying price, notional value and action history
+    # Dermine additional attributes
     underlying_price = 0.0
     action_history = Action.query.filter_by(derivative_id=derivativeId).all()
 
+    # Append underlying price, notional value and action history
     request['underlying_price'] = underlying_price
     request['notional_value'] = underlying_price * derivative.quantity
     request['actions'] = [action.id for action in action_history]
@@ -35,10 +35,11 @@ def getDerivative(derivativeId):
     # Return request
     return request
 
+
 @DerivativeManagementBlueprint.route('/add-derivative', methods=['POST'])
 def addDerivative():
-    # Verify request type
-    if not request.is_json:
+    # Verify request
+    if not request.data or not request.is_json:
         return abort(400)
 
     # Extract json body from request
@@ -57,25 +58,25 @@ def addDerivative():
     #     return flask.abort(400)
 
     # Add the derivative and corrosponding user action to the database
-    action = Action(derivative_id=derivative.id, user_id=user_id, type="ADD")
+    action = Action(derivative_id=derivative.id, user_id=user_id, type=ActionType.ADD)
     db.session.add(action)
     db.session.add(derivative)
     db.session.commit()
 
     # Return the id of the new derivative to the client
-    return {'id' : derivative.id}
+    return {'id': derivative.id}
 
 
 @DerivativeManagementBlueprint.route('/update-derivative/<derivativeId>', methods=['POST'])
 def updateDerivative(derivativeId):
-    # Verify request type
-    if not request.is_json:
+    # Verify request
+    if not request.data or not request.is_json:
         return abort(400)
 
     # Extract json body from request
     body = request.get_json()
 
-    # Validate the body
+    # Validate json body
     # if invalid body:
     #     return flask.abort(400)
 
@@ -110,15 +111,30 @@ def updateDerivative(derivativeId):
     #     return flask.abort(400)
 
     # Register the derivative updates and corrosponding user action to the database
-    action = Action(derivative_id=derivativeId, user_id=user_id, type="UPDATE", update_log=update_log)
+    action = Action(derivative_id=derivativeId, user_id=user_id, type=ActionType.UPDATE, update_info=update_log)
     db.session.add(action)
     db.session.add(derivative)
     db.session.commit()
 
     return {"updates": update_log}
 
-@DerivativeManagementBlueprint.route('/delete-derivative/<derivativeId>')
+
+@DerivativeManagementBlueprint.route('/delete-derivative/<derivativeId>', methods=['POST'])
 def deleteDerivative(derivativeId):
+    # Verify request
+    if not request.data or not request.is_json:
+        return abort(400)
+
+    # Extract json body from request
+    body = request.get_json()
+
+    # Obtatin user_id
+    user_id = body.get('user_id')
+
+    # Verify user_id has been provided
+    if user_id is None:
+        return abort(400)
+
     # Retreive the specified derivative
     derivative = Derivative.query.get(derivativeId)
 
@@ -129,7 +145,7 @@ def deleteDerivative(derivativeId):
     # TODO: potentially set deleted derivative flag
 
     # Register the user deleting the derivative
-    action = Action(derivative_id=derivativeId, user_id=1, type="DELETE")
+    action = Action(derivative_id=derivativeId, user_id=user_id, type=ActionType.DELETE)
     db.session.add(action)
 
     # Commit changes to the database
@@ -137,6 +153,7 @@ def deleteDerivative(derivativeId):
 
     # Return a 204. No Content
     return ('', 204)
+
 
 @DerivativeManagementBlueprint.route('/index-derivatives')
 def indexDerivatives():
@@ -198,7 +215,7 @@ def indexDerivatives():
     #     pass # derivatives.sort()
 
     # Return JSON response
-    return {
-        "page_count" : page_count,
-        "ids" : [d.id for d in derivatives]
+    return{
+        "page_count": page_count,
+        "ids": [d.id for d in derivatives]
     }

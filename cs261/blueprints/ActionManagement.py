@@ -2,12 +2,12 @@
 from flask import Blueprint, abort
 
 # Local application imports
-from cs261.DerivatexModels import *
+from cs261.DerivatexModels import Action
 
 # Instantiate new blueprint
 ActionManagementBlueprint = Blueprint('actionManagement',
-                                          __name__,
-                                          url_prefix='/action-management')
+                                      __name__,
+                                      url_prefix='/action-management')
 
 # Routes
 @ActionManagementBlueprint.route('/get-action/<actionId>')

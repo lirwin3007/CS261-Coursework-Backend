@@ -1,5 +1,6 @@
 # Standard library imports
 from datetime import datetime
+import enum
 
 # Local application imports
 from cs261.application import db
@@ -39,11 +40,17 @@ class User(db.Model):
         return '<User : {}>'.format(self.id)
 
 
+class ActionType(enum.Enum):
+    ADD = "Derivative recorded"
+    UPDATE = "Derivative updated"
+    DELETE = "Derivative deleted"
+
+
 class Action(db.Model):
     id = db.Column(db.BigInteger, primary_key=True)
     derivative_id = db.Column(db.BigInteger, db.ForeignKey('derivative.id'))
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    type = db.Column(db.String(16), nullable=False)
+    type = db.Column(db.Enum(ActionType), nullable=False)
     timestamp = db.Column(db.DateTime, nullable=False, default=datetime.now())
     update_info = db.Column(db.JSON)
 

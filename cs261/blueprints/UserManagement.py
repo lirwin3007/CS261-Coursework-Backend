@@ -2,11 +2,11 @@
 from flask import Blueprint
 
 # Local application imports
-from cs261.DerivatexModels import *
+from cs261.DerivatexModels import User
 
 # Instantiate new blueprint
 UserManagementBlueprint = Blueprint('userManagement',
-                                          __name__,
-                                          url_prefix='/user-management')
+                                    __name__,
+                                    url_prefix='/user-management')
 
 # Routes
