@@ -19,6 +19,8 @@ class Application:
         app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://derivatex_backend:qwerty123@localhost/derivatex'
         app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
         app.config['SQLALCHEMY_BINDS'] = {'external': 'mysql+mysqlconnector://derivatex_backend:qwerty123@localhost/external'}
+        app.config['SQLALCHEMY_POOL_SIZE'] = 100
+        app.config['SQLALCHEMY_POOL_RECYCLE'] = 280
 
         db.init_app(app)
         db.create_all()
