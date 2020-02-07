@@ -3,7 +3,7 @@ from flask import Blueprint
 
 # Local application imports
 # You can import database models with 'from backend.derivatex_models import Derivative, User, Action'
-from backend.managers.user_management import exampleFunction
+from backend.managers import user_management
 
 # Instantiate new blueprint
 UserBlueprint = Blueprint('userManagement',
@@ -14,4 +14,4 @@ UserBlueprint = Blueprint('userManagement',
 # Routes
 @UserBlueprint.route('/example-route/<exampleParam>')
 def exampleRoute(exampleParam):
-    return exampleFunction(exampleParam)
+    return user_management.exampleFunction(exampleParam)

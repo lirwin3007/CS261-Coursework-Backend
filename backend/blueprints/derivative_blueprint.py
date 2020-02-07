@@ -3,7 +3,7 @@ from flask import Blueprint
 
 # Local application imports
 # You can import database models with 'from backend.derivatex_models import Derivative, User, Action'
-from backend.managers.derivative_management import exampleFunction
+from backend.managers import derivative_management
 
 # Instantiate new blueprint
 DerivativeBlueprint = Blueprint('derivativeManagement',
@@ -14,4 +14,4 @@ DerivativeBlueprint = Blueprint('derivativeManagement',
 # Routes
 @DerivativeBlueprint.route('/example-route/<exampleParam>')
 def exampleRoute(exampleParam):
-    return exampleFunction(exampleParam)
+    return derivative_management.exampleFunction(exampleParam)
