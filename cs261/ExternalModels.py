@@ -10,7 +10,7 @@ class Company(db.Model):
     name = db.Column(db.String(32), nullable=False)
 
 
-class productSeller(db.Model):
+class ProductSeller(db.Model):
     # Bind schema to external database
     __bind_key__ = 'external'
     # Composite key (company_id, product_name)
