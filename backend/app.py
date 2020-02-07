@@ -1,9 +1,9 @@
 from flask import Flask
 
-from cs261.Models import db
-from cs261.blueprints.DerivativeManagement import DerivativeManagementBlueprint
-from cs261.blueprints.UserManagement import UserManagementBlueprint
-from cs261.blueprints.ActionManagement import ActionManagementBlueprint
+from backend.db import db
+from backend.blueprints.derivative_blueprint import DerivativeBlueprint
+from backend.blueprints.user_blueprint import UserBlueprint
+from backend.blueprints.action_blueprint import ActionBlueprint
 
 
 class Application:
@@ -23,9 +23,9 @@ class Application:
         db.init_app(app)
         db.create_all()
 
-        app.register_blueprint(DerivativeManagementBlueprint)
-        app.register_blueprint(UserManagementBlueprint)
-        app.register_blueprint(ActionManagementBlueprint)
+        app.register_blueprint(DerivativeBlueprint)
+        app.register_blueprint(UserBlueprint)
+        app.register_blueprint(ActionBlueprint)
         return app
 
     @staticmethod

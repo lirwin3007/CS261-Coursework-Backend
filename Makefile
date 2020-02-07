@@ -1,5 +1,5 @@
 # The binary to build (just the basename).
-MODULE := cs261
+MODULE := backend
 
 # Where to push the docker image.
 REGISTRY ?=
