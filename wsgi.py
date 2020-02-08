@@ -1,3 +1,3 @@
-from cs261 import app as cs261_app
+from backend import app as _app
 
-app = cs261_app.Application.get_app()
+app = _app.Application.get_app()
