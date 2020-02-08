@@ -1,6 +1,19 @@
-import json
-# You can use 'from flask import abort' and then 'abort(http_code)' to abort requests
+# Local application imports
+from backend.derivatex_models import Action
 
 
-def exampleFunction(exampleParam):
-    return json.dumps(int(exampleParam) + 1)
+def getAction(actionId):
+    # Query database for the action
+    return Action.query.get(actionId)
+
+
+def getUserActions(userID):
+    return Action.query.filter_by(user_id=userID).order_by(Action.timestamp.desc()).all()
+
+
+def getDerivativeActions(derivativeId):
+    return Action.query.filter_by(derivative_id=derivativeId).order_by(Action.timestamp.desc()).all()
+
+
+def getRecentActions(count):
+    return Action.query.order_by(Action.timestamp.desc()).limit(count).all()
