@@ -4,6 +4,7 @@ from backend.db import db
 from backend.blueprints.derivative_blueprint import DerivativeBlueprint
 from backend.blueprints.user_blueprint import UserBlueprint
 from backend.blueprints.action_blueprint import ActionBlueprint
+from backend.blueprints.report_blueprint import ReportBlueprint
 
 
 class Application:
@@ -26,6 +27,7 @@ class Application:
         app.register_blueprint(DerivativeBlueprint)
         app.register_blueprint(UserBlueprint)
         app.register_blueprint(ActionBlueprint)
+        app.register_blueprint(ReportBlueprint)
         return app
 
     @staticmethod
