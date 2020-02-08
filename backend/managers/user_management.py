@@ -1,6 +1,12 @@
-import json
-# You can use 'from flask import abort' and then 'abort(http_code)' to abort requests
+# Local application imports
+from backend.derivatex_models import User
 
 
-def exampleFunction(exampleParam):
-    return json.dumps(int(exampleParam) + 1)
+def getUser(userId):
+    # Query database for the user
+    return User.query.get(userId)
+
+
+def getAllUsers():
+    # Query database for all users
+    return User.query.all()

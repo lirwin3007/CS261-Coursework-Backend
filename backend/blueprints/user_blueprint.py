@@ -1,8 +1,7 @@
 # Third party imports
-from flask import Blueprint
+from flask import Blueprint, abort, jsonify
 
 # Local application imports
-# You can import database models with 'from backend.derivatex_models import Derivative, User, Action'
 from backend.managers import user_management
 
 # Instantiate new blueprint
@@ -12,6 +11,24 @@ UserBlueprint = Blueprint('userManagement',
 
 
 # Routes
-@UserBlueprint.route('/example-route/<exampleParam>')
-def exampleRoute(exampleParam):
-    return user_management.exampleFunction(exampleParam)
+@UserBlueprint.route('/get-user/<userId>')
+def getUser(userId):
+    # Get user from database
+    user = user_management.getUser(userId)
+    # Make response
+    return user.as_dict() if user is not None else abort(404)
+
+
+@UserBlueprint.route('/index-users')
+def indexUsers():
+    # Get all users from database
+    users = user_management.getAllUsers()
+    # Make response
+    return jsonify(users=[u.id for u in users])
+
+
+# TODO: implement
+@UserBlueprint.route('/authenticate-user')
+def authenticateUser():
+    # No content, return a 204
+    return '', 204
