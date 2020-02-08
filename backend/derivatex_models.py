@@ -17,6 +17,7 @@ class Derivative(db.Model):
     date_of_trade = db.Column(db.Date, nullable=False)
     maturity_date = db.Column(db.Date, nullable=False)
     modified = db.Column(db.Boolean, nullable=False, default=False)
+    deleted = db.Column(db.Boolean, nullable=False, default=False)
 
     def as_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
@@ -40,10 +41,10 @@ class User(db.Model):
         return '<User : {}>'.format(self.id)
 
 
-class ActionType(enum.Enum):
-    ADD = "Derivative recorded"
-    UPDATE = "Derivative updated"
-    DELETE = "Derivative deleted"
+class ActionType(str, enum.Enum):
+    ADD = 'ADD'
+    UPDATE = 'UPDATE'
+    DELETE = 'DELETE'
 
 
 class Action(db.Model):
