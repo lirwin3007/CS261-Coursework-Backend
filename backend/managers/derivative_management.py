@@ -30,6 +30,11 @@ def updateDerivative(derivative, user_id, updates):
     # Apply and log all updates to the derivative
     update_log = []
     for attribute, new_value in updates.items():
+        # Restrict updatable attributes
+        if not hasattr(derivative, attribute) or attribute in ['id', 'deleted', 'modified']:
+            continue
+
+        # Retrieve the current value
         old_value = getattr(derivative, attribute)
 
         # Perform update
@@ -37,9 +42,9 @@ def updateDerivative(derivative, user_id, updates):
 
         # Log update
         update_log.append({
-            "attribute": attribute,
-            "old_value": old_value,
-            "new_value": new_value
+            'attribute': attribute,
+            'old_value': old_value,
+            'new_value': new_value
         })
 
     # Validate the updated derivative
