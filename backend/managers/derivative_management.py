@@ -13,10 +13,13 @@ def addDerivative(derivative, user_id):
     # if invalid derivative:
     #     return False
 
-    # Add the derivative and corrosponding user action to the database
+    # Add the derivative to the database
+    db.session.add(derivative)
+    db.session.flush()
+
+    # Add corrosponding user action to the database
     action = Action(derivative_id=derivative.id, user_id=user_id, type=ActionType.ADD)
     db.session.add(action)
-    db.session.add(derivative)
     db.session.commit()
 
     # Return success
