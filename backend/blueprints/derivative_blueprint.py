@@ -88,7 +88,7 @@ def updateDerivative(derivative_id):
     return jsonify(update_log=update_log)
 
 
-@DerivativeBlueprint.route('/delete-derivative/<derivative_id>', methods=['POST'])
+@DerivativeBlueprint.route('/delete-derivative/<derivative_id>', methods=['DELETE'])
 def deleteDerivative(derivative_id):
     # Verify request
     if not request.data or not request.is_json:
