@@ -4,6 +4,7 @@ from flask import Blueprint, abort, jsonify, request
 # Local application imports
 from backend.managers import derivative_management
 from backend.derivatex_models import Derivative
+from backend.db import db
 
 # Instantiate new blueprint
 DerivativeBlueprint = Blueprint('derivativeManagement',
@@ -38,10 +39,17 @@ def addDerivative():
     derivative = Derivative(**body.get('derivative'))
 
     # Add derivative to database
-    added = derivative_management.addDerivative(derivative, user_id)
+    derivative_management.addDerivative(derivative, user_id)
+
+    # Validate the new derivative
+    # if invalid derivative:
+    #     abort(418)
+
+    # Commit the derivative addition to the database
+    db.session.commit()
 
     # Make response
-    return jsonify(id=derivative.id) if added else abort(400)
+    return jsonify(id=derivative.id)
 
 
 @DerivativeBlueprint.route('/update-derivative/<derivativeId>', methods=['POST'])
@@ -67,10 +75,17 @@ def updateDerivative(derivativeId):
         return abort(404)
 
     # Update the derivative
-    updated = derivative_management.updateDerivative(derivative, user_id, updates)
+    update_log = derivative_management.updateDerivative(derivative, user_id, updates)
+
+    # Validate the updated derivative
+    # if invalid derivative:
+    #     abort(418)
+
+    # Commit the derivative updates to the database
+    db.session.commit()
 
     # Make response
-    return jsonify(updates) if updated else abort(400)
+    return jsonify(update_log=update_log)
 
 
 @DerivativeBlueprint.route('/delete-derivative/<derivativeId>', methods=['POST'])

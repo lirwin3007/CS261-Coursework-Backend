@@ -9,21 +9,14 @@ def getDerivative(derivativeId):
 
 
 def addDerivative(derivative, user_id):
-    # Validate the derivative
-    # if invalid derivative:
-    #     return False
-
-    # Add the derivative to the database
+    # Add the derivative to the database session
     db.session.add(derivative)
     db.session.flush()
 
-    # Add corrosponding user action to the database
+    # Add corrosponding user action to the database session
     action = Action(derivative_id=derivative.id, user_id=user_id, type=ActionType.ADD)
     db.session.add(action)
-    db.session.commit()
-
-    # Return success
-    return True
+    db.session.flush()
 
 
 def updateDerivative(derivative, user_id, updates):
@@ -47,25 +40,21 @@ def updateDerivative(derivative, user_id, updates):
             'new_value': new_value
         })
 
-    # Validate the updated derivative
-    # if invalid derivative:
-    #     return False
-
-    # Register the derivative updates and corrosponding user action to the database
+    # Register the derivative updates and corrosponding user action to the database session
     action = Action(derivative_id=derivative.id, user_id=user_id, type=ActionType.UPDATE, update_info=update_log)
     db.session.add(action)
     db.session.add(derivative)
-    db.session.commit()
+    db.session.flush()
 
-    # Replace the update request with the update log
-    updates.clear()
-    updates['updates'] = update_log
-
-    # Return success
-    return True
+    # Return the update log
+    return update_log
 
 
 def deleteDerivative(derivative, user_id):
+    # The derivative is already flagged as deleted, return
+    if derivative.deleted:
+        return
+
     # Mark the derivative as deleted
     derivative.deleted = True
 
