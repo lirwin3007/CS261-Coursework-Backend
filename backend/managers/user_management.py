@@ -2,9 +2,9 @@
 from backend.derivatex_models import User
 
 
-def getUser(userId):
+def getUser(user_id):
     # Query database for the user
-    return User.query.get(userId)
+    return User.query.get(user_id)
 
 
 def getAllUsers():

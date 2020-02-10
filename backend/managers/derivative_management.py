@@ -3,9 +3,9 @@ from backend.derivatex_models import Derivative, Action, ActionType
 from backend.db import db
 
 
-def getDerivative(derivativeId):
+def getDerivative(derivative_id):
     # Query database for the derivative
-    return Derivative.query.filter_by(deleted=False, id=derivativeId).first()
+    return Derivative.query.filter_by(deleted=False, id=derivative_id).first()
 
 
 def addDerivative(derivative, user_id):

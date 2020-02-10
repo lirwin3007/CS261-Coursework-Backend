@@ -11,18 +11,18 @@ ActionBlueprint = Blueprint('actionManagement',
 
 
 # Routes
-@ActionBlueprint.route('/get-action/<actionId>')
-def getAction(actionId):
+@ActionBlueprint.route('/get-action/<action_id>')
+def getAction(action_id):
     # Get action from database
-    action = action_management.getAction(actionId)
+    action = action_management.getAction(action_id)
     # Make response
     return action.as_dict() if action is not None else abort(404)
 
 
-@ActionBlueprint.route('/get-user-actions/<userId>')
-def getUserActions(userId):
+@ActionBlueprint.route('/get-user-actions/<user_id>')
+def getUserActions(user_id):
     # Get user actions from database
-    actions = action_management.getUserActions(userId)
+    actions = action_management.getUserActions(user_id)
     # Make response
     return jsonify(actions=[a.id for a in actions])
 

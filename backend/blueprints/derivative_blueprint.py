@@ -13,10 +13,10 @@ DerivativeBlueprint = Blueprint('derivativeManagement',
 
 
 # Routes
-@DerivativeBlueprint.route('/get-derivative/<derivativeId>')
-def getDerivative(derivativeId):
+@DerivativeBlueprint.route('/get-derivative/<derivative_id>')
+def getDerivative(derivative_id):
     # Get derivative from database
-    derivative = derivative_management.getDerivative(derivativeId)
+    derivative = derivative_management.getDerivative(derivative_id)
     # Make response
     return derivative.as_dict() if derivative is not None else abort(404)
 
@@ -52,8 +52,8 @@ def addDerivative():
     return jsonify(id=derivative.id)
 
 
-@DerivativeBlueprint.route('/update-derivative/<derivativeId>', methods=['POST'])
-def updateDerivative(derivativeId):
+@DerivativeBlueprint.route('/update-derivative/<derivative_id>', methods=['POST'])
+def updateDerivative(derivative_id):
     # Verify request
     if not request.data or not request.is_json:
         return abort(400)
@@ -70,7 +70,7 @@ def updateDerivative(derivativeId):
     updates = body.get('updates')
 
     # Retreive the specified derivative
-    derivative = derivative_management.getDerivative(derivativeId)
+    derivative = derivative_management.getDerivative(derivative_id)
     if derivative is None:
         return abort(404)
 
@@ -88,8 +88,8 @@ def updateDerivative(derivativeId):
     return jsonify(update_log=update_log)
 
 
-@DerivativeBlueprint.route('/delete-derivative/<derivativeId>', methods=['POST'])
-def deleteDerivative(derivativeId):
+@DerivativeBlueprint.route('/delete-derivative/<derivative_id>', methods=['POST'])
+def deleteDerivative(derivative_id):
     # Verify request
     if not request.data or not request.is_json:
         return abort(400)
@@ -101,7 +101,7 @@ def deleteDerivative(derivativeId):
         return abort(400)
 
     # Retreive the specified derivative
-    derivative = derivative_management.getDerivative(derivativeId)
+    derivative = derivative_management.getDerivative(derivative_id)
     if derivative is None:
         return abort(404)
 

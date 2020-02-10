@@ -11,10 +11,10 @@ UserBlueprint = Blueprint('userManagement',
 
 
 # Routes
-@UserBlueprint.route('/get-user/<userId>')
-def getUser(userId):
+@UserBlueprint.route('/get-user/<user_id>')
+def getUser(user_id):
     # Get user from database
-    user = user_management.getUser(userId)
+    user = user_management.getUser(user_id)
     # Make response
     return user.as_dict() if user is not None else abort(404)
 

@@ -2,17 +2,17 @@
 from backend.derivatex_models import Action
 
 
-def getAction(actionId):
+def getAction(action_id):
     # Query database for the action
-    return Action.query.get(actionId)
+    return Action.query.get(action_id)
 
 
-def getUserActions(userID):
-    return Action.query.filter_by(user_id=userID).order_by(Action.timestamp.desc()).all()
+def getUserActions(user_id):
+    return Action.query.filter_by(user_id=user_id).order_by(Action.timestamp.desc()).all()
 
 
-def getDerivativeActions(derivativeId):
-    return Action.query.filter_by(derivative_id=derivativeId).order_by(Action.timestamp.desc()).all()
+def getDerivativeActions(derivative_id):
+    return Action.query.filter_by(derivative_id=derivative_id).order_by(Action.timestamp.desc()).all()
 
 
 def getRecentActions(count):
