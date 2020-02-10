@@ -1,5 +1,7 @@
+# Third party imports
 from flask import Flask
 
+# Local application imports
 from backend.db import db
 from backend.blueprints.derivative_blueprint import DerivativeBlueprint
 from backend.blueprints.user_blueprint import UserBlueprint
@@ -10,11 +12,11 @@ from backend.blueprints.report_blueprint import ReportBlueprint
 class Application:
 
     @staticmethod
-    def setupApp(configObj):
+    def setupApp(config):
         # Create flask app
         app = Flask(__name__)
         app.app_context().push()
-        app.config.from_object(configObj)
+        app.config.from_object(config)
 
         # Bind SQLAlchemy database engine to flask app
         db.init_app(app)
@@ -31,24 +33,24 @@ class Application:
         return app
 
     @staticmethod
+    def getProductionApp():
+        # Setup and return app
+        return Application.setupApp(BaseConfig)
+
+    @staticmethod
     def runDevServer():
         # Setup app
-        app = Application.setupApp(Config)
+        app = Application.setupApp(DevConfig)
         # Run flask development server
         app.run()
 
     @staticmethod
-    def getProductionApp():
-        # Setup and return app
-        return Application.setupApp(Config)
-
-    @staticmethod
     def getTestApp():
         # Setup and return app
-        return Application.setupApp(Config)
+        return Application.setupApp(TestConfig)
 
 
-class Config:
+class BaseConfig:
     DEBUG = False
     TESTING = False
     JSON_SORT_KEYS = True
@@ -61,3 +63,12 @@ class Config:
     SQLALCHEMY_ENGINE_OPTIONS = {
         'pool_size': 100, 'pool_recycle': 1, 'pool_pre_ping': True
     }
+
+
+class DevConfig(BaseConfig):
+    DEBUG = True
+
+
+class TestConfig(BaseConfig):
+    TESTING = True
+    SQLALCHEMY_DATABASE_URI = 'mysql+mysqlconnector://derivatex_backend:qwerty123@localhost/test'
