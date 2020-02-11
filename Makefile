@@ -27,11 +27,11 @@ init:
 	apt install flake8 bandit
 
 init_db:
+	export DEBIAN_FRONTEND=noninteractive
 	sudo rm -rf /var/lib/mysql/mysql
 	sudo apt-get remove --purge mysql-server mysql-client mysql-common
 	sudo apt-get autoremove
 	sudo apt-get autoclean
-	export DEBIAN_FRONTEND=noninteractive
 	sudo -E apt-get -q -y install mysql-server
 	mysqladmin -u root password secretPassword
 	sudo mysql -u root -p secretPassword -e "USE mysql; create user 'derivatex_backend'@'localhost' identified by 'qwerty123'; create database test; grant all privileges on test.* to 'derivatex_backend'@'localhost'; flush privileges;"
