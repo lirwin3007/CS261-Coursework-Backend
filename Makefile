@@ -37,7 +37,7 @@ init_db:
 	sleep 3
 	sudo mysql -u root -e "FLUSH PRIVILEGES; SET PASSWORD FOR root@'localhost' = PASSWORD('password');"
 	sudo systemctl stop mysql
-	sudo systemctl stop start
+	sudo systemctl start mysql
 	sudo mysql -u root -p password -e "USE mysql; create user 'derivatex_backend'@'localhost' identified by 'qwerty123'; create database test; grant all privileges on test.* to 'derivatex_backend'@'localhost'; flush privileges;"
 
 db:
