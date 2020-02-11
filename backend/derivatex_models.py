@@ -19,8 +19,20 @@ class Derivative(db.Model):
     modified = db.Column(db.Boolean, nullable=False, default=False)
     deleted = db.Column(db.Boolean, nullable=False, default=False)
 
-    def as_dict(self):
-        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+    # TODO: revise
+    @property
+    def associated_actions(self):
+        actions = Action.query.filter_by(derivative_id=self.id).order_by(Action.timestamp.desc()).all()
+        return [action.id for action in actions]
+
+    # TODO: obtain current underlying price
+    @property
+    def underlying_price(self):
+        return 1.0
+
+    @property
+    def notional_value(self):
+        return self.quantity * self.underlying_price
 
     def __str__(self):
         return '<Derivative : {}>'.format(self.id)
@@ -33,9 +45,6 @@ class User(db.Model):
     email = db.Column(db.String(32), nullable=False, unique=True)
     password = db.Column(db.String(128), nullable=False, unique=True)
     profile_image = db.Column(db.String(128))
-
-    def as_dict(self):
-        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
     def __str__(self):
         return '<User : {}>'.format(self.id)
@@ -54,9 +63,6 @@ class Action(db.Model):
     type = db.Column(db.Enum(ActionType), nullable=False)
     timestamp = db.Column(db.DateTime, nullable=False, default=datetime.now())
     update_info = db.Column(db.JSON)
-
-    def as_dict(self):
-        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
     def __str__(self):
         return '<Action : {}>'.format(self.id)

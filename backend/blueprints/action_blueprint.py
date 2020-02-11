@@ -15,8 +15,11 @@ ActionBlueprint = Blueprint('actionManagement',
 def getAction(action_id):
     # Get action from database
     action = action_management.getAction(action_id)
+    if action is None:
+        abort(404)
+
     # Make response
-    return action.as_dict() if action is not None else abort(404)
+    return jsonify(action=action)
 
 
 @ActionBlueprint.route('/get-user-actions/<user_id>')

@@ -15,8 +15,11 @@ UserBlueprint = Blueprint('userManagement',
 def getUser(user_id):
     # Get user from database
     user = user_management.getUser(user_id)
+    if user is None:
+        abort(404)
+
     # Make response
-    return user.as_dict() if user is not None else abort(404)
+    return jsonify(user=user)
 
 
 @UserBlueprint.route('/index-users')

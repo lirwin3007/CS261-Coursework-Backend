@@ -1,5 +1,7 @@
 # Third party imports
 from flask import Flask
+from flask.json import JSONEncoder
+from sqlalchemy.ext.declarative import DeclarativeMeta
 
 # Local application imports
 from backend.db import db
@@ -20,6 +22,8 @@ class Application:
 
         # Bind SQLAlchemy database engine to flask app
         db.init_app(app)
+        # Extend the default json encoder to support ORM models
+        app.json_encoder = CustomJSONEncoder
         # Create all schemas defined by ORM models
         db.create_all()
 
@@ -48,6 +52,21 @@ class Application:
     def getTestApp():
         # Setup and return app
         return Application.setupApp(TestConfig)
+
+
+# Custom JSON encoder for SQLAlchemy Models
+class CustomJSONEncoder(JSONEncoder):
+
+    def default(self, o):  # pylint: disable=E0202
+        if isinstance(o.__class__, DeclarativeMeta):
+            # Gather object attributes
+            columns = [c.name for c in o.__table__.columns]
+            properties = [n for n, v in vars(o.__class__).items() if isinstance(v, property)]
+            attributes = columns + properties
+            # Return a dictionary of attribute-value pairs
+            return {attribute: getattr(o, attribute) for attribute in attributes}
+
+        return super(CustomJSONEncoder, self).default(o)
 
 
 class BaseConfig:

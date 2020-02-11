@@ -17,8 +17,11 @@ DerivativeBlueprint = Blueprint('derivativeManagement',
 def getDerivative(derivative_id):
     # Get derivative from database
     derivative = derivative_management.getDerivative(derivative_id)
+    if derivative is None:
+        abort(404)
+
     # Make response
-    return derivative.as_dict() if derivative is not None else abort(404)
+    return jsonify(derivative=derivative)
 
 
 @DerivativeBlueprint.route('/add-derivative', methods=['POST'])
