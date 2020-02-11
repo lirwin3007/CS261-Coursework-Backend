@@ -2,6 +2,7 @@
 from flask import Flask
 from flask.json import JSONEncoder
 from sqlalchemy.ext.declarative import DeclarativeMeta
+from flask_apscheduler import APScheduler
 
 # Local application imports
 from backend.db import db
@@ -9,6 +10,7 @@ from backend.blueprints.derivative_blueprint import DerivativeBlueprint
 from backend.blueprints.user_blueprint import UserBlueprint
 from backend.blueprints.action_blueprint import ActionBlueprint
 from backend.blueprints.report_blueprint import ReportBlueprint
+from backend.managers import report_management
 
 
 class Application:
@@ -19,6 +21,12 @@ class Application:
         app = Flask(__name__)
         app.app_context().push()
         app.config.from_object(config)
+
+        # Create scheduler for generating reports
+        scheduler = APScheduler()
+        scheduler.init_app(app)
+        scheduler.start()
+        app.apscheduler.add_job(func=report_management.generateReports, trigger='cron', hour='23', minute='59', id='j1')
 
         # Bind SQLAlchemy database engine to flask app
         db.init_app(app)
