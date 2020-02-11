@@ -30,8 +30,8 @@ init_db:
 	export DEBIAN_FRONTEND=noninteractive
 	sudo -E apt-get -q -y install mysql-server
 	sudo systemctl stop mysql
-	mkdir -p /var/run/mysqld
-	chown mysql:mysql /var/run/mysqld
+	sudo mkdir -p /var/run/mysqld
+	sudo chown mysql:mysql /var/run/mysqld
 	sudo mysqld_safe --skip-grant-tables --skip-networking &
 	sudo mysql -u root -e "USE mysql; create user 'derivatex_backend'@'localhost' identified by 'qwerty123'; create database test; grant all privileges on test.* to 'derivatex_backend'@'localhost'; flush privileges;"
 
