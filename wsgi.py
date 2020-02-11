@@ -1,3 +1,3 @@
-from backend import app as _app
+from backend.app import Application
 
-app = _app.Application.get_app()
+app = Application.getProductionApp()

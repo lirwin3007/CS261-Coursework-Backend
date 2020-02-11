@@ -9,12 +9,19 @@ mysql -e "
 
   drop user if exists 'derivatex_backend'@'localhost';
   create user 'derivatex_backend'@'localhost' identified by 'qwerty123';
+
   drop database if exists derivatex;
-  create database derivatex;
-  grant all privileges on derivatex.* to 'derivatex_backend'@'localhost';
   drop database if exists external;
+  drop database if exists test;
+
+  create database derivatex;
   create database external;
+  create database test;
+
+  grant all privileges on derivatex.* to 'derivatex_backend'@'localhost';
   grant all privileges on external.* to 'derivatex_backend'@'localhost';
+  grant all privileges on test.* to 'derivatex_backend'@'localhost';
+
   flush privileges;
 "
 echo "database initialised"
@@ -45,7 +52,7 @@ mysql -e "
     (product_name, company_id);"
 
 echo "populating currency table"
-for p in res/dummy/currencyValues/2019/**/*.csv; do
+for p in res/dummy/currencyValues/**/*.csv; do
   mysql -e "
      USE external;
      LOAD DATA LOCAL INFILE '${p}'
@@ -57,7 +64,7 @@ for p in res/dummy/currencyValues/2019/**/*.csv; do
 done
 
 echo "populating company_stock table"
-for p in res/dummy/stockPrices/2019/**/*.csv; do
+for p in res/dummy/stockPrices/**/*.csv; do
   mysql -e "
      USE external;
      LOAD DATA LOCAL INFILE '${p}'
@@ -69,7 +76,7 @@ for p in res/dummy/stockPrices/2019/**/*.csv; do
 done
 
 echo "populating product table"
-for p in res/dummy/productPrices/2019/**/*.csv; do
+for p in res/dummy/productPrices/**/*.csv; do
   mysql -e "
      USE external;
      LOAD DATA LOCAL INFILE '${p}'
@@ -81,7 +88,7 @@ for p in res/dummy/productPrices/2019/**/*.csv; do
 done
 
 echo "populating derivative table"
-for p in res/dummy/derivativeTrades/2019/April/**/*.csv; do
+for p in res/dummy/derivativeTrades/April/**/*.csv; do
   mysql -e "
      USE derivatex;
      LOAD DATA LOCAL INFILE '${p}'
