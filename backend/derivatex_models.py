@@ -66,3 +66,13 @@ class Action(db.Model):
 
     def __str__(self):
         return '<Action : {}>'.format(self.id)
+
+
+class Report(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    target_date = db.Column(db.Date, nullable=False)
+    creation_date = db.Column(db.Date, nullable=False)
+    version = db.Column(db.Integer, nullable=False)
+
+    def __str__(self):
+        return '<Report : {}>'.format(self.id)
