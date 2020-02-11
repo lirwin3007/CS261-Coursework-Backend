@@ -32,10 +32,10 @@ init_db:
 	sudo systemctl stop mysql
 	sudo mkdir -p /var/run/mysqld
 	sudo chown mysql:mysql /var/run/mysqld
-	sudo mysqld_safe --skip-grant-tables --skip-networking &
-	#sudo /usr/sbin/mysqld --skip-grant-tables --skip-networking &
-	sleep 3
-	sudo mysql -u root -e "FLUSH PRIVILEGES; SET PASSWORD FOR root@'localhost' = PASSWORD('password');"
+	#sudo mysqld_safe --skip-grant-tables --skip-networking &
+	#sleep 3
+	sudo mysqld_safe --skip-grant-tables --skip-networking -u root -e "FLUSH PRIVILEGES; SET PASSWORD FOR root@'localhost' = PASSWORD('password');"
+	#sudo mysql -u root -e "FLUSH PRIVILEGES; SET PASSWORD FOR root@'localhost' = PASSWORD('password');"
 	sudo mysqld stop
 	sudo systemctl start mysql
 	sudo mysql -u root -p password -e "USE mysql; create user 'derivatex_backend'@'localhost' identified by 'qwerty123'; create database test; grant all privileges on test.* to 'derivatex_backend'@'localhost'; flush privileges;"
