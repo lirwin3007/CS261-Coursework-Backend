@@ -29,7 +29,7 @@ init:
 init_db:
 	export DEBIAN_FRONTEND=noninteractive
 	sudo -E apt-get -q -y install mysql-server
-	sudo /usr/sbin/mysqld --skip-grant-tables --skip-networking &
+	sudo mysqld_safe --skip-grant-tables --skip-networking &
 	#sudo mkdir -p /var/run/mysqld
 	#sudo chown mysql:mysql /var/run/mysqld
 	#sudo mysqld_safe --skip-grant-tables --skip-networking &
