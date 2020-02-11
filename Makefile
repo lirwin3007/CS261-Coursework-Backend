@@ -29,6 +29,7 @@ init:
 init_db:
 	export DEBIAN_FRONTEND=noninteractive
 	sudo -E apt-get -q -y install mysql-server
+	sudo systemctl start mysql
 	mysqladmin -u root password secretPassword
 	sudo mysql -u root -p secretPassword -e "USE mysql; create user 'derivatex_backend'@'localhost' identified by 'qwerty123'; create database test; grant all privileges on test.* to 'derivatex_backend'@'localhost'; flush privileges;"
 
