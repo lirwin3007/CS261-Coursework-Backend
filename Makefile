@@ -26,6 +26,16 @@ init:
 	# Install tools
 	apt install flake8 bandit
 
+init_db:
+	sudo apt install mysql-server
+	mysql -e "
+	  USE mysql;
+	  create user 'derivatex_backend'@'localhost' identified by 'qwerty123';
+	  create database test;
+	  grant all privileges on test.* to 'derivatex_backend'@'localhost';
+	  flush privileges;
+	"
+
 db:
 	sudo ./setup_db.sh
 
