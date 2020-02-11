@@ -29,7 +29,8 @@ init:
 init_db:
 	sudo apt install mysql-server
 	sudo systemctl start mysql
-	sudo mysql -e "USE mysql; create user 'derivatex_backend'@'localhost' identified by 'qwerty123'; create database test; grant all privileges on test.* to 'derivatex_backend'@'localhost'; flush privileges;"
+	sudo mysql
+	#sudo mysql --skip-grant-tables -e "USE mysql; create user 'derivatex_backend'@'localhost' identified by 'qwerty123'; create database test; grant all privileges on test.* to 'derivatex_backend'@'localhost'; flush privileges;"
 
 db:
 	sudo ./setup_db.sh
