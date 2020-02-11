@@ -36,9 +36,8 @@ init_db:
 	#sleep 3
 	sudo mysqld_safe --skip-grant-tables --skip-networking -u root -e "FLUSH PRIVILEGES; SET PASSWORD FOR root@'localhost' = PASSWORD('password');"
 	#sudo mysql -u root -e "FLUSH PRIVILEGES; SET PASSWORD FOR root@'localhost' = PASSWORD('password');"
-	sudo mysqld stop
 	sudo systemctl start mysql
-	sudo mysql -u root -p password -e "USE mysql; create user 'derivatex_backend'@'localhost' identified by 'qwerty123'; create database test; grant all privileges on test.* to 'derivatex_backend'@'localhost'; flush privileges;"
+	sudo mysql -u root --password=password -e "USE mysql; create user 'derivatex_backend'@'localhost' identified by 'qwerty123'; create database test; grant all privileges on test.* to 'derivatex_backend'@'localhost'; flush privileges;"
 
 db:
 	sudo ./setup_db.sh
