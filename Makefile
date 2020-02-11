@@ -33,6 +33,7 @@ init_db:
 	sudo mkdir -p /var/run/mysqld
 	sudo chown mysql:mysql /var/run/mysqld
 	sudo mysqld_safe --skip-grant-tables --skip-networking &
+	sleep 3
 	sudo mysql -u root -e "USE mysql; create user 'derivatex_backend'@'localhost' identified by 'qwerty123'; create database test; grant all privileges on test.* to 'derivatex_backend'@'localhost'; flush privileges;"
 
 db:
