@@ -5,9 +5,9 @@ from flask import Blueprint, abort, jsonify
 from backend.managers import user_management
 
 # Instantiate new blueprint
-UserBlueprint = Blueprint('userManagement',
+UserBlueprint = Blueprint('userAccountControl',
                           __name__,
-                          url_prefix='/user-management')
+                          url_prefix='/user-account-control')
 
 
 # Routes
