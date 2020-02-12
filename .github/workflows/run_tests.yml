@@ -24,7 +24,6 @@ jobs:
         pip install -r requirements.txt
     - name: Set up test Database
       run: |
-      	systemctl start mysql
         mysql -uroot -h127.0.0.1 -proot -e 'USE mysql; create user 'derivatex_backend'@'localhost' identified by 'qwerty123'; create database test; grant all privileges on test.* to 'derivatex_backend'@'localhost'; flush privileges;'
     - name: Run tests
       run: make test
