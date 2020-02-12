@@ -29,6 +29,8 @@ def updateDerivative(derivative, user_id, updates):
 
         # Retrieve the current value
         old_value = getattr(derivative, attribute)
+        if isinstance(old_value, datetime.date):
+            old_value = str(old_value)
 
         # Perform update
         setattr(derivative, attribute, new_value)
@@ -41,7 +43,7 @@ def updateDerivative(derivative, user_id, updates):
         })
 
     # Register the derivative updates and corrosponding user action to the database session
-    action = Action(derivative_id=derivative.id, user_id=user_id, type=ActionType.UPDATE, update_info=update_log)
+    action = Action(derivative_id=derivative.id, user_id=user_id, type=ActionType.UPDATE, update_log=update_log)
     db.session.add(action)
     db.session.add(derivative)
     db.session.flush()
