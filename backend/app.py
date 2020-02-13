@@ -1,6 +1,7 @@
 # Third party imports
 from flask import Flask
 from flask.json import JSONEncoder
+from flask_cors import CORS
 from sqlalchemy.ext.declarative import DeclarativeMeta
 
 # Local application imports
@@ -19,6 +20,9 @@ class Application:
         app = Flask(__name__)
         app.app_context().push()
         app.config.from_object(config)
+
+        # Allow cross-origin requests
+        CORS(app)
 
         # Bind SQLAlchemy database engine to flask app
         db.init_app(app)
