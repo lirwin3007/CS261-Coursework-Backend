@@ -4,6 +4,7 @@ import enum
 
 # Local application imports
 from backend.db import db
+from backend import util
 
 
 class Derivative(db.Model):
@@ -34,10 +35,9 @@ class Derivative(db.Model):
     def notional_value(self):
         return self.quantity * self.underlying_price
 
-    # TODO: implement currency code to symbol lookup
     @property
     def currency_symbol(self):
-        symbol = None
+        symbol = util.get_currency_symbol(self.currency_code)
         return symbol or '?'
 
     def __str__(self):

@@ -16,12 +16,15 @@ NC='\033[0m' # No Color
 .SILENT:
 
 init:
-	# Install application dependencies
 	apt update
+	# Install python and package installer
 	apt install python3 python3-pip
+	# Install python package dependencies
 	pip3 install -r requirements.txt
 	# Install database dependencies
 	apt install mysql-server python-mysqldb
+	# Update system locales
+	apt install locales-all
 	# Install linter tools
 	apt install flake8 bandit
 
