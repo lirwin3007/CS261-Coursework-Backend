@@ -34,6 +34,12 @@ class Derivative(db.Model):
     def notional_value(self):
         return self.quantity * self.underlying_price
 
+    # TODO: implement currency code to symbol lookup
+    @property
+    def currency_symbol(self):
+        symbol = None
+        return symbol or '?'
+
     def __str__(self):
         return '<Derivative : {}>'.format(self.id)
 
