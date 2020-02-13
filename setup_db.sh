@@ -2,33 +2,15 @@
 
 # Start mysql server
 systemctl start mysql
+echo "started mysql server"
 
-# Create the database and a user
-mysql -e "
-  USE mysql;
-
-  drop user if exists 'derivatex_backend'@'localhost';
-  create user 'derivatex_backend'@'localhost' identified by 'qwerty123';
-
-  drop database if exists derivatex;
-  drop database if exists external;
-  drop database if exists test;
-
-  create database derivatex;
-  create database external;
-  create database test;
-
-  grant all privileges on derivatex.* to 'derivatex_backend'@'localhost';
-  grant all privileges on external.* to 'derivatex_backend'@'localhost';
-  grant all privileges on test.* to 'derivatex_backend'@'localhost';
-
-  flush privileges;
-"
-echo "database initialised"
+# Setup MySQL objects
+sudo mysql < setup_sql.sql
+echo "setup sql objects"
 
 # Let SQL Alchemy generate schema from models
 python3 ./wsgi.py
-echo "schema initialised"
+echo "schemas initialised"
 
 # Enable recurse
 shopt -s globstar
@@ -88,7 +70,7 @@ for p in res/dummy/productPrices/**/*.csv; do
 done
 
 echo "populating derivative table"
-for p in res/dummy/derivativeTrades/April/**/*.csv; do
+for p in res/dummy/derivativeTrades/**/*.csv; do
   mysql -e "
      USE derivatex;
      LOAD DATA LOCAL INFILE '${p}'

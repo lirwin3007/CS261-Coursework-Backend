@@ -15,29 +15,15 @@ NC='\033[0m' # No Color
 # Suppress console spam
 .SILENT:
 
-# Run as root
 init:
-	# Install Application dependencies
+	# Install application dependencies
 	apt update
 	apt install python3 python3-pip
 	pip3 install -r requirements.txt
 	# Install database dependencies
 	apt install mysql-server python-mysqldb
-	# Install tools
+	# Install linter tools
 	apt install flake8 bandit
-
-init_db:
-	export DEBIAN_FRONTEND=noninteractive
-	sudo -E apt-get -q -y install mysql-server
-	sudo systemctl stop mysql
-	sudo mkdir -p /var/run/mysqld
-	sudo chown mysql:mysql /var/run/mysqld
-	#sudo mysqld_safe --skip-grant-tables --skip-networking &
-	#sleep 3
-	sudo mysqld_safe --skip-grant-tables --skip-networking -u root -e "FLUSH PRIVILEGES; SET PASSWORD FOR 'root'@'localhost' = PASSWORD('password');"
-	#sudo mysql -u root -e "FLUSH PRIVILEGES; SET PASSWORD FOR root@'localhost' = PASSWORD('password');"
-	sudo systemctl start mysql
-	sudo mysql -u root --password=password -e "USE mysql; create user 'derivatex_backend'@'localhost' identified by 'qwerty123'; create database test; grant all privileges on test.* to 'derivatex_backend'@'localhost'; flush privileges;"
 
 db:
 	sudo ./setup_db.sh
