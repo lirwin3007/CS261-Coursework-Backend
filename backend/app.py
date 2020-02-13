@@ -1,6 +1,7 @@
 # Third party imports
 from flask import Flask
 from flask.json import JSONEncoder
+from flask_cors import CORS
 from sqlalchemy.ext.declarative import DeclarativeMeta
 from flask_apscheduler import APScheduler
 
@@ -28,6 +29,9 @@ class Application:
         scheduler.start()
         app.apscheduler.add_job(func=report_management.generateReports,
                             trigger='cron', hour='23', minute='59', id='j1')  # pylint: disable=E1101
+
+        # Allow cross-origin requests
+        CORS(app)
 
         # Bind SQLAlchemy database engine to flask app
         db.init_app(app)
