@@ -2,15 +2,16 @@
 from flask import send_file
 
 # Local application imports
-from backend.derivatex_models import Derivative, Report
-from backend.db import db
+# from backend.derivatex_models import Derivative, Report
+# from backend.db import db
 
-def indexReports(date_from,date_to):
-    return {"report_ids": [1,2,3]}
+
+def indexReports(date_from, date_to):
+    return {"report_ids": [1, 2, 3]}
 
 
 def getReport(report_id):
-    return {"report_id": 1, "report": {"derivatives": [1,2,3]}}
+    return {"report_id": 1, "report": {"derivatives": [1, 2, 3]}}
 
 
 def downloadCSV(report_id):
@@ -18,6 +19,7 @@ def downloadCSV(report_id):
         send_file("static/reports/" + report_id + ".csv")
         return True
     except Exception as e:
+        print(e)
         return False
 
 
@@ -26,6 +28,7 @@ def downloadPDF(report_id):
         send_file("static/reports/" + report_id + ".pdf")
         return True
     except Exception as e:
+        print(e)
         return False
 
 
