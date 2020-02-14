@@ -2,7 +2,7 @@
 import locale
 
 
-def get_currency_symbol(currency_code):
+def getCurrencySymbol(currency_code):
     for l in locale.locale_alias.values():
         try:
             locale.setlocale(locale.LC_ALL, l)

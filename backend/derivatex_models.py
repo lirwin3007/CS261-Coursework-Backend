@@ -37,8 +37,7 @@ class Derivative(db.Model):
 
     @property
     def currency_symbol(self):
-        symbol = util.get_currency_symbol(self.currency_code)
-        return symbol or '?'
+        return util.getCurrencySymbol(self.currency_code) or '?'
 
     def __str__(self):
         return '<Derivative : {}>'.format(self.id)
