@@ -2,8 +2,7 @@
 from flask import send_file
 
 # Local application imports
-# from backend.derivatex_models import Derivative, Report
-# from backend.db import db
+# from backend.derivatex_models import Report
 
 
 def indexReports(date_from, date_to):

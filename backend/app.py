@@ -28,7 +28,7 @@ class Application:
         scheduler.init_app(app)
         scheduler.start()
         app.apscheduler.add_job(func=report_management.generateReports,
-                                trigger='cron', hour='23', minute='59', id='j1')  # pylint: disable=E1101
+                                trigger='cron', hour='23', minute='59', id='j1')
 
         # Allow cross-origin requests
         CORS(app)
