@@ -74,22 +74,24 @@ def updateDerivative(derivative, user_id, updates):
     return update_log
 
 
-# TODO: simplify / refactor
+# TODO: simplify / optimize performance
 def indexDerivatives(filter_dict, page_size, page_number):  # noqa: C901
     # Create base query
     query = Derivative.query
 
-    # Initialise filter sets
+    # Initialise pre and post query filter sets
     pre_filters = set()
     post_filters = set()
 
-    # Determine all the filters from filter dictionary
+    # Create filters from the filter dictionary
     for filter_name, value in filter_dict.items():
         # Determine filter comparison operation from the filter name prefix
         if filter_name.startswith('min_'):
+            # Select >= operator and extract filter name
             filter_name = filter_name[4:]
             op = operator.ge
         elif filter_name.startswith('max_'):
+            # Select <= operator and extract filter name
             filter_name = filter_name[4:]
             op = operator.le
         else:
@@ -98,13 +100,13 @@ def indexDerivatives(filter_dict, page_size, page_number):  # noqa: C901
 
         # The filter attribute is a member of the Derivative schema
         if filter_name in Derivative.__table__.columns:
-            # Create filter from operator and filter_name and add to pre-filters
+            # Create and add filter to pre-filters
             filter = op(Derivative.__table__.columns[filter_name], value)
             pre_filters.add(filter)
 
         # The filter attribute is a property of the Derivative class
         elif isinstance(getattr(Derivative, filter_name, None), property):
-            # Create filter from operator and filter_name and add to post-filters
+            # Create and add filter to post-filters
             filter = lambda d: op(getattr(d, filter_name), value)  # noqa: E731
             post_filters.add(filter)
 
@@ -113,23 +115,26 @@ def indexDerivatives(filter_dict, page_size, page_number):  # noqa: C901
         query = query.filter(f)
 
     # Determine derivative ordering key
-    order_key = filter_dict.get('order_key')
+    order_key = filter_dict.get('order_key') or ''
     reverse_order = filter_dict.get('reverse_order') or False
 
     # Order the query if the order key is a field in the schema
-    if order_key is not None and order_key in Derivative.__table__.columns:
-        order_function = desc if reverse_order else asc
-        query = query.order_by(order_function(order_key))
+    if order_key in Derivative.__table__.columns:
+        query = query.order_by(desc(order_key) if reverse_order else asc(order_key))
 
-    # Calculate derivative offset
+    # Determine if there is a post ordering
+    post_ordering = isinstance(getattr(Derivative, order_key, None), property)
+
+    # Calculate index offset
     offset = page_size * max(page_number - 1, 0)
 
-    if post_filters or order_key is not None and isinstance(getattr(Derivative, order_key, None), property):
+    # If there is a post query ordering or filters execute the query and apply
+    if post_filters or post_ordering:
         # Execute sql query
         derivatives = query.all()
 
-        # Sort derivatives
-        if order_key is not None and isinstance(getattr(Derivative, order_key, None), property):
+        # Apply post ordering
+        if post_ordering:
             derivatives.sort(key=lambda d: getattr(d, order_key), reverse=reverse_order)
 
         # Apply all post-query filters to derivatives
