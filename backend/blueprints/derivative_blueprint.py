@@ -121,8 +121,8 @@ def indexDerivatives():
     body = request.get_json() if request.data and request.is_json else {}
 
     # Determine page parameters
-    page_size = body.get('page_size') or 15
-    page_number = body.get('page_number') or 0
+    page_size = max(body.get('page_size') or 15, 1)
+    page_number = request.args.get('page_number', default=0, type=int)
 
     # Index derivatives
     derivatives, page_count = derivative_management.indexDerivatives(body, page_size, page_number)
