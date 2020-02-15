@@ -20,6 +20,13 @@ class Derivative(db.Model):
     modified = db.Column(db.Boolean, nullable=False, default=False)
     deleted = db.Column(db.Boolean, nullable=False, default=False)
 
+    @property
+    def absolute(self):
+        # Determine time diff between date of trade and now
+        delta = datetime.now() - datetime.combine(self.date_of_trade, datetime.min.time())
+        # The derivative is absolute if it was traded over a month ago
+        return delta.days >= 30
+
     # TODO: revise
     @property
     def associated_actions(self):

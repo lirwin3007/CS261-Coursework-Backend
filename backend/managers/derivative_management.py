@@ -27,8 +27,8 @@ def addDerivative(derivative, user_id):
 
 
 def deleteDerivative(derivative, user_id):
-    # The derivative is already flagged as deleted, return
-    if derivative.deleted:
+    # The derivative has already been flagged as deleted or is absolute, return
+    if derivative.deleted or derivative.absolute:
         return
 
     # Mark the derivative as deleted
@@ -42,6 +42,10 @@ def deleteDerivative(derivative, user_id):
 
 
 def updateDerivative(derivative, user_id, updates):
+    # The derivative has been deleted or is absolute, return
+    if derivative.deleted or derivative.absolute:
+        return
+
     # Apply and log all updates to the derivative
     update_log = []
     for attribute, new_value in updates.items():
