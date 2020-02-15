@@ -4,6 +4,7 @@ import enum
 
 # Local application imports
 from backend.db import db
+from backend import util
 
 
 class Derivative(db.Model):
@@ -19,6 +20,13 @@ class Derivative(db.Model):
     modified = db.Column(db.Boolean, nullable=False, default=False)
     deleted = db.Column(db.Boolean, nullable=False, default=False)
 
+    @property
+    def absolute(self):
+        # Determine time diff between date of trade and now
+        delta = datetime.now() - datetime.combine(self.date_of_trade, datetime.min.time())
+        # The derivative is absolute if it was traded over a month ago
+        return delta.days >= 30
+
     # TODO: revise
     @property
     def associated_actions(self):
@@ -33,6 +41,10 @@ class Derivative(db.Model):
     @property
     def notional_value(self):
         return self.quantity * self.underlying_price
+
+    @property
+    def currency_symbol(self):
+        return util.getCurrencySymbol(self.currency_code) or '?'
 
     def __str__(self):
         return '<Derivative : {}>'.format(self.id)
@@ -62,7 +74,7 @@ class Action(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     type = db.Column(db.Enum(ActionType), nullable=False)
     timestamp = db.Column(db.DateTime, nullable=False, default=datetime.now())
-    update_info = db.Column(db.JSON)
+    update_log = db.Column(db.JSON)
 
     def __str__(self):
         return '<Action : {}>'.format(self.id)
