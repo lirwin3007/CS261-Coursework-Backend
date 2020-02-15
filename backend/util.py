@@ -16,3 +16,7 @@ def getCurrencySymbol(currency_code):
             return conv['currency_symbol']
 
     return None
+
+
+def clamp(val, min_val, max_val):
+    return max(min(max_val, val), min_val)

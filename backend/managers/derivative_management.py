@@ -8,6 +8,7 @@ from sqlalchemy import asc, desc
 # Local application imports
 from backend.derivatex_models import Derivative, Action, ActionType
 from backend.db import db
+from backend.util import clamp
 
 
 def getDerivative(derivative_id):
@@ -129,9 +130,6 @@ def indexDerivatives(filter_dict, page_size, page_number):  # noqa: C901
     # Determine if there is a post ordering
     post_ordering = isinstance(getattr(Derivative, order_key, None), property)
 
-    # Calculate index offset
-    offset = page_size * max(page_number - 1, 0)
-
     # If there is a post query ordering or filters execute the query and apply
     if post_filters or post_ordering:
         # Execute sql query
@@ -145,19 +143,21 @@ def indexDerivatives(filter_dict, page_size, page_number):  # noqa: C901
         for f in post_filters:
             derivatives = [d for d in derivatives if f(d)]
 
+        # Determine page count
+        page_count = len(derivatives) // page_size + 1
+        # Calculate index offset
+        offset = page_size * (clamp(page_number, 1, page_count) - 1)
         # Paginate derivatives
-        derivative_count = len(derivatives)
         derivatives = derivatives[offset:offset + page_size]
     else:
+        # Determine page count
+        page_count = query.count() // page_size + 1
+        # Calculate index offset
+        offset = page_size * (clamp(page_number, 1, page_count) - 1)
         # Paginate query
-        derivative_count = query.count()
         query = query.limit(page_size).offset(offset)
-
         # Execute sql query
         derivatives = query.all()
-
-    # Determine page count
-    page_count = derivative_count // page_size + 1
 
     # Return derivatives and page count
     return derivatives, page_count
