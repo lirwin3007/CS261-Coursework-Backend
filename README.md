@@ -15,7 +15,7 @@ To setup a development environment for the Derivatex backend, execute the follow
 
 The dummy data can be downloaded from [here](https://warwick.ac.uk/fac/sci/dcs/teaching/material/cs261/project/cs261dummydata.zip).
 
-Note that the development environment requires a Linux host system, ideally Ubuntu.
+Note that the development environment requires a Debian Linux host system, ideally Ubuntu.
 
 ## Running
 
@@ -37,10 +37,10 @@ Tests can be ran using:
 
 ## Linter
 
-The configured linter tools (pylint, flake8 and bandit) can all be ran using:
+The linter tools (pylint, flake8 and bandit) can all be ran using:
 
 ```shell
-~ $ make test
+~ $ make lint
 ```
 
 Note that workflows have been setup to execute the linter tools on pull requests into the master and dev branches. Therefore, these tools should be used often locally to ensure these tests pass.
