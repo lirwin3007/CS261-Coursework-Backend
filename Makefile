@@ -16,12 +16,21 @@ NC='\033[0m' # No Color
 .SILENT:
 
 init:
-	# Install application dependencies
+	# Force the user to run directive with root privileges
+	if ! [ "$(shell id -u)" = 0 ];then \
+		echo "Error: root privileges required, run this directive with sudo."; \
+		exit 1; \
+  fi; \
+
 	apt update
+	# Install python and package manager
 	apt install python3 python3-pip
+	# Install package dependencies
 	pip3 install -r requirements.txt
 	# Install database dependencies
 	apt install mysql-server python-mysqldb
+	# Update system locales
+	apt install locales-all
 	# Install linter tools
 	apt install flake8 bandit
 
@@ -39,6 +48,7 @@ lint:
 	pylint --rcfile=setup.cfg **/*.py
 	echo "\n${BLUE}Running Flake8 against source and test files...${NC}\n"
 	flake8
+	echo "Your code passes flake8 linter test"
 	echo "\n${BLUE}Running Bandit against source files...${NC}\n"
 	bandit -r --ini setup.cfg
 

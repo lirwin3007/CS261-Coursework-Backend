@@ -8,7 +8,7 @@ from backend.managers import derivative_management
 from backend.db import db
 
 
-def testGetDerivative():
+def testGetDerivativeRetrievesDerivative():
     # Obtain dummy derivative
     derivative = dummyDerivative()
 
@@ -18,6 +18,23 @@ def testGetDerivative():
 
     # Assert that getDerivative returns the derivative
     assert derivative_management.getDerivative(derivative.id) == derivative
+
+
+def testGetDerivativeReturnsNoneIfNotFound():
+    # Obtain dummy derivative
+    derivative = dummyDerivative()
+
+    # Add dummy derivative to database session
+    db.session.add(derivative)
+    db.session.flush()
+
+    # Store the newly generated derivative id
+    fresh_id = derivative.id
+    # Discard the new derivative from the session to free the id
+    db.session.rollback()
+
+    # Assert that None is returned for the given id
+    assert derivative_management.getDerivative(fresh_id) is None
 
 
 def testAddDerivativeStoresDerivative():
@@ -94,6 +111,79 @@ def testDeleteDerivativeRegistersAction():
     assert action is not None
 
 
+def testUpdateDerivativeUpdatesAttributes():
+    # Obtain dummy derivative, user and update
+    derivative = dummyDerivative()
+    user = dummyUser()
+    updates = dummyUpdates()
+
+    # Add dummy derivative and user to database session
+    db.session.add(derivative)
+    db.session.add(user)
+    db.session.flush()
+
+    # Execute updateDerivative
+    derivative_management.updateDerivative(derivative, user.id, updates)
+
+    # Assert that all attribute values have been correctly updated
+    assert all(getattr(derivative, a) == v for a, v in updates.items())
+
+    # Assert that all other attributes remain unchanged
+    assert True
+
+
+def testUpdateDerivativeLogsUpdates():
+    # Obtain dummy derivative, user and update
+    derivative = dummyDerivative()
+    user = dummyUser()
+    updates = dummyUpdates()
+
+    # Add dummy derivative and user to database session
+    db.session.add(derivative)
+    db.session.add(user)
+    db.session.flush()
+
+    # Generate expected update log
+    expected_update_log = []
+    for attribute, new_value in updates.items():
+        expected_update_log.append({
+            "attribute": attribute,
+            "old_value": getattr(derivative, attribute),
+            "new_value": new_value
+        })
+
+    # Execute updateDerivative
+    update_log = derivative_management.updateDerivative(derivative, user.id, updates)
+
+    # Assert that updateDerivative returns the correct update log
+    assert update_log == expected_update_log
+
+
+def testUpdateDerivativeRegistersAction():
+    # Obtain dummy derivative, user and update
+    derivative = dummyDerivative()
+    user = dummyUser()
+    updates = dummyUpdates()
+
+    # Add dummy derivative and user to database session
+    db.session.add(derivative)
+    db.session.add(user)
+    db.session.flush()
+
+    # Execute updateDerivative
+    update_log = derivative_management.updateDerivative(derivative, user.id, updates)
+
+    # Query the database for an action that corrosponds to updating the derivative
+    action = Action.query.filter_by(derivative_id=derivative.id,
+                                    user_id=user.id,
+                                    type=ActionType.UPDATE).first()
+    # Assert that such an action exists
+    assert action is not None
+
+    # Assert that the action stored the update log
+    assert action.update_log == update_log
+
+
 def dummyDerivative():
     return Derivative(
         buying_party='foo',
@@ -117,3 +207,11 @@ def dummyUser():
             password='password'
         )
     return user
+
+
+def dummyUpdates():
+    return {
+        'buying_party': 'foo',
+        'selling_party': 'bar',
+        'asset': 'baz'
+    }
