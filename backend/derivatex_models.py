@@ -23,7 +23,7 @@ class Derivative(db.Model):
     @property
     def absolute(self):
         # Determine time diff between date of trade and now
-        delta = datetime.now() - datetime.combine(self.date_of_trade, datetime.min.time())
+        delta = datetime.date(datetime.now()) - self.date_of_trade
         # The derivative is absolute if it was traded over a month ago
         return delta.days >= 30
 

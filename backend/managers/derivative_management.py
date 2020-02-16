@@ -53,9 +53,14 @@ def updateDerivative(derivative, user_id, updates):
         # Restrict updatable attributes
         if not hasattr(derivative, attribute) or attribute in ['id', 'deleted', 'modified']:
             continue
-
+                
         # Retrieve the current value
         old_value = getattr(derivative, attribute)
+
+        # Ignore the update if it doesn't change anything
+        if old_value == new_value:
+            continue
+
         if isinstance(old_value, datetime.date):
             old_value = str(old_value)
 
