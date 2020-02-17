@@ -2,15 +2,14 @@
 from datetime import datetime
 
 # Local application imports
-from tests import context # noqa # pylint: disable=unused-import
 from backend.derivatex_models import Derivative, User, Action, ActionType
 from backend.managers import derivative_management
 from backend.db import db
 
 
-def testGetDerivativeRetrievesDerivative():
+def testGetDerivativeRetrievesDerivative(dummy_derivative):
     # Obtain dummy derivative
-    derivative = dummyDerivative()
+    derivative = dummy_derivative
 
     # Add dummy derivative to database session
     db.session.add(derivative)
@@ -20,27 +19,15 @@ def testGetDerivativeRetrievesDerivative():
     assert derivative_management.getDerivative(derivative.id) == derivative
 
 
-def testGetDerivativeReturnsNoneIfNotFound():
-    # Obtain dummy derivative
-    derivative = dummyDerivative()
-
-    # Add dummy derivative to database session
-    db.session.add(derivative)
-    db.session.flush()
-
-    # Store the newly generated derivative id
-    fresh_id = derivative.id
-    # Discard the new derivative from the session to free the id
-    db.session.rollback()
-
-    # Assert that None is returned for the given id
-    assert derivative_management.getDerivative(fresh_id) is None
+def testGetDerivativeReturnsNoneIfNotFound(free_derivtive_id):
+    # Assert that None is returned for the free id
+    assert derivative_management.getDerivative(free_derivtive_id) is None
 
 
-def testAddDerivativeStoresDerivative():
+def testAddDerivativeStoresDerivative(dummy_derivative, dummy_user):
     # Obtain dummy derivative and user
-    derivative = dummyDerivative()
-    user = dummyUser()
+    derivative = dummy_derivative
+    user = dummy_user
 
     # Add dummy user to database session
     db.session.add(user)
@@ -53,10 +40,10 @@ def testAddDerivativeStoresDerivative():
     assert Derivative.query.get(derivative.id) == derivative
 
 
-def testAddDerivativeRegistersAction():
+def testAddDerivativeRegistersAction(dummy_derivative, dummy_user, dummy_updates):
     # Obtain dummy derivative and user
-    derivative = dummyDerivative()
-    user = dummyUser()
+    derivative = dummy_derivative
+    user = dummy_user
 
     # Update database session
     db.session.add(user)
@@ -73,10 +60,10 @@ def testAddDerivativeRegistersAction():
     assert action is not None
 
 
-def testDeleteDerivativeFlagsDerivative():
+def testDeleteDerivativeFlagsDerivative(dummy_derivative, dummy_user):
     # Obtain dummy derivative and user
-    derivative = dummyDerivative()
-    user = dummyUser()
+    derivative = dummy_derivative
+    user = dummy_user
 
     # Add dummy derivative and user to database session
     db.session.add(derivative)
@@ -90,10 +77,10 @@ def testDeleteDerivativeFlagsDerivative():
     assert Derivative.query.get(derivative.id).deleted
 
 
-def testDeleteDerivativeRegistersAction():
+def testDeleteDerivativeRegistersAction(dummy_derivative, dummy_user):
     # Obtain dummy derivative and user
-    derivative = dummyDerivative()
-    user = dummyUser()
+    derivative = dummy_derivative
+    user = dummy_user
 
     # Add dummy derivative and user to database session
     db.session.add(derivative)
@@ -111,11 +98,11 @@ def testDeleteDerivativeRegistersAction():
     assert action is not None
 
 
-def testUpdateDerivativeUpdatesAttributes():
+def testUpdateDerivativeUpdatesAttributes(dummy_derivative, dummy_user, dummy_updates):
     # Obtain dummy derivative, user and update
-    derivative = dummyDerivative()
-    user = dummyUser()
-    updates = dummyUpdates()
+    derivative = dummy_derivative
+    user = dummy_user
+    updates = dummy_updates
 
     # Add dummy derivative and user to database session
     db.session.add(derivative)
@@ -132,11 +119,11 @@ def testUpdateDerivativeUpdatesAttributes():
     assert True
 
 
-def testUpdateDerivativeLogsUpdates():
+def testUpdateDerivativeLogsUpdates(dummy_derivative, dummy_user, dummy_updates):
     # Obtain dummy derivative, user and update
-    derivative = dummyDerivative()
-    user = dummyUser()
-    updates = dummyUpdates()
+    derivative = dummy_derivative
+    user = dummy_user
+    updates = dummy_updates
 
     # Add dummy derivative and user to database session
     db.session.add(derivative)
@@ -159,11 +146,11 @@ def testUpdateDerivativeLogsUpdates():
     assert update_log == expected_update_log
 
 
-def testUpdateDerivativeRegistersAction():
+def testUpdateDerivativeRegistersAction(dummy_derivative, dummy_user, dummy_updates):
     # Obtain dummy derivative, user and update
-    derivative = dummyDerivative()
-    user = dummyUser()
-    updates = dummyUpdates()
+    derivative = dummy_derivative
+    user = dummy_user
+    updates = dummy_updates
 
     # Add dummy derivative and user to database session
     db.session.add(derivative)
@@ -182,36 +169,3 @@ def testUpdateDerivativeRegistersAction():
 
     # Assert that the action stored the update log
     assert action.update_log == update_log
-
-
-def dummyDerivative():
-    return Derivative(
-        buying_party='foo',
-        selling_party='bar',
-        asset='baz',
-        quantity=1,
-        strike_price=20.20,
-        currency_code='USD',
-        date_of_trade=datetime.now(),
-        maturity_date=datetime.now()
-    )
-
-
-def dummyUser():
-    user = User.query.first()
-    if user is None:
-        user = User(
-            f_name='f_name',
-            l_name='l_name',
-            email='email',
-            password='password'
-        )
-    return user
-
-
-def dummyUpdates():
-    return {
-        'buying_party': 'foo',
-        'selling_party': 'bar',
-        'asset': 'baz'
-    }
