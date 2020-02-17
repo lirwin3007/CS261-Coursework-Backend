@@ -41,7 +41,7 @@ run:
 	python3 -m $(MODULE)
 
 test:
-	pytest
+	pytest $(options)
 
 lint:
 	echo "\n${BLUE}Running Pylint against source and test files...${NC}\n"
