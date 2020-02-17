@@ -1,8 +1,5 @@
-# Standard library imports
-from datetime import datetime
-
 # Local application imports
-from backend.derivatex_models import Derivative, User, Action, ActionType
+from backend.derivatex_models import Derivative, Action, ActionType
 from backend.managers import derivative_management
 from backend.db import db
 
@@ -40,7 +37,7 @@ def testAddDerivativeStoresDerivative(dummy_derivative, dummy_user):
     assert Derivative.query.get(derivative.id) == derivative
 
 
-def testAddDerivativeRegistersAction(dummy_derivative, dummy_user, dummy_updates):
+def testAddDerivativeRegistersAction(dummy_derivative, dummy_user):
     # Obtain dummy derivative and user
     derivative = dummy_derivative
     user = dummy_user

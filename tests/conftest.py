@@ -1,3 +1,5 @@
+# pylint: disable=redefined-outer-name
+
 # Standard library imports
 from datetime import datetime
 
@@ -49,11 +51,11 @@ def free_derivtive_id(dummy_derivative):
     db.session.flush()
 
     # Store the id of the new derivative
-    id = dummy_derivative.id
+    free_id = dummy_derivative.id
     # Discard the new derivative from the session to free the id
     db.session.rollback()
     # Return the free id
-    return id
+    return free_id
 
 
 @pytest.fixture
