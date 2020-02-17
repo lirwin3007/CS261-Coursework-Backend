@@ -9,6 +9,7 @@ from backend import util
 
 class Derivative(db.Model):
     id = db.Column(db.BigInteger, primary_key=True)
+    code = db.Column(db.String(16), nullable=False, unique=True)
     buying_party = db.Column(db.String(6), nullable=False)
     selling_party = db.Column(db.String(6), nullable=False)
     asset = db.Column(db.String(128), nullable=False)
