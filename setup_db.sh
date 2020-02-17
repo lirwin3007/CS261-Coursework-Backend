@@ -2,26 +2,15 @@
 
 # Start mysql server
 systemctl start mysql
+echo "started mysql server"
 
-# Create the database and a user
-mysql -e "
-  USE mysql;
-
-  drop user if exists 'derivatex_backend'@'localhost';
-  create user 'derivatex_backend'@'localhost' identified by 'qwerty123';
-  drop database if exists derivatex;
-  create database derivatex;
-  grant all privileges on derivatex.* to 'derivatex_backend'@'localhost';
-  drop database if exists external;
-  create database external;
-  grant all privileges on external.* to 'derivatex_backend'@'localhost';
-  flush privileges;
-"
-echo "database initialised"
+# Setup MySQL objects
+sudo mysql < setup_sql.sql
+echo "setup sql objects"
 
 # Let SQL Alchemy generate schema from models
 python3 ./wsgi.py
-echo "schema initialised"
+echo "schemas initialised"
 
 # Enable recurse
 shopt -s globstar
@@ -45,7 +34,7 @@ mysql -e "
     (product_name, company_id);"
 
 echo "populating currency table"
-for p in res/dummy/currencyValues/2019/**/*.csv; do
+for p in res/dummy/currencyValues/**/*.csv; do
   mysql -e "
      USE external;
      LOAD DATA LOCAL INFILE '${p}'
@@ -57,7 +46,7 @@ for p in res/dummy/currencyValues/2019/**/*.csv; do
 done
 
 echo "populating company_stock table"
-for p in res/dummy/stockPrices/2019/**/*.csv; do
+for p in res/dummy/stockPrices/**/*.csv; do
   mysql -e "
      USE external;
      LOAD DATA LOCAL INFILE '${p}'
@@ -69,7 +58,7 @@ for p in res/dummy/stockPrices/2019/**/*.csv; do
 done
 
 echo "populating product table"
-for p in res/dummy/productPrices/2019/**/*.csv; do
+for p in res/dummy/productPrices/**/*.csv; do
   mysql -e "
      USE external;
      LOAD DATA LOCAL INFILE '${p}'
@@ -81,7 +70,7 @@ for p in res/dummy/productPrices/2019/**/*.csv; do
 done
 
 echo "populating derivative table"
-for p in res/dummy/derivativeTrades/2019/April/**/*.csv; do
+for p in res/dummy/derivativeTrades/**/*.csv; do
   mysql -e "
      USE derivatex;
      LOAD DATA LOCAL INFILE '${p}'

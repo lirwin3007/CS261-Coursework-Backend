@@ -22,5 +22,7 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
+    - name: Set up MySQL
+      run: mysql -uroot -h127.0.0.1 -proot < setup_sql.sql
     - name: Run tests
       run: make test
