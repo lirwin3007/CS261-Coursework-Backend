@@ -21,10 +21,6 @@ def test_app():
     if not app.config['TESTING']:
         raise SystemExit('App must be conifgured for testing')
 
-    # Clean derivatex tables in the test database
-    db.drop_all(bind=None)
-    db.create_all(bind=None)
-
     # Return the flask app
     return app
 
@@ -45,11 +41,11 @@ def test_client(test_app):
 
 
 @pytest.fixture(autouse=True)
-def rollback_session():
-    # Run the test
-    yield
-    # Rollback the session after running the test
+def clean_database(test_app):
+    # Clean the session and all tables in the test database
     db.session.rollback()
+    db.drop_all(bind=None)
+    db.create_all(bind=None)
 
 
 @pytest.fixture
