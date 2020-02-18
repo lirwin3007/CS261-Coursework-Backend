@@ -79,7 +79,7 @@ def dummy_derivative():
         strike_price=20.20,
         currency_code='USD',
         date_of_trade=today,
-        maturity_date=today
+        maturity_date=today + timedelta(days=365)
     )
 
 
