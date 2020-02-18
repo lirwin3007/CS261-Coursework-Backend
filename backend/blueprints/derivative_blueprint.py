@@ -21,7 +21,7 @@ def getDerivative(derivative_id):
 
     # Verify derivative exists
     if derivative is None:
-        return abort(404, 'derivative with id {} not found'.format(derivative_id))
+        return abort(404, f'derivative with id {derivative_id} not found')
 
     # Make response
     return jsonify(derivative=derivative)
