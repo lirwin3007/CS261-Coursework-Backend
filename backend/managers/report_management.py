@@ -31,25 +31,26 @@ def indexReports(body, page_size, page_number, date_from, date_to):  # noqa: C90
 
 
 def getReport(report_id):
+    # Locate and read CSV
+    # Turn data into list
+    # Return list
     return {"report_id": 1, "report": {"derivatives": [1, 2, 3]}}
 
 
-def downloadCSV(report_id):
+def createCSV(report_id):
     try:
-        send_file("static/reports/" + report_id + ".csv")
-        return True
+        # Make CSV file and return path
+        return "static/temp/" + report_id + ".csv"
     except Exception as e:
         print(e)
-        return False
 
 
-def downloadPDF(report_id):
+def createPDF(report_id):
     try:
-        send_file("static/reports/" + report_id + ".pdf")
-        return True
+        # Make PDF file and return path
+        return "static/temp/" + report_id + ".csv"
     except Exception as e:
         print(e)
-        return False
 
 
 def generateReports():
