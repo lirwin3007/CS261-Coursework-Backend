@@ -15,8 +15,10 @@ UserBlueprint = Blueprint('userAccountControl',
 def getUser(user_id):
     # Get user from database
     user = user_management.getUser(user_id)
+
+    # Verify user exists
     if user is None:
-        abort(404)
+        return abort(404, 'user id {} does not exist'.format(user_id))
 
     # Make response
     return jsonify(user=user)
