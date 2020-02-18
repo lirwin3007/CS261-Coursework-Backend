@@ -21,6 +21,9 @@ def addDerivative(derivative, user_id):
     db.session.add(derivative)
     db.session.flush()
 
+    # Flag that the derivative needs to be reported
+    derivative.reported = False
+
     # Add corrosponding user action to the database session
     action = Action(derivative_id=derivative.id, user_id=user_id, type=ActionType.ADD)
     db.session.add(action)
@@ -34,6 +37,9 @@ def deleteDerivative(derivative, user_id):
 
     # Mark the derivative as deleted
     derivative.deleted = True
+
+    # Flag that the derivative needs to be reported
+    derivative.reported = False
 
     # Register the user deleting the derivative
     action = Action(derivative_id=derivative.id, user_id=user_id, type=ActionType.DELETE)
@@ -73,6 +79,9 @@ def updateDerivative(derivative, user_id, updates):
             'old_value': old_value,
             'new_value': new_value
         })
+
+    # Flag that the derivative needs to be reported
+    derivative.reported = False
 
     # Register the derivative updates and corrosponding user action to the database session
     action = Action(derivative_id=derivative.id, user_id=user_id, type=ActionType.UPDATE, update_log=update_log)

@@ -19,6 +19,7 @@ class Derivative(db.Model):
     date_of_trade = db.Column(db.Date, nullable=False)
     maturity_date = db.Column(db.Date, nullable=False)
     modified = db.Column(db.Boolean, nullable=False, default=False)
+    reported = db.Column(db.Boolean, nullable=False, default=False)
     deleted = db.Column(db.Boolean, nullable=False, default=False)
 
     @property
