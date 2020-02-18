@@ -1,7 +1,7 @@
 # pylint: disable=redefined-outer-name
 
 # Standard library imports
-from datetime import datetime
+from datetime import datetime, timedelta
 
 # Third party imports
 import pytest
@@ -21,15 +21,11 @@ def test_app():
     if not app.config['TESTING']:
         raise SystemExit('App must be conifgured for testing')
 
-    # Clean derivatex tables in the test database
-    db.drop_all(bind=None)
-    db.create_all(bind=None)
-
     # Return the flask app
     return app
 
 
-@pytest.fixture
+@pytest.fixture(scope="session", autouse=True)
 def test_client(test_app):
     # Get test client
     testing_client = test_app.test_client()
@@ -42,6 +38,14 @@ def test_client(test_app):
     yield testing_client
 
     ctx.pop()
+
+
+@pytest.fixture(autouse=True)
+def clean_database():
+    # Clean the session and all tables in the test database
+    db.session.rollback()
+    db.drop_all(bind=None)
+    db.create_all(bind=None)
 
 
 @pytest.fixture
@@ -60,15 +64,35 @@ def free_derivtive_id(dummy_derivative):
 
 @pytest.fixture
 def dummy_derivative():
+    today = datetime.date(datetime.now())
+
     return Derivative(
+        code='doe',
         buying_party='foo',
         selling_party='bar',
         asset='baz',
         quantity=1,
         strike_price=20.20,
         currency_code='USD',
-        date_of_trade=datetime.now(),
-        maturity_date=datetime.now()
+        date_of_trade=today,
+        maturity_date=today + timedelta(days=365)
+    )
+
+
+@pytest.fixture
+def dummy_abs_derivative():
+    today = datetime.date(datetime.now())
+
+    return Derivative(
+        code='doe',
+        buying_party='foo',
+        selling_party='bar',
+        asset='baz',
+        quantity=1,
+        strike_price=20.20,
+        currency_code='USD',
+        date_of_trade=today - timedelta(days=365),
+        maturity_date=today + timedelta(days=365)
     )
 
 
