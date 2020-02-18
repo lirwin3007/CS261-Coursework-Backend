@@ -83,7 +83,7 @@ def deleteDerivative(derivative_id):
 
     # Verify derivative exists
     if derivative is None:
-        return abort(404, 'derivative id {} does not exist'.format(derivative_id))
+        return abort(404, f'derivative id {derivative_id} does not exist')
 
     # Delete the derivative
     derivative_management.deleteDerivative(derivative, user_id)
