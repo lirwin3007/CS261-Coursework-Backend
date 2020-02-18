@@ -102,9 +102,6 @@ def testUpdateDerivativeUpdatesAttributes(dummy_derivative, dummy_user, dummy_up
     # Assert that all attribute values have been correctly updated
     assert all(getattr(dummy_derivative, a) == v for a, v in dummy_updates.items())
 
-    # Assert that all other attributes remain unchanged
-    assert True
-
 
 def testUpdateDerivativeLogsUpdates(dummy_derivative, dummy_user, dummy_updates):
     # Add dummy derivative and user to database session

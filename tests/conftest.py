@@ -29,7 +29,7 @@ def test_app():
     return app
 
 
-@pytest.fixture
+@pytest.fixture(scope="session", autouse=True)
 def test_client(test_app):
     # Get test client
     testing_client = test_app.test_client()
@@ -42,6 +42,14 @@ def test_client(test_app):
     yield testing_client
 
     ctx.pop()
+
+
+@pytest.fixture(autouse=True)
+def rollback_session():
+    # Run the test
+    yield
+    # Rollback the session after running the test
+    db.session.rollback()
 
 
 @pytest.fixture
@@ -60,6 +68,8 @@ def free_derivtive_id(dummy_derivative):
 
 @pytest.fixture
 def dummy_derivative():
+    today = datetime.date(datetime.now())
+
     return Derivative(
         code = 'doe',
         buying_party='foo',
@@ -68,8 +78,8 @@ def dummy_derivative():
         quantity=1,
         strike_price=20.20,
         currency_code='USD',
-        date_of_trade=datetime.now(),
-        maturity_date=datetime.now()
+        date_of_trade=today,
+        maturity_date=today
     )
 
 
