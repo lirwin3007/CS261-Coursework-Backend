@@ -53,7 +53,6 @@ def free_derivtive_id(dummy_derivative):
     # Add dummy derivative to database session
     db.session.add(dummy_derivative)
     db.session.flush()
-
     # Store the id of the new derivative
     free_id = dummy_derivative.id
     # Discard the new derivative from the session to free the id
@@ -62,6 +61,7 @@ def free_derivtive_id(dummy_derivative):
     return free_id
 
 
+# TODO: revisit
 @pytest.fixture
 def dummy_derivative():
     today = datetime.date(datetime.now())
@@ -70,32 +70,27 @@ def dummy_derivative():
         code='doe',
         buying_party='foo',
         selling_party='bar',
-        asset='baz',
+        asset='Stocks',
         quantity=1,
         strike_price=20.20,
-        currency_code='USD',
+        notional_curr_code='USD',
         date_of_trade=today,
         maturity_date=today + timedelta(days=365)
     )
 
 
+# TODO: revisit
 @pytest.fixture
-def dummy_abs_derivative():
+def dummy_abs_derivative(dummy_derivative):
+    # Get the current date
     today = datetime.date(datetime.now())
-
-    return Derivative(
-        code='doe',
-        buying_party='foo',
-        selling_party='bar',
-        asset='baz',
-        quantity=1,
-        strike_price=20.20,
-        currency_code='USD',
-        date_of_trade=today - timedelta(days=365),
-        maturity_date=today + timedelta(days=365)
-    )
+    # Modify the dummy derivatives date of trade to make it absolute
+    dummy_derivative.date_of_trade = today - timedelta(days=365)
+    # Return absolute dummy derivative
+    return dummy_derivative
 
 
+# TODO: revisit
 @pytest.fixture
 def dummy_user():
     user = User.query.first()
@@ -109,6 +104,7 @@ def dummy_user():
     return user
 
 
+# TODO: revisit
 @pytest.fixture
 def dummy_updates():
     return {
