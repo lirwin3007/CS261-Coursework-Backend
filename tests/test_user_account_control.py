@@ -4,25 +4,10 @@ from backend.derivatex_models import User
 from backend.managers import user_management
 from backend.db import db
 
-def testGetUser():
-    # Obtain dummy user
-    user = dummyUser()
-
+def testGetUser(dummy_user):
     # Add dummy user to database session
-    db.session.add(user)
+    db.session.add(dummy_user)
     db.session.flush()
 
     # Assert that getUser returns the user
-    assert user_management.getUser(user.id) == user
-
-
-def dummyUser():
-    user = User.query.first()
-    if user is None:
-        user = User(
-            f_name='f_name',
-            l_name='l_name',
-            email='email',
-            password='password'
-        )
-    return user
+    assert user_management.getUser(dummy_user.id) == dummy_user
