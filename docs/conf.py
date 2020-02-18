@@ -18,7 +18,8 @@ sys.path.insert(0, os.path.abspath('..'))
 # -- Project information -----------------------------------------------------
 
 project = 'Derivatex'
-copyright = '2020, Louis Irwin, Jordan Fisher, Harry Roberts, Pratyush Ravishankar, Neeraj Krishnan'
+copyright = """2020, Louis Irwin, Jordan Fisher, Harry Roberts,
+            Pratyush Ravishankar, Neeraj Krishnan"""  # pylint: disable=W0622
 author = 'Louis Irwin, Jordan Fisher, Harry Roberts, Pratyush Ravishankar, Neeraj Krishnan'
 
 
