@@ -29,7 +29,7 @@ def getAction(action_id):
 def getUserActions(user_id):
     # Validate user id
     if user_management.getUser(user_id) is None:
-        return abort(404, 'user id {} does not exist'.format(user_id))
+        return abort(404, f'user id {user_id} does not exist')
 
     # Get user actions from database
     actions = action_management.getUserActions(user_id)
