@@ -71,7 +71,7 @@ def dummy_derivative():
     today = datetime.date(datetime.now())
 
     return Derivative(
-        code = 'doe',
+        code='doe',
         buying_party='foo',
         selling_party='bar',
         asset='baz',
@@ -91,7 +91,7 @@ def dummy_abs_derivative():
     maturity_date = today + timedelta(days=365)
 
     return Derivative(
-        code = 'doe',
+        code='doe',
         buying_party='foo',
         selling_party='bar',
         asset='baz',
