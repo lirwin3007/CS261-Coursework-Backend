@@ -40,6 +40,12 @@ db:
 run:
 	python3 -m $(MODULE)
 
+build-docs:
+	sphinx-build docs docs/_build -a
+
+build-api-docs:
+	sphinx-build api-docs api-docs/_build -a
+
 test:
 	pytest $(options)
 

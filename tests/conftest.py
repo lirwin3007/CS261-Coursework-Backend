@@ -87,9 +87,6 @@ def dummy_derivative():
 def dummy_abs_derivative():
     today = datetime.date(datetime.now())
 
-    date_of_trade = today - timedelta(days=365)
-    maturity_date = today + timedelta(days=365)
-
     return Derivative(
         code='doe',
         buying_party='foo',
@@ -98,8 +95,8 @@ def dummy_abs_derivative():
         quantity=1,
         strike_price=20.20,
         currency_code='USD',
-        date_of_trade=date_of_trade,
-        maturity_date=maturity_date
+        date_of_trade=today - timedelta(days=365),
+        maturity_date=today + timedelta(days=365)
     )
 
 
