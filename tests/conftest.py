@@ -41,7 +41,7 @@ def test_client(test_app):
 
 
 @pytest.fixture(autouse=True)
-def clean_database(test_app):
+def clean_database():
     # Clean the session and all tables in the test database
     db.session.rollback()
     db.drop_all(bind=None)

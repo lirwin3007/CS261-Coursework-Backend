@@ -44,20 +44,19 @@ def addDerivative():
         return abort(404, 'user id {} does not exist'.format(user_id))
 
     try:
-        # Create derivative object
+        # Create derivative and add it to database
         derivative = Derivative(**body.get('derivative'))
-
-        # Add derivative to database
         derivative_management.addDerivative(derivative, user_id)
 
-        # Commit addition to database
-        db.session.commit()
     except Exception:
         return abort(400)
 
     # Validate the new derivative
     # if invalid derivative:
     #     return abort(418)
+
+    # Commit addition to database
+    db.session.commit()
 
     # Make response
     return jsonify(id=derivative.id)
