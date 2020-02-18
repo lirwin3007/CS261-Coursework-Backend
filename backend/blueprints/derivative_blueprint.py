@@ -109,7 +109,7 @@ def updateDerivative(derivative_id):
 
     # Validate user exists
     if user_management.getUser(user_id) is None:
-        return abort(404, 'user id {} does not exist'.format(user_id))
+        return abort(404, f'user id {user_id} does not exist')
 
     # Obtain updates
     updates = body.get('updates')
