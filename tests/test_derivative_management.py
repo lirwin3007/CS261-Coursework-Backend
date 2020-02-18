@@ -72,6 +72,22 @@ def testDeleteDerivativeRegistersAction(dummy_derivative, dummy_user):
     assert action is not None
 
 
+def testDeleteDerivativeSkipsAbsoluteDerivatives(dummy_abs_derivative, dummy_user):
+    # Add dummy derivative and user to database session
+    db.session.add(dummy_abs_derivative)
+    db.session.add(dummy_user)
+    db.session.flush()
+
+    # Assert that derivative is absolute
+    assert dummy_abs_derivative.absolute
+
+    # Execute deleteDerivative
+    derivative_management.deleteDerivative(dummy_abs_derivative, dummy_user.id)
+
+    # Assert that the derivative was not deleted
+    assert not dummy_abs_derivative.deleted
+
+
 def testUpdateDerivativeUpdatesAttributes(dummy_derivative, dummy_user, dummy_updates):
     # Add dummy derivative and user to database session
     db.session.add(dummy_derivative)
@@ -86,9 +102,6 @@ def testUpdateDerivativeUpdatesAttributes(dummy_derivative, dummy_user, dummy_up
     # Assert that all attribute values have been correctly updated
     assert all(getattr(dummy_derivative, a) == v for a, v in dummy_updates.items())
 
-    # Assert that all other attributes remain unchanged
-    assert True
-
 
 def testUpdateDerivativeLogsUpdates(dummy_derivative, dummy_user, dummy_updates):
     # Add dummy derivative and user to database session
@@ -99,11 +112,14 @@ def testUpdateDerivativeLogsUpdates(dummy_derivative, dummy_user, dummy_updates)
     # Generate expected update log
     expected_update_log = []
     for attribute, new_value in dummy_updates.items():
-        expected_update_log.append({
-            "attribute": attribute,
-            "old_value": getattr(dummy_derivative, attribute),
-            "new_value": new_value
-        })
+        old_value = getattr(dummy_derivative, attribute)
+
+        if new_value != old_value:
+            expected_update_log.append({
+                "attribute": attribute,
+                "old_value": getattr(dummy_derivative, attribute),
+                "new_value": new_value
+            })
 
     # Execute updateDerivative
     update_log = derivative_management.updateDerivative(dummy_derivative,
@@ -134,3 +150,27 @@ def testUpdateDerivativeRegistersAction(dummy_derivative, dummy_user, dummy_upda
 
     # Assert that the action stored the update log
     assert action.update_log == update_log
+
+
+def testUpdateDerivativeSkipsAbsoluteDerivatives(dummy_abs_derivative, dummy_user, dummy_updates):
+    # Add dummy derivative and user to database session
+    db.session.add(dummy_abs_derivative)
+    db.session.add(dummy_user)
+    db.session.flush()
+
+    # Make a copy of the derivatives value dictionary
+    dict_copy = dummy_abs_derivative.__dict__.copy()
+
+    # Assert that derivative is absolute
+    assert dummy_abs_derivative.absolute
+
+    # Execute deleteDerivative
+    update_log = derivative_management.updateDerivative(dummy_abs_derivative,
+                                                        dummy_user.id,
+                                                        dummy_updates)
+
+    # Assert that there is no update log
+    assert update_log is None
+
+    # Assert that the derivative remains unchanged by checking its value dictionary
+    assert dummy_abs_derivative.__dict__ == dict_copy
