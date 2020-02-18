@@ -18,7 +18,7 @@ def getUser(user_id):
 
     # Verify user exists
     if user is None:
-        return abort(404, 'user id {} does not exist'.format(user_id))
+        return abort(404, f'user id {} does not exist')
 
     # Make response
     return jsonify(user=user)
