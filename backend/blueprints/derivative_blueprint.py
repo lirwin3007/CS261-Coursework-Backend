@@ -76,7 +76,7 @@ def deleteDerivative(derivative_id):
 
     # Validate user id
     if user_management.getUser(user_id) is None:
-        return abort(404, 'user id {} does not exist'.format(user_id))
+        return abort(404, f'user id {user_id} does not exist')
 
     # Retreive derivative from database
     derivative = derivative_management.getDerivative(derivative_id)
