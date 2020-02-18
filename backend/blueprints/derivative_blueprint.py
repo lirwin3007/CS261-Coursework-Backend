@@ -3,6 +3,7 @@ from flask import Blueprint, abort, jsonify, request
 
 # Local application imports
 from backend.managers import derivative_management
+from backend.managers import user_management
 from backend.derivatex_models import Derivative
 from backend.db import db
 
@@ -17,8 +18,10 @@ DerivativeBlueprint = Blueprint('derivativeManagement',
 def getDerivative(derivative_id):
     # Get derivative from database
     derivative = derivative_management.getDerivative(derivative_id)
+
+    # Verify derivative exists
     if derivative is None:
-        abort(404)
+        return abort(404, 'derivative with id {} not found'.format(derivative_id))
 
     # Make response
     return jsonify(derivative=derivative)
@@ -30,26 +33,31 @@ def addDerivative():
     if not request.data or not request.is_json:
         return abort(400)
 
-    # Extract json body from request
+    # Retreive json body from request
     body = request.get_json()
 
-    # Validate the json body
-    # if invalid body:
-    #     return flask.abort(400)
-
-    # Extract user_id and create derivative object
+    # Obtatin user_id
     user_id = body.get('user_id')
-    derivative = Derivative(**body.get('derivative'))
 
-    # Add derivative to database
-    derivative_management.addDerivative(derivative, user_id)
+    # Validate user id
+    if user_management.getUser(user_id) is None:
+        return abort(404, 'user id {} does not exist'.format(user_id))
+
+    try:
+        # Create derivative object
+        derivative = Derivative(**body.get('derivative'))
+
+        # Add derivative to database
+        derivative_management.addDerivative(derivative, user_id)
+
+        # Commit addition to database
+        db.session.commit()
+    except Exception:
+        return abort(400)
 
     # Validate the new derivative
     # if invalid derivative:
-    #     abort(418)
-
-    # Commit the derivative addition to the database
-    db.session.commit()
+    #     return abort(418)
 
     # Make response
     return jsonify(id=derivative.id)
@@ -61,16 +69,22 @@ def deleteDerivative(derivative_id):
     if not request.data or not request.is_json:
         return abort(400)
 
-    # Obtatin user_id
+    # Retreive json body from request
     body = request.get_json()
-    user_id = body.get('user_id')
-    if user_id is None:
-        return abort(400)
 
-    # Retreive the specified derivative
+    # Obtatin user_id
+    user_id = body.get('user_id')
+
+    # Validate user id
+    if user_management.getUser(user_id) is None:
+        return abort(404, 'user id {} does not exist'.format(user_id))
+
+    # Retreive derivative from database
     derivative = derivative_management.getDerivative(derivative_id)
+
+    # Verify derivative exists
     if derivative is None:
-        return abort(404)
+        return abort(404, 'derivative id {} does not exist'.format(derivative_id))
 
     # Delete the derivative
     derivative_management.deleteDerivative(derivative, user_id)
@@ -88,28 +102,40 @@ def updateDerivative(derivative_id):
     if not request.data or not request.is_json:
         return abort(400)
 
-    # Extract json body from request
+    # Retreive json body from request
     body = request.get_json()
 
-    # Validate the json body
-    # if invalid body:
-    #     return flask.abort(400)
-
-    # Extract user_id and updates
+    # Obtatin user_id
     user_id = body.get('user_id')
+
+    # Validate user exists
+    if user_management.getUser(user_id) is None:
+        return abort(404, 'user id {} does not exist'.format(user_id))
+
+    # Obtain updates
     updates = body.get('updates')
+
+    # Validate updates
+    if updates is None:
+        return abort(400)
 
     # Retreive the specified derivative
     derivative = derivative_management.getDerivative(derivative_id)
+
+    # Verify derivative exists
     if derivative is None:
-        return abort(404)
+        return abort(404, 'derivative id {} does not exist'.format(derivative_id))
 
     # Update the derivative
     update_log = derivative_management.updateDerivative(derivative, user_id, updates)
 
+    # If no updates were made to the derivative, abort
+    if not update_log:
+        return abort(400)
+
     # Validate the updated derivative
     # if invalid derivative:
-    #     abort(418)
+    #     return abort(418)
 
     # Commit the derivative updates to the database
     db.session.commit()
@@ -120,15 +146,20 @@ def updateDerivative(derivative_id):
 
 @DerivativeBlueprint.route('/index-derivatives')
 def indexDerivatives():
-    # Get request
-    body = request.get_json() if request.data and request.is_json else {}
+    # Determine body from request
+    if request.data and request.is_json:
+        body = request.get_json()
+    else:
+        body = {}
 
     # Determine page parameters
     page_size = max(body.get('page_size') or 15, 1)
     page_number = request.args.get('page_number', default=0, type=int)
 
     # Index derivatives
-    derivatives, page_count = derivative_management.indexDerivatives(body, page_size, page_number)
+    derivatives, page_count = derivative_management.indexDerivatives(body,
+                                                                     page_size,
+                                                                     page_number)
 
     # Make response
     return jsonify(page_count=page_count, derivatives=[d.id for d in derivatives])
