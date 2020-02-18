@@ -39,7 +39,6 @@ def deleteDerivative(derivative, user_id):
     action = Action(derivative_id=derivative.id, user_id=user_id, type=ActionType.DELETE)
     db.session.add(derivative)
     db.session.add(action)
-    db.session.commit()
 
 
 def updateDerivative(derivative, user_id, updates):
@@ -61,6 +60,7 @@ def updateDerivative(derivative, user_id, updates):
         if old_value == new_value:
             continue
 
+        # TODO: review this
         if isinstance(old_value, datetime.date):
             old_value = str(old_value)
 

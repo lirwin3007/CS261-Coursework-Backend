@@ -75,6 +75,9 @@ def deleteDerivative(derivative_id):
     # Delete the derivative
     derivative_management.deleteDerivative(derivative, user_id)
 
+    # Commit the deletion
+    db.session.commit()
+
     # Return a 204, no content
     return '', 204
 
