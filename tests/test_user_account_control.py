@@ -5,7 +5,7 @@ from backend.managers import user_management
 from backend.db import db
 
 def testGetUser():
-    # Obtain dummy derivative
+    # Obtain dummy user
     user = dummyUser()
 
     # Add dummy user to database session
