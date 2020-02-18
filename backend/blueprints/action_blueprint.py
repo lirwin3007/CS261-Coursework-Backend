@@ -19,7 +19,7 @@ def getAction(action_id):
 
     # Verify action exists
     if action is None:
-        return abort(404, 'action id {} does not exist'.format(action_id))
+        return abort(404, f'action id {action_id} does not exist')
 
     # Make response
     return jsonify(action=action)
