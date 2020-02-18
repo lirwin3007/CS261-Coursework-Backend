@@ -40,8 +40,14 @@ db:
 run:
 	python3 -m $(MODULE)
 
+build-docs:
+	sphinx-build docs docs/_build -a
+
+build-api-docs:
+	sphinx-build api-docs api-docs/_build -a
+
 test:
-	pytest
+	pytest $(options)
 
 lint:
 	echo "\n${BLUE}Running Pylint against source and test files...${NC}\n"

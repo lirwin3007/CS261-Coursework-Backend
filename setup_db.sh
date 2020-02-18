@@ -77,7 +77,7 @@ for p in res/dummy/derivativeTrades/**/*.csv; do
      INTO TABLE derivative
      FIELDS TERMINATED BY ',' ENCLOSED BY '\"' LINES TERMINATED BY '\n'
      IGNORE 1 ROWS
-     (@date_of_trade, @dummy, asset, buying_party, selling_party, @dummy, currency_code, quantity, @maturity_date, @dummy, @dummy, strike_price)
+     (@date_of_trade, code, asset, buying_party, selling_party, @dummy, currency_code, quantity, @maturity_date, @dummy, @dummy, strike_price)
      SET date_of_trade = STR_TO_DATE(@date_of_trade, '%d/%m/%Y'), maturity_date = STR_TO_DATE(@maturity_date, '%d/%m/%Y');"
 done
 
