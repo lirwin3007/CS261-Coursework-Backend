@@ -31,7 +31,7 @@ def getDerivative(derivative_id):
 def addDerivative():
     # Verify request
     if not request.data or not request.is_json:
-        return abort(400)
+        return abort(400, 'empty request body')
 
     # Retreive json body from request
     body = request.get_json()
@@ -48,8 +48,9 @@ def addDerivative():
         derivative = Derivative(**body.get('derivative'))
         derivative_management.addDerivative(derivative, user_id)
 
-    except Exception:
-        return abort(400)
+    except Exception as error:
+        print(error)
+        return abort(400, 'invalid derivative data')
 
     # Validate the new derivative
     # if invalid derivative:
@@ -66,7 +67,7 @@ def addDerivative():
 def deleteDerivative(derivative_id):
     # Verify request
     if not request.data or not request.is_json:
-        return abort(400)
+        return abort(400, 'empty request body')
 
     # Retreive json body from request
     body = request.get_json()
@@ -99,7 +100,7 @@ def deleteDerivative(derivative_id):
 def updateDerivative(derivative_id):
     # Verify request
     if not request.data or not request.is_json:
-        return abort(400)
+        return abort(400, 'empty request body')
 
     # Retreive json body from request
     body = request.get_json()
@@ -114,10 +115,6 @@ def updateDerivative(derivative_id):
     # Obtain updates
     updates = body.get('updates')
 
-    # Validate updates
-    if updates is None:
-        return abort(400)
-
     # Retreive the specified derivative
     derivative = derivative_management.getDerivative(derivative_id)
 
@@ -130,7 +127,7 @@ def updateDerivative(derivative_id):
 
     # If no updates were made to the derivative, abort
     if not update_log:
-        return abort(400)
+        return abort(400, 'no valid updates')
 
     # Validate the updated derivative
     # if invalid derivative:

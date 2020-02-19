@@ -77,8 +77,8 @@ def deleteDerivative(derivative, user_id):
 
 
 def updateDerivative(derivative, user_id, updates):
-    # The derivative has been deleted or is absolute, return
-    if derivative.deleted or derivative.absolute:
+    # Return if derivative has been deleted or is absolute or there are no updates
+    if derivative.deleted or derivative.absolute or updates is None:
         return
 
     # Apply and log all updates to the derivative
