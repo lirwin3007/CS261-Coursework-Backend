@@ -12,7 +12,7 @@ from backend.app import Application
 from backend.db import db
 
 
-@pytest.fixture(scope="session", autouse=True)
+@pytest.fixture(scope='session', autouse=True)
 def test_app():
     # Initialise test app instance
     app = Application.getTestApp()
@@ -25,7 +25,7 @@ def test_app():
     return app
 
 
-@pytest.fixture(scope="session", autouse=True)
+@pytest.fixture(scope='session', autouse=True)
 def test_client(test_app):
     # Get test client
     testing_client = test_app.test_client()
@@ -77,6 +77,22 @@ def dummy_derivative():
         date_of_trade=today,
         maturity_date=today + timedelta(days=365)
     )
+
+
+# TODO: revisit
+@pytest.fixture
+def dummy_derivative_json(dummy_derivative):
+    return {
+        'code': dummy_derivative.code,
+        'buying_party': dummy_derivative.buying_party,
+        'selling_party': dummy_derivative.selling_party,
+        'asset': dummy_derivative.asset,
+        'quantity': dummy_derivative.quantity,
+        'strike_price': dummy_derivative.strike_price,
+        'notional_curr_code': dummy_derivative.notional_curr_code,
+        'maturity_date': str(dummy_derivative.maturity_date),
+        'date_of_trade': str(dummy_derivative.date_of_trade)
+    }
 
 
 # TODO: revisit

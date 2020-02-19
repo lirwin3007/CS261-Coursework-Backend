@@ -116,9 +116,9 @@ def testUpdateDerivativeLogsUpdates(dummy_derivative, dummy_user, dummy_updates)
 
         if new_value != old_value:
             expected_update_log.append({
-                "attribute": attribute,
-                "old_value": getattr(dummy_derivative, attribute),
-                "new_value": new_value
+                'attribute': attribute,
+                'old_value': getattr(dummy_derivative, attribute),
+                'new_value': new_value
             })
 
     # Execute updateDerivative
