@@ -1,3 +1,6 @@
+# Standard library imports
+import os
+
 # Third party imports
 from flask import Blueprint, abort, jsonify, request
 
@@ -55,17 +58,17 @@ def getReport(report_id):
 def downloadReport(format, report_id):
     if format == 'CSV':
         # Generate CSV and return file path
-        CSV_file = report_management.downloadCSV(report_id)
-        # Verify file exists
-        if CSV_file is None:
-            return abort(404, f'report with id {report_id} not found')
-        send_file(CSV_file)
-        # Delete generated CSV
-
-    # Generate PDF and return file path
-    PDF_file = report_management.downloadPDF(report_id)
+        path_to_file = report_management.downloadCSV(report_id)
+    else
+        # Generate PDF and return file path
+        path_to_file = report_management.downloadPDF(report_id)
     # Verify file exists
-    if PDF_file is None:
+    if path_to_file is None:
         return abort(404, f'report with id {report_id} not found')
-    send_file(PDF_file)
-    # Delete generated PDF
+    # Set to delete file after it is sent
+    @after_this_request
+    def deleteFile(response):
+        os.remove(path_to_file)
+        return reponse
+    # Return the file
+    return send_file(path_to_file)
