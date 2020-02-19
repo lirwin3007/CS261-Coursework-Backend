@@ -1,5 +1,5 @@
 # Standard library imports
-from datetime import datetime
+from datetime import date
 
 # Local application imports
 from backend.external_models import Company, Currency, Product, CompanyStock
@@ -7,7 +7,7 @@ from backend.external_models import Company, Currency, Product, CompanyStock
 
 # TODO: revisit this whole file
 def getCurrentDate():
-    return datetime.date(datetime.now()).replace(year=2019)
+    return date.today().replace(year=2019)
 
 
 def getCompanyName(company_id):
@@ -41,5 +41,4 @@ def getCompanyStockPrice(company_id):
 def getAssetPrice(asset_name, selling_party):
     if asset_name.lower() == 'stocks':
         return getCompanyStockPrice(selling_party)
-    else:
-        return getProductPrice(asset_name)
+    return getProductPrice(asset_name)

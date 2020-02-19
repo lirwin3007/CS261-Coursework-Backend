@@ -1,7 +1,7 @@
 # pylint: disable=redefined-outer-name
 
 # Standard library imports
-from datetime import datetime, timedelta
+from datetime import date, timedelta
 
 # Third party imports
 import pytest
@@ -64,7 +64,7 @@ def free_derivtive_id(dummy_derivative):
 # TODO: revisit
 @pytest.fixture
 def dummy_derivative():
-    today = datetime.date(datetime.now())
+    today = date.today()
 
     return Derivative(
         code='doe',
@@ -83,7 +83,7 @@ def dummy_derivative():
 @pytest.fixture
 def dummy_abs_derivative(dummy_derivative):
     # Get the current date
-    today = datetime.date(datetime.now())
+    today = date.today()
     # Modify the dummy derivatives date of trade to make it absolute
     dummy_derivative.date_of_trade = today - timedelta(days=365)
     # Return absolute dummy derivative
