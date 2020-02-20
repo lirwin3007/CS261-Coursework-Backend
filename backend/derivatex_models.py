@@ -25,6 +25,7 @@ class Derivative(db.Model):
 
     @property
     def absolute(self):
+        return False
         # Determine time diff between date of trade and now
         delta = date.today() - self.date_of_trade
         # The derivative is absolute if it was traded over a month ago
@@ -145,7 +146,7 @@ class DecisionTreeNode(db.Model):
         Returns:
             Boolean: The value of the feature for the given item
         """
-        return item.buying_party == self.criteria
+        return item['derivative']['buying_party'] == self.criteria
 
     def calculateSellingPartyFeature(self, item):
         """ Calculate the selling party feature of a given item.
@@ -156,7 +157,7 @@ class DecisionTreeNode(db.Model):
         Returns:
             Boolean: The value of the feature for the given item
         """
-        return item.selling_party == self.criteria
+        return item['derivative']['selling_party'] == self.criteria
 
     def calculateAssetFeature(self, item):
         """ Calculate the asset party feature of a given item.
@@ -167,7 +168,7 @@ class DecisionTreeNode(db.Model):
         Returns:
             Boolean: The value of the feature for the given item
         """
-        return item.asset == self.criteria
+        return item['derivative']['asset'] == self.criteria
 
     def calculateQuantityFeature(self, item, mean=0, standardDeviation=0):
         """ Calculate the quantity feature of a given item.
@@ -182,19 +183,19 @@ class DecisionTreeNode(db.Model):
         """
         result = False
         if self.criteria == 'less_than_mean':
-            result = item.quantity < mean
+            result = item['derivative']['quantity'] < mean
         elif self.criteria == 'more_than_mean':
-            result = item.quantity > mean
+            result = item['derivative']['quantity'] > mean
         elif self.criteria == '0_to_1_std':
-            result = abs(mean - item.quantity) <= standardDeviation
+            result = abs(mean - item['derivative']['quantity']) <= standardDeviation
         elif self.criteria == '1_to_2_std':
-            deviation = abs(mean - item.quantity)
+            deviation = abs(mean - item['derivative']['quantity'])
             result = standardDeviation < deviation <= 2 * standardDeviation
         elif self.criteria == '2_to_3_std':
-            deviation = abs(mean - item.quantity)
+            deviation = abs(mean - item['derivative']['quantity'])
             result = 2 * standardDeviation < deviation <= 3 * standardDeviation
         elif self.criteria == '3_to_inf_std':
-            deviation = abs(mean - item.quantity)
+            deviation = abs(mean - item['derivative']['quantity'])
             result = deviation > 3 * standardDeviation
         return result
 
@@ -211,19 +212,19 @@ class DecisionTreeNode(db.Model):
         """
         result = False
         if self.criteria == 'less_than_mean':
-            result = item.strike_price < mean
+            result = item['derivative']['strike_price'] < mean
         elif self.criteria == 'more_than_mean':
-            result = item.strike_price > mean
+            result = item['derivative']['strike_price'] > mean
         elif self.criteria == '0_to_1_std':
-            result = abs(mean - item.strike_price) <= standardDeviation
+            result = abs(mean - item['derivative']['strike_price']) <= standardDeviation
         elif self.criteria == '1_to_2_std':
-            deviation = abs(mean - item.strike_price)
+            deviation = abs(mean - item['derivative']['strike_price'])
             result = standardDeviation < deviation <= 2 * standardDeviation
         elif self.criteria == '2_to_3_std':
-            deviation = abs(mean - item.strike_price)
+            deviation = abs(mean - item['derivative']['strike_price'])
             result = 2 * standardDeviation < deviation <= 3 * standardDeviation
         elif self.criteria == '3_to_inf_std':
-            deviation = abs(mean - item.strike_price)
+            deviation = abs(mean - item['derivative']['strike_price'])
             result = deviation > 3 * standardDeviation
         return result
 
@@ -256,25 +257,22 @@ class DecisionTreeNode(db.Model):
             mean = 0
             standardDeviation = 0
             if self.criteria == 'less_than_mean' or self.criteria == 'more_than_mean':
-                mean = statistics.mean([x.quantity for x in data])
+                mean = statistics.mean([x['derivative']['quantity'] for x in data])
             else:
-                standardDeviation = statistics.stdev([x.quantity for x in data])
+                standardDeviation = statistics.stdev([x['derivative']['quantity'] for x in data])
             trueSplit = filter(lambda x: self.calculateQuantityFeature(x, mean, standardDeviation), data)
             falseSplit = filter(lambda x: not self.calculateQuantityFeature(x, mean, standardDeviation), data)
         elif self.feature == Features.STRIKE_PRICE:
             mean = 0
             standardDeviation = 0
             if self.criteria == 'less_than_mean' or self.criteria == 'more_than_mean':
-                mean = statistics.mean([x.strike_price for x in data])
+                mean = statistics.mean([x['derivative']['strike_price'] for x in data])
             else:
-                standardDeviation = statistics.stdev([x.strike_price for x in data])
+                standardDeviation = statistics.stdev([x['derivative']['strike_price'] for x in data])
             trueSplit = filter(lambda x: self.calculateStrikePriceFeature(x, mean, standardDeviation), data)
             falseSplit = filter(lambda x: not self.calculateStrikePriceFeature(x, mean, standardDeviation), data)
 
-        return {
-            'true': list(trueSplit),
-            'false': list(falseSplit)
-        }
+        return list(trueSplit), list(falseSplit)
 
     def __str__(self):
-        return f'<DecisionTreeNode : {self.id}>'
+        return f'<DecisionTreeNode : {self.id}, {self.feature}: {self.criteria}>'
