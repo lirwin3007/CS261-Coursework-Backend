@@ -4,7 +4,6 @@ import locale
 
 class AbsoluteDerivativeException(Exception):
     """Exception raised when a absolute derivative is modified"""
-    pass
 
 
 def getCurrencySymbol(currency_code):

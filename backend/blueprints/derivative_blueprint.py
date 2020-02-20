@@ -36,8 +36,6 @@ def addDerivative():
 
     # Retreive json body from request
     body = request.get_json()
-
-    # Obtatin user_id
     user_id = body.get('user_id')
 
     # Validate user id
@@ -72,11 +70,9 @@ def deleteDerivative(derivative_id):
 
     # Retreive json body from request
     body = request.get_json()
-
-    # Obtatin user_id
     user_id = body.get('user_id')
 
-    # Validate user id
+    # Verify user exists
     if user_management.getUser(user_id) is None:
         return abort(404, f'user id {user_id} does not exist')
 
@@ -108,11 +104,9 @@ def updateDerivative(derivative_id):
 
     # Retreive json body from request
     body = request.get_json()
-
-    # Obtatin user_id
     user_id = body.get('user_id')
 
-    # Validate user exists
+    # Verify user exists
     if user_management.getUser(user_id) is None:
         return abort(404, f'user id {user_id} does not exist')
 
