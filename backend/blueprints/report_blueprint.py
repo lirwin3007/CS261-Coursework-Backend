@@ -1,8 +1,8 @@
 # Standard library imports
 import os
 
+from flask import Blueprint, abort, jsonify, request, send_file, after_this_request
 # Third party imports
-from flask import Blueprint, abort, jsonify, request, send_file
 
 # Local application imports
 from backend.managers import report_management
@@ -31,12 +31,10 @@ def indexReports():
     page_number = request.args.get('page_number', default=0, type=int)
 
     # Index reports
-    reports, page_count = report_management.indexReports(body,
+    reports, page_count = report_management.indexReports(date_from,
+                                                         date_to,
                                                          page_size,
-                                                         page_number,
-                                                         date_from,
-                                                         date_to)
-
+                                                         page_number)
     # Make response
     return jsonify(page_count=page_count, reports=[r.id for r in reports])
 

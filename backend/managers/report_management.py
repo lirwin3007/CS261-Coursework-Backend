@@ -11,7 +11,7 @@ from backend.db import db
 from backend.util import clamp
 
 
-def indexReports(body, page_size, page_number, date_from, date_to):
+def indexReports(date_from, date_to, page_size, page_number):
     # Create base query
     query = Report.query
 
