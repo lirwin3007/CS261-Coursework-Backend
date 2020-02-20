@@ -124,7 +124,7 @@ def dummy_user():
 @pytest.fixture
 def dummy_updates():
     return {
-        'buying_party': 'foo',
-        'selling_party': 'bar',
-        'asset': 'baz'
+        'buying_party': 'newfoo',
+        'selling_party': 'newbar',
+        'asset': 'newbaz'
     }

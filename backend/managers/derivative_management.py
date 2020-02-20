@@ -95,26 +95,29 @@ def updateDerivative(derivative, user_id, updates):
         if old_value == new_value:
             continue
 
-        # TODO: review this
+        # Cast date attributes to strings
         if isinstance(old_value, datetime.date):
             old_value = str(old_value)
 
         # Perform update
         setattr(derivative, attribute, new_value)
 
-        # Log update
-        update_log.append({
+        # Log update one at a time
+        log = {
             'attribute': attribute,
             'old_value': old_value,
             'new_value': new_value
-        })
+        }
+
+        # Register update action
+        action = Action(derivative_id=derivative.id, user_id=user_id, type=ActionType.UPDATE, update_log=log)
+        db.session.add(action)
+        update_log.append(log)
 
     # Flag that the derivative needs to be reported
     derivative.reported = False
 
-    # Register the derivative updates and corrosponding user action to the database session
-    action = Action(derivative_id=derivative.id, user_id=user_id, type=ActionType.UPDATE, update_log=update_log)
-    db.session.add(action)
+    # Add the updated derivative to the session
     db.session.add(derivative)
     db.session.flush()
 
