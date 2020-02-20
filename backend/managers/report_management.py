@@ -41,7 +41,7 @@ def getReport(report_id):
 def createCSV(report_id):
     try:
         # Make CSV file and return path
-        return f'static/temp/{report_id}.csv'
+        return f'res/temp/{report_id}.csv'
     except Exception as e:
         print(e)
 
@@ -49,7 +49,7 @@ def createCSV(report_id):
 def createPDF(report_id):
     try:
         # Make PDF file and return path
-        return f'static/temp/{report_id}.csv'
+        return f'res/temp/{report_id}.pdf'
     except Exception as e:
         print(e)
 
@@ -66,7 +66,7 @@ def generateReports():
             report_id += 1
 
         # Make CSV and open for writing
-        with open(f'static/reports/{report_id}.csv', 'w', newline=' ') as file:
+        with open(f'res/reports/{report.id}.csv', 'w') as file:
             writer = csv.writer(file)
             # Filter derivatives for the target_date that have not been deleted
             query = Derivative.query.filter_by(date_of_trade=target_date,
