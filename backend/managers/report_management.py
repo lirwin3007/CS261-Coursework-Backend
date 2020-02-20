@@ -11,23 +11,21 @@ from backend.db import db
 from backend.util import clamp
 
 
-def indexReports(body, page_size, page_number, date_from, date_to):  # noqa: C901
+def indexReports(body, page_size, page_number, date_from, date_to):
     # Create base query
     query = Report.query
 
-    # Apply filter to query
-    query = query.filter(date_from < Report.target_date < date_to)
-
-    # Order the query
+    # Filter and order query
+    query.filter(date_from < Report.target_date)
+    query.filter(Report.target_date < date_to)
     query = query.order_by(asc(Report.target_date))
 
-    # Determine page count
-    page_count = query.count() // page_size + 1
-    # Calculate index offset
-    offset = page_size * (clamp(page_number, 1, page_count) - 1)
     # Paginate query
+    page_count = query.count() // page_size + 1
+    offset = page_size * (clamp(page_number, 1, page_count) - 1)
     query = query.limit(page_size).offset(offset)
-    # Execute SQL query
+
+    # Execute query
     reports = query.all()
 
     return reports, page_count
@@ -43,7 +41,7 @@ def getReport(report_id):
 def createCSV(report_id):
     try:
         # Make CSV file and return path
-        return 'static/temp/' + report_id + '.csv'
+        return f'static/temp/{report_id}.csv'
     except Exception as e:
         print(e)
 
@@ -51,7 +49,7 @@ def createCSV(report_id):
 def createPDF(report_id):
     try:
         # Make PDF file and return path
-        return 'static/temp/' + report_id + '.csv'
+        return f'static/temp/{report_id}.csv'
     except Exception as e:
         print(e)
 
