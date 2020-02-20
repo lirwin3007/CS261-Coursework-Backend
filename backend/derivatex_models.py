@@ -69,7 +69,7 @@ class Derivative(db.Model):
         return util.getCurrencySymbol(self.underlying_curr_code) or '?'
 
     def __str__(self):
-        return '<Derivative : {}>'.format(self.id)
+        return f'<Derivative : {self.id}>'
 
 
 class User(db.Model):
@@ -81,7 +81,7 @@ class User(db.Model):
     profile_image = db.Column(db.String(128))
 
     def __str__(self):
-        return '<User : {}>'.format(self.id)
+        return f'<User : {self.id}>'
 
 
 class ActionType(str, enum.Enum):
@@ -99,7 +99,7 @@ class Action(db.Model):
     update_log = db.Column(db.JSON)
 
     def __str__(self):
-        return '<Action : {}>'.format(self.id)
+        return f'<Action : {self.id}>'
 
 
 class Report(db.Model):
@@ -109,4 +109,4 @@ class Report(db.Model):
     version = db.Column(db.Integer, nullable=False)
 
     def __str__(self):
-        return '<Report : {}>'.format(self.id)
+        return f'<Report : {self.id}>'
