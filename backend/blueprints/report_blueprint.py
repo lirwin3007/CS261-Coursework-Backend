@@ -2,7 +2,7 @@
 import os
 
 # Third party imports
-from flask import Blueprint, abort, jsonify, request
+from flask import Blueprint, abort, jsonify, request, send_file
 
 # Local application imports
 from backend.managers import report_management
@@ -23,8 +23,8 @@ def indexReports():
         body = {}
 
     # Retrieve input data
-    date_from = request.args.get('date_from', default=None, type=String)
-    date_to = request.args.get('date_to', default=None, type=String)
+    date_from = request.args.get('date_from', type=str)
+    date_to = request.args.get('date_to', type=str)
 
     # Determine page parameters
     page_size = max(body.get('page_size') or 15, 1)
@@ -47,7 +47,7 @@ def getReport(report_id):
     report = report_management.getReport(report_id)
 
     # Verify report exists
-    if report is None
+    if report is None:
         return abort(404, f'report with id {report_id} not found')
 
     # Make response
@@ -59,16 +59,25 @@ def downloadReport(format, report_id):
     if format == 'CSV':
         # Generate CSV and return file path
         path_to_file = report_management.downloadCSV(report_id)
-    else
+    else:
         # Generate PDF and return file path
         path_to_file = report_management.downloadPDF(report_id)
+
     # Verify file exists
     if path_to_file is None:
         return abort(404, f'report with id {report_id} not found')
+
     # Set to delete file after it is sent
     @after_this_request
     def deleteFile(response):
         os.remove(path_to_file)
-        return reponse
+        return response
+
     # Return the file
     return send_file(path_to_file)
+
+
+@ReportBlueprint.route('/debug-generate-reports')
+def generateReportsDebugEndpoint():
+    report_management.generateReports()
+    return '', 204
