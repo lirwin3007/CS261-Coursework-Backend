@@ -58,25 +58,22 @@ def generateReports():
     report_dates = db.session.query(Derivative.date_of_trade.distinct()).filter_by(reported=False).all()
 
     for target_date in report_dates:
-        # Get next report id or initialise as 0
-        report_id = db.session.query(func.max(Report.id)).scalar()
-        if report_id is None:
-            report_id = 0
-        else:
-            report_id += 1
+        # Create new Report and flush session
+        report = Report(target_date=target_date, creation_date=date.today())
+        db.session.add(report)
+        db.session.flush()
 
         # Make CSV and open for writing
         with open(f'res/reports/{report.id}.csv', 'w') as file:
             writer = csv.writer(file)
             # Filter derivatives for the target_date that have not been deleted
-            query = Derivative.query.filter_by(date_of_trade=target_date,
-                                               deleted=False).order_by(asc(id))
+            query = Derivative.query.filter_by(date_of_trade=target_date, deleted=False)
             # Execute query
             derivatives = query.all()
 
             for d in derivatives:
                 row = [d.id, d.code, d.buying_party, d.selling_party,
-                       d.asset, d.quantity, d.strike_price, d.currency_code,
+                       d.asset, d.quantity, d.strike_price, d.notional_curr_code,
                        d.date_of_trade, d.maturity_date]
 
                 # Write the derivative to the file
@@ -96,9 +93,11 @@ def generateReports():
         else:
             version += 1
 
-        report = Report(report_id, target_date, creation_date, version)
+        # Set the report version
+        report.version = version
+
+        # Commit session to database
         db.session.add(report)
-        db.session.flush()
         db.session.commit()
 
     return True
