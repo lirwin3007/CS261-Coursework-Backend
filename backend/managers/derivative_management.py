@@ -77,8 +77,8 @@ def deleteDerivative(derivative, user_id):
 
 
 def updateDerivative(derivative, user_id, updates):
-    # Return if derivative has been deleted or is absolute or there are no updates
-    if derivative.deleted or derivative.absolute or updates is None:
+    # Return if the derivative has been deleted or is absolute
+    if derivative.deleted or derivative.absolute:
         return
 
     # Apply and log all updates to the derivative
@@ -113,6 +113,10 @@ def updateDerivative(derivative, user_id, updates):
         action = Action(derivative_id=derivative.id, user_id=user_id, type=ActionType.UPDATE, update_log=log)
         db.session.add(action)
         update_log.append(log)
+
+    # If no valid updates were made return None
+    if not update_log:
+        return None
 
     # Flag that the derivative needs to be reported
     derivative.reported = False
