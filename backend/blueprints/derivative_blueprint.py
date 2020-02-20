@@ -6,6 +6,7 @@ from backend.managers import derivative_management
 from backend.managers import user_management
 from backend.derivatex_models import Derivative
 from backend.db import db
+from backend.util import AbsoluteDerivativeException
 
 # Instantiate new blueprint
 DerivativeBlueprint = Blueprint('derivativeManagement',
@@ -31,12 +32,10 @@ def getDerivative(derivative_id):
 def addDerivative():
     # Verify request
     if not request.data or not request.is_json:
-        return abort(400)
+        return abort(400, 'empty request body')
 
     # Retreive json body from request
     body = request.get_json()
-
-    # Obtatin user_id
     user_id = body.get('user_id')
 
     # Validate user id
@@ -48,8 +47,9 @@ def addDerivative():
         derivative = Derivative(**body.get('derivative'))
         derivative_management.addDerivative(derivative, user_id)
 
-    except Exception:
-        return abort(400)
+    except Exception as error:
+        print(error)
+        return abort(400, 'invalid derivative data')
 
     # Validate the new derivative
     # if invalid derivative:
@@ -66,15 +66,13 @@ def addDerivative():
 def deleteDerivative(derivative_id):
     # Verify request
     if not request.data or not request.is_json:
-        return abort(400)
+        return abort(400, 'empty request body')
 
     # Retreive json body from request
     body = request.get_json()
-
-    # Obtatin user_id
     user_id = body.get('user_id')
 
-    # Validate user id
+    # Verify user exists
     if user_management.getUser(user_id) is None:
         return abort(404, f'user id {user_id} does not exist')
 
@@ -86,7 +84,10 @@ def deleteDerivative(derivative_id):
         return abort(404, f'derivative id {derivative_id} does not exist')
 
     # Delete the derivative
-    derivative_management.deleteDerivative(derivative, user_id)
+    try:
+        derivative_management.deleteDerivative(derivative, user_id)
+    except AbsoluteDerivativeException:
+        return abort(400, 'derivative is absolute, deletion denied')
 
     # Commit the deletion
     db.session.commit()
@@ -99,24 +100,18 @@ def deleteDerivative(derivative_id):
 def updateDerivative(derivative_id):
     # Verify request
     if not request.data or not request.is_json:
-        return abort(400)
+        return abort(400, 'empty request body')
 
     # Retreive json body from request
     body = request.get_json()
-
-    # Obtatin user_id
     user_id = body.get('user_id')
 
-    # Validate user exists
+    # Verify user exists
     if user_management.getUser(user_id) is None:
         return abort(404, f'user id {user_id} does not exist')
 
     # Obtain updates
     updates = body.get('updates')
-
-    # Validate updates
-    if updates is None:
-        return abort(400)
 
     # Retreive the specified derivative
     derivative = derivative_management.getDerivative(derivative_id)
@@ -126,11 +121,14 @@ def updateDerivative(derivative_id):
         return abort(404, f'derivative id {derivative_id} does not exist')
 
     # Update the derivative
-    update_log = derivative_management.updateDerivative(derivative, user_id, updates)
+    try:
+        update_log = derivative_management.updateDerivative(derivative, user_id, updates)
+    except AbsoluteDerivativeException:
+        return abort(400, 'derivative is absolute, update denied')
 
     # If no updates were made to the derivative, abort
     if not update_log:
-        return abort(400)
+        return abort(400, 'no valid updates')
 
     # Validate the updated derivative
     # if invalid derivative:
