@@ -9,6 +9,8 @@ from backend.external_models import Company, Currency, Product, CompanyStock
 def getCurrentDate():
     return date.today().replace(year=2019)
 
+def getAllCompanies():
+    return Company.query.all()
 
 def getCompanyName(company_id):
     company = Company.query.get(company_id)
@@ -37,6 +39,8 @@ def getCompanyStockPrice(company_id):
         return company_stock.stock_price, company_stock.currency_code
     return None
 
+def getAllProducts():
+    return Product.query.with_entities(Product.name).distinct(Product.name).all()
 
 def getAssetPrice(asset_name, selling_party):
     if asset_name.lower() == 'stocks':
