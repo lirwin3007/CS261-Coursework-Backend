@@ -8,9 +8,9 @@ from flask import Blueprint, abort, jsonify, request
 from backend.managers import report_management
 
 # Instantiate new blueprint
-ReportBlueprint = Blueprint('reportManagement',
+ReportBlueprint = Blueprint('reporting',
                             __name__,
-                            url_prefix='/report-management')
+                            url_prefix='/reporting')
 
 
 # Routes
