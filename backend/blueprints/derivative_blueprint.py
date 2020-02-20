@@ -6,6 +6,7 @@ from backend.managers import derivative_management
 from backend.managers import user_management
 from backend.derivatex_models import Derivative
 from backend.db import db
+from backend.util import AbsoluteDerivativeException
 
 # Instantiate new blueprint
 DerivativeBlueprint = Blueprint('derivativeManagement',
@@ -87,7 +88,10 @@ def deleteDerivative(derivative_id):
         return abort(404, f'derivative id {derivative_id} does not exist')
 
     # Delete the derivative
-    derivative_management.deleteDerivative(derivative, user_id)
+    try:
+        derivative_management.deleteDerivative(derivative, user_id)
+    except AbsoluteDerivativeException:
+        return abort(400, 'derivative is absolute, deletion denied')
 
     # Commit the deletion
     db.session.commit()
@@ -123,7 +127,10 @@ def updateDerivative(derivative_id):
         return abort(404, f'derivative id {derivative_id} does not exist')
 
     # Update the derivative
-    update_log = derivative_management.updateDerivative(derivative, user_id, updates)
+    try:
+        update_log = derivative_management.updateDerivative(derivative, user_id, updates)
+    except AbsoluteDerivativeException:
+        return abort(400, 'derivative is absolute, update denied')
 
     # If no updates were made to the derivative, abort
     if not update_log:

@@ -8,7 +8,7 @@ from sqlalchemy import asc, desc
 # Local application imports
 from backend.derivatex_models import Derivative, Action, ActionType
 from backend.db import db
-from backend.util import clamp
+from backend.util import clamp, AbsoluteDerivativeException
 
 
 def getDerivative(derivative_id):
@@ -60,9 +60,8 @@ def addDerivative(derivative, user_id):
 
 
 def deleteDerivative(derivative, user_id):
-    # The derivative has already been flagged as deleted or is absolute, return
-    if derivative.deleted or derivative.absolute:
-        return
+    if derivative.absolute:
+        raise AbsoluteDerivativeException
 
     # Mark the derivative as deleted
     derivative.deleted = True
@@ -77,9 +76,8 @@ def deleteDerivative(derivative, user_id):
 
 
 def updateDerivative(derivative, user_id, updates):
-    # Return if the derivative has been deleted or is absolute
-    if derivative.deleted or derivative.absolute:
-        return
+    if derivative.absolute:
+        raise AbsoluteDerivativeException
 
     # Apply and log all updates to the derivative
     update_log = []
@@ -114,16 +112,13 @@ def updateDerivative(derivative, user_id, updates):
         db.session.add(action)
         update_log.append(log)
 
-    # If no valid updates were made return None
-    if not update_log:
-        return None
+    if update_log:
+        # Flag that the derivative needs to be reported
+        derivative.reported = False
 
-    # Flag that the derivative needs to be reported
-    derivative.reported = False
-
-    # Add the updated derivative to the session
-    db.session.add(derivative)
-    db.session.flush()
+        # Add the updated derivative to the session
+        db.session.add(derivative)
+        db.session.flush()
 
     # Return the update log
     return update_log

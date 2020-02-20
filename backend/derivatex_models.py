@@ -27,7 +27,7 @@ class Derivative(db.Model):
         # Determine time diff between date of trade and now
         delta = date.today() - self.date_of_trade
         # The derivative is absolute if it was traded over a month ago
-        return delta.days >= 30
+        return self.deleted or delta.days >= 30
 
     @property
     def associated_actions(self):
