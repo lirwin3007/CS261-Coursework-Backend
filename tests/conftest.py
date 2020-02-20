@@ -1,7 +1,7 @@
 # pylint: disable=redefined-outer-name
 
 # Standard library imports
-from datetime import datetime, timedelta
+from datetime import date, timedelta
 
 # Third party imports
 import pytest
@@ -12,7 +12,7 @@ from backend.app import Application
 from backend.db import db
 
 
-@pytest.fixture(scope="session", autouse=True)
+@pytest.fixture(scope='session', autouse=True)
 def test_app():
     # Initialise test app instance
     app = Application.getTestApp()
@@ -25,7 +25,7 @@ def test_app():
     return app
 
 
-@pytest.fixture(scope="session", autouse=True)
+@pytest.fixture(scope='session', autouse=True)
 def test_client(test_app):
     # Get test client
     testing_client = test_app.test_client()
@@ -53,7 +53,6 @@ def free_derivtive_id(dummy_derivative):
     # Add dummy derivative to database session
     db.session.add(dummy_derivative)
     db.session.flush()
-
     # Store the id of the new derivative
     free_id = dummy_derivative.id
     # Discard the new derivative from the session to free the id
@@ -62,40 +61,52 @@ def free_derivtive_id(dummy_derivative):
     return free_id
 
 
+# TODO: revisit
 @pytest.fixture
 def dummy_derivative():
-    today = datetime.date(datetime.now())
+    today = date.today()
 
     return Derivative(
         code='doe',
         buying_party='foo',
         selling_party='bar',
-        asset='baz',
+        asset='Stocks',
         quantity=1,
         strike_price=20.20,
-        currency_code='USD',
+        notional_curr_code='USD',
         date_of_trade=today,
         maturity_date=today + timedelta(days=365)
     )
 
 
+# TODO: revisit
 @pytest.fixture
-def dummy_abs_derivative():
-    today = datetime.date(datetime.now())
-
-    return Derivative(
-        code='doe',
-        buying_party='foo',
-        selling_party='bar',
-        asset='baz',
-        quantity=1,
-        strike_price=20.20,
-        currency_code='USD',
-        date_of_trade=today - timedelta(days=365),
-        maturity_date=today + timedelta(days=365)
-    )
+def dummy_derivative_json(dummy_derivative):
+    return {
+        'code': dummy_derivative.code,
+        'buying_party': dummy_derivative.buying_party,
+        'selling_party': dummy_derivative.selling_party,
+        'asset': dummy_derivative.asset,
+        'quantity': dummy_derivative.quantity,
+        'strike_price': dummy_derivative.strike_price,
+        'notional_curr_code': dummy_derivative.notional_curr_code,
+        'maturity_date': str(dummy_derivative.maturity_date),
+        'date_of_trade': str(dummy_derivative.date_of_trade)
+    }
 
 
+# TODO: revisit
+@pytest.fixture
+def dummy_abs_derivative(dummy_derivative):
+    # Get the current date
+    today = date.today()
+    # Modify the dummy derivatives date of trade to make it absolute
+    dummy_derivative.date_of_trade = today - timedelta(days=365)
+    # Return absolute dummy derivative
+    return dummy_derivative
+
+
+# TODO: revisit
 @pytest.fixture
 def dummy_user():
     user = User.query.first()
@@ -109,10 +120,11 @@ def dummy_user():
     return user
 
 
+# TODO: revisit
 @pytest.fixture
 def dummy_updates():
     return {
-        'buying_party': 'foo',
-        'selling_party': 'bar',
-        'asset': 'baz'
+        'buying_party': 'newfoo',
+        'selling_party': 'newbar',
+        'asset': 'newbaz'
     }

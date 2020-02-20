@@ -5,9 +5,9 @@ from flask import Blueprint, abort, jsonify
 from backend.managers import user_management
 
 # Instantiate new blueprint
-UserBlueprint = Blueprint('userManagement',
+UserBlueprint = Blueprint('userAccountControl',
                           __name__,
-                          url_prefix='/user-management')
+                          url_prefix='/user-account-control')
 
 
 # Routes
@@ -15,8 +15,10 @@ UserBlueprint = Blueprint('userManagement',
 def getUser(user_id):
     # Get user from database
     user = user_management.getUser(user_id)
+
+    # Verify user exists
     if user is None:
-        abort(404)
+        return abort(404, f'user with id {user_id} does not exist')
 
     # Make response
     return jsonify(user=user)

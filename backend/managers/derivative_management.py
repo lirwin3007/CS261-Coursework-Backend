@@ -8,44 +8,31 @@ from sqlalchemy import asc, desc
 # Local application imports
 from backend.derivatex_models import Derivative, Action, ActionType
 from backend.db import db
-from backend.util import clamp
+from backend.util import clamp, AbsoluteDerivativeException
 
 
 def getDerivative(derivative_id):
-    """Example Google style docstrings.
+    """ Retrieve the derivative from the database that has the given ID.
 
-    This module demonstrates documentation as specified by the `Google Python
-    Style Guide`_. Docstrings may extend over multiple lines. Sections are created
-    with a section header and a colon followed by a block of indented text.
+    Args:
+        derivative_id (int): The ID of the desired derivative.
 
-    Example:
-        Examples can be given using either the ``Example`` or ``Examples``
-        sections. Sections support any reStructuredText formatting, including
-        literal blocks::
-
-            $ python example_google.py
-
-    Section breaks are created by resuming unindented text. Section breaks
-    are also implicitly created anytime a new section starts.
-
-    Attributes:
-        module_level_variable1 (int): Module level variables may be documented in
-            either the ``Attributes`` section of the module docstring, or in an
-            inline docstring immediately following the variable.
-
-            Either form is acceptable, but the two should not be mixed. Choose
-            one convention to document module level variables and be consistent
-            with it.
-
-    .. _Google Python Style Guide:
-       http://google.github.io/styleguide/pyguide.html
-
+    Returns:
+        Derivative: The derivative in the database with the corrosponding ID.
     """
-    # Query database for the derivative
     return Derivative.query.filter_by(deleted=False, id=derivative_id).first()
 
 
 def addDerivative(derivative, user_id):
+    """ Adds a derivative and a corrosponding user action to the database
+
+    Args:
+        derivative (Derivative): The derivative to be added to the database.
+        user_id (int): The ID of the user requesting the derivative addition.
+
+    Returns:
+        None
+    """
     # Add the derivative to the database session
     db.session.add(derivative)
     db.session.flush()
@@ -60,9 +47,21 @@ def addDerivative(derivative, user_id):
 
 
 def deleteDerivative(derivative, user_id):
-    # The derivative has already been flagged as deleted or is absolute, return
-    if derivative.deleted or derivative.absolute:
-        return
+    """ Labels a derivative in the database as deleted and registers a
+    user action that corrosponds to the deletion.
+
+    Args:
+        derivative (Derivative): The derivative to be marked as deleted.
+        user_id (int): The ID of the user requesting the derivative addition.
+
+    Returns:
+        None
+
+    Raises:
+        AbsoluteDerivativeException: If the derivative is absolute
+    """
+    if derivative.absolute:
+        raise AbsoluteDerivativeException
 
     # Mark the derivative as deleted
     derivative.deleted = True
@@ -77,9 +76,22 @@ def deleteDerivative(derivative, user_id):
 
 
 def updateDerivative(derivative, user_id, updates):
-    # The derivative has been deleted or is absolute, return
-    if derivative.deleted or derivative.absolute:
-        return
+    """ Updates the attributes of the given derivative with new values and
+    registers corrosponding actions.
+
+    Args:
+        derivative (Derivative): The derivative to be updated.
+        user_id (int): The ID of the user performing the derivative update.
+        updates (dict): A dictionary of derivative attribute, value pairs.
+
+    Returns:
+        list: A list of dictionarys that each log an update to an derivative attribute.
+
+    Raises:
+        AbsoluteDerivativeException: If the derivative is absolute
+    """
+    if derivative.absolute:
+        raise AbsoluteDerivativeException
 
     # Apply and log all updates to the derivative
     update_log = []
@@ -95,7 +107,7 @@ def updateDerivative(derivative, user_id, updates):
         if old_value == new_value:
             continue
 
-        # TODO: review this
+        # Cast date attributes to strings
         if isinstance(old_value, datetime.date):
             old_value = str(old_value)
 
@@ -108,23 +120,38 @@ def updateDerivative(derivative, user_id, updates):
             'old_value': old_value,
             'new_value': new_value
         }
+
+        # Register update action
         action = Action(derivative_id=derivative.id, user_id=user_id, type=ActionType.UPDATE, update_log=log)
         db.session.add(action)
         update_log.append(log)
 
-    # Flag that the derivative needs to be reported
-    derivative.reported = False
+    if update_log:
+        # Flag that the derivative needs to be reported
+        derivative.reported = False
 
-    # Register the derivative updates and corrosponding user action to the database session
-    db.session.add(derivative)
-    db.session.flush()
+        # Add the updated derivative to the session
+        db.session.add(derivative)
+        db.session.flush()
 
     # Return the update log
     return update_log
 
 
-# TODO: simplify / optimize performance
 def indexDerivatives(filter_dict, page_size, page_number):  # noqa: C901
+    """ Enumerates a page of derivatives from filtered and sorted subset of
+    all derivatives in the database.
+
+    Args:
+        filter_dict (dict): A dictionary of filtering and ordering keys.
+        page_size (int): The number of derivatives that form a page.
+        page_number (int): The page number offset of the index list.
+
+    Returns:
+        (tuple): tuple containing:
+            derivatives (list): The list of derivatives that make up the page
+            page_count (int): The number of pages all the derivatives are spread across
+    """
     # Create base query
     query = Derivative.query
 
