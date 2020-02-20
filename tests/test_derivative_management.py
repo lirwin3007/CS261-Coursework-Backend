@@ -1,7 +1,11 @@
+# Third party imports
+import pytest
+
 # Local application imports
 from backend.derivatex_models import Derivative, Action, ActionType
 from backend.managers import derivative_management
 from backend.db import db
+from backend.util import AbsoluteDerivativeException
 
 
 def testGetDerivativeRetrievesDerivative(dummy_derivative):
@@ -72,20 +76,24 @@ def testDeleteDerivativeRegistersAction(dummy_derivative, dummy_user):
     assert action is not None
 
 
-def testDeleteDerivativeSkipsAbsoluteDerivatives(dummy_abs_derivative, dummy_user):
+def testDeleteDerivativeHandlesAbsoluteDerivatives(dummy_abs_derivative, dummy_user):
     # Add dummy derivative and user to database session
     db.session.add(dummy_abs_derivative)
     db.session.add(dummy_user)
     db.session.flush()
 
+    # Make a copy of the derivatives value dictionary
+    dict_copy = dummy_abs_derivative.__dict__.copy()
+
     # Assert that derivative is absolute
     assert dummy_abs_derivative.absolute
 
-    # Execute deleteDerivative
-    derivative_management.deleteDerivative(dummy_abs_derivative, dummy_user.id)
+    # Assert that deleteDerivative raises exception
+    with pytest.raises(AbsoluteDerivativeException):
+        derivative_management.deleteDerivative(dummy_abs_derivative, dummy_user.id)
 
-    # Assert that the derivative was not deleted
-    assert not dummy_abs_derivative.deleted
+    # Assert that the derivative remains unchanged by comparing value dictionary
+    assert dummy_abs_derivative.__dict__ == dict_copy
 
 
 def testUpdateDerivativeUpdatesAttributes(dummy_derivative, dummy_user, dummy_updates):
@@ -116,9 +124,9 @@ def testUpdateDerivativeLogsUpdates(dummy_derivative, dummy_user, dummy_updates)
 
         if new_value != old_value:
             expected_update_log.append({
-                "attribute": attribute,
-                "old_value": getattr(dummy_derivative, attribute),
-                "new_value": new_value
+                'attribute': attribute,
+                'old_value': getattr(dummy_derivative, attribute),
+                'new_value': new_value
             })
 
     # Execute updateDerivative
@@ -130,7 +138,7 @@ def testUpdateDerivativeLogsUpdates(dummy_derivative, dummy_user, dummy_updates)
     assert update_log == expected_update_log
 
 
-def testUpdateDerivativeRegistersAction(dummy_derivative, dummy_user, dummy_updates):
+def testUpdateDerivativeRegistersActions(dummy_derivative, dummy_user, dummy_updates):
     # Add dummy derivative and user to database session
     db.session.add(dummy_derivative)
     db.session.add(dummy_user)
@@ -141,18 +149,17 @@ def testUpdateDerivativeRegistersAction(dummy_derivative, dummy_user, dummy_upda
                                                         dummy_user.id,
                                                         dummy_updates)
 
-    # Query the database for an action that corrosponds to updating the derivative
-    action = Action.query.filter_by(derivative_id=dummy_derivative.id,
-                                    user_id=dummy_user.id,
-                                    type=ActionType.UPDATE).first()
-    # Assert that such an action exists
-    assert action is not None
+    # Query the database for the actions that corrosponds to the update
+    actions = Action.query.filter_by(derivative_id=dummy_derivative.id,
+                                     user_id=dummy_user.id,
+                                     type=ActionType.UPDATE).all()
 
-    # Assert that the action stored the update log
-    assert action.update_log == update_log
+    # Assert that there exists an action to log each update
+    for update in update_log:
+        assert any(action.update_log == update for action in actions)
 
 
-def testUpdateDerivativeSkipsAbsoluteDerivatives(dummy_abs_derivative, dummy_user, dummy_updates):
+def testUpdateDerivativeHandlesAbsoluteDerivatives(dummy_abs_derivative, dummy_user, dummy_updates):
     # Add dummy derivative and user to database session
     db.session.add(dummy_abs_derivative)
     db.session.add(dummy_user)
@@ -164,13 +171,11 @@ def testUpdateDerivativeSkipsAbsoluteDerivatives(dummy_abs_derivative, dummy_use
     # Assert that derivative is absolute
     assert dummy_abs_derivative.absolute
 
-    # Execute deleteDerivative
-    update_log = derivative_management.updateDerivative(dummy_abs_derivative,
-                                                        dummy_user.id,
-                                                        dummy_updates)
+    # Assert that updateDerivative raises exception
+    with pytest.raises(AbsoluteDerivativeException):
+        derivative_management.updateDerivative(dummy_abs_derivative,
+                                               dummy_user.id,
+                                               dummy_updates)
 
-    # Assert that there is no update log
-    assert update_log is None
-
-    # Assert that the derivative remains unchanged by checking its value dictionary
+    # Assert that the derivative remains unchanged by comparing value dictionary
     assert dummy_abs_derivative.__dict__ == dict_copy
