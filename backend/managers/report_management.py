@@ -61,10 +61,20 @@ def generateReports():
     query = query.with_entities(Derivative.date_of_trade).distinct()
     # Execute query and extract dates from sqlalchemy.util._collections.result
     report_dates = [d[0] for d in query.all()]
+    report_dates = [report_dates[0]]
 
     for target_date in report_dates:
-        # Create new Report and flush session
-        report = Report(target_date=target_date, creation_date=date.today())
+        # Get next version of report or initialise as 0
+        query = Report.query.filter_by(target_date=target_date)
+        query = query # Find max version here ?
+        version = query.scalar() or 0
+
+        # Create new Report
+        report = Report(target_date=target_date,
+                        creation_date=date.today(),
+                        version=version + 1)
+                        
+        # Add report to database session
         db.session.add(report)
         db.session.flush()
 
@@ -88,21 +98,8 @@ def generateReports():
                 d.reported = True
                 db.session.add(d)
 
-        # Get creation date
-        creation_date = date.today()
-
-        # Get next version of report or initialise as 0
-        version = db.session.query(func.max(Report.version)).filter_by(target_date=target_date).scalar()
-        if version is None:
-            version = 0
-        else:
-            version += 1
-
-        # Set the report version
-        report.version = version
 
         # Commit session to database
-        db.session.add(report)
         db.session.commit()
 
     return True
