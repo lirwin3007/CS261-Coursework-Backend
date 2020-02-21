@@ -55,7 +55,12 @@ def createPDF(report_id):
 
 
 def generateReports():
-    report_dates = db.session.query(Derivative.date_of_trade.distinct()).filter_by(reported=False).all()
+    # Filter the unreported derivatives
+    query = Derivative.query.filter_by(reported=False)
+    # Query distinct dates with unreported derivatives
+    query = query.with_entities(Derivative.date_of_trade).distinct()
+    # Execute query and extract dates from sqlalchemy.util._collections.result
+    report_dates = [d[0] for d in query.all()]
 
     for target_date in report_dates:
         # Create new Report and flush session
