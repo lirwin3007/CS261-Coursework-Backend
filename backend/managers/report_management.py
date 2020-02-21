@@ -32,19 +32,23 @@ def indexReports(date_from, date_to, page_size, page_number):
 
 
 def getReport(report_id):
-    # Locate and read CSV
-    with open(f'res/reports/{report.id}.csv') as file:
-        reader = csv.reader(file, delimiter=",")
-        # Create and return list storing derivative data in the report
-        return [row for row in reader]
+    # Locate and read CSV or return nothing if it does not exist
+    try:
+        with open(f'res/reports/{report.id}.csv') as file:
+            reader = csv.reader(file, delimiter=",")
+            # Create and return list storing derivative data in the report
+            return [row for row in reader]
+    except:
+        return
+
 
 
 def createCSV(report_id):
     try:
         # Make CSV file and return path
         return f'res/temp/{report_id}.csv'
-    except Exception as e:
-        print(e)
+    except:
+        return
 
 
 def createPDF(report_id):
@@ -52,7 +56,7 @@ def createPDF(report_id):
         # Make PDF file and return path
         return f'res/temp/{report_id}.pdf'
     except Exception as e:
-        print(e)
+        return
 
 
 def generateReports():
@@ -103,5 +107,3 @@ def generateReports():
 
         # Commit session to database
         db.session.commit()
-
-    return True
