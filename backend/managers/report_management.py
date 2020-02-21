@@ -33,9 +33,10 @@ def indexReports(date_from, date_to, page_size, page_number):
 
 def getReport(report_id):
     # Locate and read CSV
-    # Turn data into list
-    # Return list
-    return {'report_id': 1, 'report': {'derivatives': [1, 2, 3]}}
+    with open(f'res/reports/{report.id}.csv') as file:
+        reader = csv.reader(file, delimiter=",")
+        # Create and return list storing derivative data in the report
+        return [row for row in reader]
 
 
 def createCSV(report_id):
