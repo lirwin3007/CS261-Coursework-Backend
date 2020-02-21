@@ -3,7 +3,7 @@ from datetime import date
 import csv
 
 # Third party imports
-from sqlalchemy import func, asc
+from sqlalchemy import asc
 
 # Local application imports
 from backend.derivatex_models import Report, Derivative
@@ -66,14 +66,14 @@ def generateReports():
     for target_date in report_dates:
         # Get next version of report or initialise as 0
         query = Report.query.filter_by(target_date=target_date)
-        query = query # Find max version here ?
+        query = query  # Find max version here ?
         version = query.scalar() or 0
 
         # Create new Report
         report = Report(target_date=target_date,
                         creation_date=date.today(),
                         version=version + 1)
-                        
+
         # Add report to database session
         db.session.add(report)
         db.session.flush()
@@ -97,7 +97,6 @@ def generateReports():
                 # Mark the derivative as reported
                 d.reported = True
                 db.session.add(d)
-
 
         # Commit session to database
         db.session.commit()
