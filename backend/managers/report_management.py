@@ -12,6 +12,20 @@ from backend.util import clamp
 
 
 def indexReports(date_from, date_to, page_size, page_number):
+    """ Enumerates a page of reports from a date range filtered subset of
+    all reports in the database.
+
+    Args:
+        date_from (date): The earliest date a returned report can be for.
+        date_to (date): The latest date a returned report can be for.
+        page_size (int): The number of reports that form a page.
+        page_number (int): The page number offset of the index list.
+
+    Returns:
+        (tuple): tuple containing:
+            reports (list): The list of reports that make up the page
+            page_count (int): The number of pages all the reports are spread across
+    """
     # Create base query
     query = Report.query
 
@@ -32,6 +46,14 @@ def indexReports(date_from, date_to, page_size, page_number):
 
 
 def getReport(report_id):
+    """ Retrieve the report from the database that has the given ID.
+
+    Args:
+        report_id (int): The ID of the desired report.
+
+    Returns:
+        Report: The report in the database with the corrosponding ID.
+    """
     # Locate and read CSV or return nothing if it does not exist
     try:
         with open(f'res/reports/{report.id}.csv') as file:
@@ -44,6 +66,14 @@ def getReport(report_id):
 
 
 def createCSV(report_id):
+    """ Create a temporary CSV file containing the data required by the trade repository.
+
+    Args:
+        report_id (int): The ID of the report which a CSV is required for.
+
+    Returns:
+        String: A string corresponding to the path to the generated CSV.
+    """
     try:
         # Make CSV file and return path
         return f'res/temp/{report_id}.csv'
@@ -52,6 +82,14 @@ def createCSV(report_id):
 
 
 def createPDF(report_id):
+    """ Create a temporary PDF file containing the data required by the trade repository.
+
+    Args:
+        report_id (int): The ID of the report which a PDF is required for.
+
+    Returns:
+        String: A string corresponding to the path to the generated PDF.
+    """
     try:
         # Make PDF file and return path
         return f'res/temp/{report_id}.pdf'
@@ -60,6 +98,14 @@ def createPDF(report_id):
 
 
 def generateReports():
+    """ Generates and stores new report CSVs for dates containing unreported derivatives.
+
+    Args:
+        None
+
+    Returns:
+        None
+    """
     # Filter the unreported derivatives
     query = Derivative.query.filter_by(reported=False)
     # Query distinct dates with unreported derivatives
