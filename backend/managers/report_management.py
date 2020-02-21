@@ -66,8 +66,10 @@ def generateReports():
     for target_date in report_dates:
         # Get next version of report or initialise as 0
         query = Report.query.filter_by(target_date=target_date)
-        query = query  # Find max version here ?
-        version = query.scalar() or 0
+        query = query.with_entities(Report.version)
+        versions = [v[0] for v in query.all()]
+        versions = [versions[0]]
+        version = max(versions) or 0
 
         # Create new Report
         report = Report(target_date=target_date,
