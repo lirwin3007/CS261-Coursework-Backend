@@ -10,3 +10,8 @@ def testGetUser(dummy_user):
 
     # Assert that getUser returns the user
     assert user_management.getUser(dummy_user.id) == dummy_user
+
+
+def testGetUserReturnsNoneIfNotFound(free_user_id):
+    # Assert that None is returned for the free id
+    assert user_management.getUser(free_user_id) is None
