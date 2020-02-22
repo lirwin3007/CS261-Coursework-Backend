@@ -4,6 +4,7 @@ import csv
 
 # Third party imports
 from sqlalchemy import asc
+from fpdf import FPDF, HTMLMixin
 
 # Local application imports
 from backend.derivatex_models import Report, Derivative
@@ -75,6 +76,7 @@ def createCSV(report_id):
         String: A string corresponding to the path to the generated CSV.
     """
     try:
+        data = getReport(report_id)
         # Make CSV file and return path
         return f'res/temp/{report_id}.csv'
     except:
@@ -91,7 +93,47 @@ def createPDF(report_id):
         String: A string corresponding to the path to the generated PDF.
     """
     try:
-        # Make PDF file and return path
+        data = getReport(report_id)
+        date = data[0][1]
+
+        # Creates design for table to be added to PDF
+        header = """
+        <table align="center" width="100%">
+        <thead><tr>
+        <th width="5%">id</th><th width="8%">Date Of Trade</th><th width="18%">Trade Code</th>
+        <th width="12%">Asset</th><th width="5%">Quantity</th><th width="6%">Buying Party</th>
+        <th width="6%">Selling Party</th><th width="8%">Notional Value</th><th width="4%">Notional Currency</th>
+        <th width="8%">Maturity Date</th><th width="6%">Underlying Price</th><th width="4%">Underlying Currency</th>
+        <th width="10%">Strike Price</th>
+        </tr></thead>
+        """
+
+        # Adds every row of data to html which will be used to create table
+        html_out = ""
+        grey = False
+        for row in range(0,len(data)):
+            html_out += "<tr bgcolor=\"#E1E1E1\"><td>" if grey else "<tr bgcolor=\"#FFFFFF\"><td>"
+            grey = not grey
+            html_out += data[row][0]
+            for i in range(1,len(data[row])):
+                html_out += ("</td><td>" + data[row][i])
+            html_out += "</td></tr>\n"
+
+        # Create final html that represents table
+        html = header + html_out + "</tbody></table>"
+
+        # Create PDF
+        pdfFile=MyFPDF('P','mm','letter')
+        pdfFile.set_top_margin(margin=18)  #18
+        pdfFile.set_auto_page_break(True, 27) #27
+        pdfFile.add_page()
+        pdfFile.alias_nb_pages()
+        pdfFile.set_font("Arial", style="B", size=14)
+        pdfFile.cell(200, 5, txt=f'Derivative Report {date}', ln=1, align="C")
+        pdfFile.write_html(html)
+        pdfFile.output(f'res/temp/{report_id}.pdf')
+
+        # Return path to PDF
         return f'res/temp/{report_id}.pdf'
     except Exception as e:
         return
@@ -140,9 +182,9 @@ def generateReports():
             derivatives = query.all()
 
             for d in derivatives:
-                row = [d.id, d.code, d.buying_party, d.selling_party,
-                       d.asset, d.quantity, d.strike_price, d.notional_curr_code,
-                       d.date_of_trade, d.maturity_date]
+                row = [d.id, d.date_of_trade, d.code, d.asset, d.quantity, d.buying_party,
+                        d.selling_party, d.notional_value, d.notional_curr_code, d.maturity_date,
+                        d.underlying_price, d.underlying_curr_code, d.strike_price]
 
                 # Write the derivative to the file
                 writer.writerow(row)
