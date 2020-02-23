@@ -192,7 +192,8 @@ def generateReports():
         # Create new Report
         report = Report(target_date=target_date,
                         creation_date=date.today(),
-                        version=version + 1)
+                        version=version + 1,
+                        derivative_count = 0)
 
         # Add report to database session
         db.session.add(report)
@@ -207,6 +208,9 @@ def generateReports():
             # Write report header
             # writer.writerow('') TODO
 
+            # Track how many derivatives are added to the report
+            count = 0
+
             for d in derivatives:
                 # Append the derivative to the report if it has not been deleted
                 if not d.deleted:
@@ -216,10 +220,13 @@ def generateReports():
 
                     # Write the derivative to the file
                     writer.writerow(row)
+                    count += 1
 
                 # Mark the derivative as reported
                 d.reported = True
                 db.session.add(d)
 
-        # Commit session to database
+        # Set derivative count and commit session
+        report.derivative_count = count
+        db.session.add(report)
         db.session.commit()
