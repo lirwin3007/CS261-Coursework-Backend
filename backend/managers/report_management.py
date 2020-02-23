@@ -77,6 +77,14 @@ def createCSV(report_id):
     """
     try:
         data = getReport(report_id)
+
+        with open(f'res/temp/{report_id}.csv', 'w') as file:
+            writer = csv.writer(file)
+            for row in data:
+                # Get desired data from rows of stored CSV report
+                new_row = [row[0], row[1], row[2]]  # TBC
+                writer.writerow(new_row)
+
         # Make CSV file and return path
         return f'res/temp/{report_id}.csv'
     except:
@@ -93,6 +101,7 @@ def createPDF(report_id):
         String: A string corresponding to the path to the generated PDF.
     """
     try:
+        # Get report derivative rows as list of lists
         data = getReport(report_id)
         date = data[0][1]
 
