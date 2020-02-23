@@ -36,7 +36,7 @@ def indexReports():
                                                          page_size,
                                                          page_number)
     # Make response
-    return jsonify(page_count=page_count, reports=[r.id for r in reports])
+    return jsonify(page_count=page_count, reports=reports)
 
 
 @ReportBlueprint.route('/get-report/<report_id>')
