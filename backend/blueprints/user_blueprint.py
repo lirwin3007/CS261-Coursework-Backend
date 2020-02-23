@@ -34,6 +34,10 @@ def indexUsers():
 
 # TODO: implement
 @UserBlueprint.route('/authenticate-user')
-def authenticateUser():
-    # No content, return a 204
-    return '', 204
+def authenticateUser(user_id, password):
+    # Attempt to find user in database
+    user = user_management.getUser(user_id)
+    # Check if correct credentials are supplied
+    if user.password == password:
+        return abort(200, "OK") # placeholder code
+    return abort(401, "Incorrect username or password")
