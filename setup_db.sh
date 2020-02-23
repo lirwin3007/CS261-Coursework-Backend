@@ -99,6 +99,10 @@ mysql -e "
     (SELECT id FROM user ORDER BY RAND () LIMIT 1),
   'ADD', date_of_trade FROM derivative;
 "
+
+echo "introducing errors"
+python3 introduceErrors.py
+
 # Restart mysql server
 echo "restarting mysql server"
 systemctl restart mysql

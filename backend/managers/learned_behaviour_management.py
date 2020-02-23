@@ -3,6 +3,7 @@ import random
 
 # Local application imports
 from backend import external_api
+from backend.db import db
 from backend.derivatex_models import DecisionTreeNode, Label, Derivative, Action, ActionType, Features
 
 
@@ -14,29 +15,80 @@ def growTrees():
     """
 
     trainingData, testData = compileData()
-    potentialNodeCriteria = generatePotentialNodeCriteria()
+    growTree(trainingData)
+    db.session.commit()
 
-    rootNode, rootTrueSplit, rootFalseSplit = growNode(potentialNodeCriteria, trainingData)
-    childTrueNode, childTrueTrueSplit, childTrueFalseSplit = growNode(potentialNodeCriteria, rootTrueSplit)
-    childFalseNode, childFalseTrueSplit, childFalseFalseSplit = growNode(potentialNodeCriteria, rootFalseSplit)
-
-    childTrueLabelTrue, childTrueLabelFalse = getNodeLabel(childTrueTrueSplit, childTrueFalseSplit)
-    childFalseLabelTrue, childFalseLabelFalse = getNodeLabel(childFalseTrueSplit, childFalseFalseSplit)
-
-    print(f"If {rootNode.feature} == {rootNode.criteria}:")
-    print(f"\tIf {childTrueNode.feature} == {childTrueNode.criteria}:")
-    print(f"\t\t{childTrueLabelTrue}")
-    print(f"\tElse:")
-    print(f"\t\t{childTrueLabelFalse}")
-    print(f"Else:")
-    print(f"\tIf {childFalseNode.feature} == {childFalseNode.criteria}:")
-    print(f"\t\t{childFalseLabelTrue}")
-    print(f"\tElse:")
-    print(f"\t\t{childFalseLabelFalse}")
-    print()
-    print()
+    # rootNode, rootTrueSplit, rootFalseSplit = growNode(potentialNodeCriteria, trainingData)
+    # if len(rootTrueSplit) > 0:
+    #     childTrueNode, childTrueTrueSplit, childTrueFalseSplit = growNode(potentialNodeCriteria, rootTrueSplit)
+    #     childTrueLabelTrue, childTrueLabelFalse = getNodeLabel(childTrueTrueSplit, childTrueFalseSplit)
+    # if len(rootFalseSplit) > 0:
+    #     childFalseNode, childFalseTrueSplit, childFalseFalseSplit = growNode(potentialNodeCriteria, rootFalseSplit)
+    #     childFalseLabelTrue, childFalseLabelFalse = getNodeLabel(childFalseTrueSplit, childFalseFalseSplit)
+    #
+    # print(f"If {rootNode.feature} == {rootNode.criteria}:")
+    # if childTrueNode:
+    #     print(f"\tIf {childTrueNode.feature} == {childTrueNode.criteria}:")
+    #     print(f"\t\t{childTrueLabelTrue}")
+    #     print(f"\tElse:")
+    #     print(f"\t\t{childTrueLabelFalse}")
+    # else:
+    #     print("\tNo matching trades")
+    # print(f"Else:")
+    # if childFalseNode:
+    #     print(f"\tIf {childFalseNode.feature} == {childFalseNode.criteria}:")
+    #     print(f"\t\t{childFalseLabelTrue}")
+    #     print(f"\tElse:")
+    #     print(f"\t\t{childFalseLabelFalse}")
+    # else:
+    #     print("\tNo matching trades")
+    # print()
+    # print()
 
     return 1
+
+def growTree(trainingData):
+
+    potentialNodeCriteria = generatePotentialNodeCriteria()
+    q = []
+    q.append(growNode(potentialNodeCriteria, trainingData))
+    db.session.add(q[0][0])
+    while len(q) > 0:
+        print("Creating children")
+        currentNodeData = q.pop(0)
+        currentNode = currentNodeData[0]
+        trueData = currentNodeData[1]
+        falseData = currentNodeData[2]
+        #Check for the tree being complete
+
+        trueNodeData = growNode(potentialNodeCriteria, trueData)
+        trueLabel, falseLabel = getNodeLabel(trueNodeData[1], trueNodeData[2])
+        impurity = calculateGiniImpurity(trueNodeData[1], trueNodeData[2])
+        print(f"trueNode: {trueNodeData[0]}")
+        print(f"truelabel: {trueLabel}")
+        print(f"falselabel: {falseLabel}")
+        print(f"impurity: {calculateGiniImpurity(trueNodeData[1], trueNodeData[2])}")
+        print()
+        if not (impurity == 0 or (trueLabel == Label.ERRONEOUS and falseLabel == Label.ERRONEOUS)):
+            trueNodeData[0].parent_id = currentNode.id
+            db.session.add(trueNodeData[0])
+            currentNode.true_node_id = trueNodeData[0].id
+            q.append(trueNodeData)
+
+        falseNodeData = growNode(potentialNodeCriteria, falseData)
+        trueLabel, falseLabel = getNodeLabel(falseNodeData[1], falseNodeData[2])
+        impurity = calculateGiniImpurity(falseNodeData[1], falseNodeData[2])
+        print(f"trueNode: {falseNodeData[0]}")
+        print(f"truelabel: {trueLabel}")
+        print(f"falselabel: {falseLabel}")
+        print()
+        if not (impurity == 0 or (trueLabel == Label.ERRONEOUS and falseLabel == Label.ERRONEOUS)):
+            falseNodeData[0].parent_id = currentNode.id
+            db.session.add(falseNodeData[0])
+            currentNode.false_node_id = falseNodeData[0].id
+            q.append(falseNodeData)
+
+
 
 def getNodeLabel(trueSplit, falseSplit):
     trueValid = len([x for x in trueSplit if x['label'] == Label.VALID])
@@ -105,7 +157,7 @@ def generatePotentialNodeCriteria():
 
 def compileData():
     # Get all of the data
-    derivatives = Derivative.query.filter(Derivative.id <= 50000, Derivative.deleted == False).all()
+    derivatives = Derivative.query.filter(Derivative.id <= 5000, Derivative.deleted == False).all()
 
     # Calculate the features and label of each derivative
     validData = []

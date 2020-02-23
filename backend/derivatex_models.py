@@ -256,21 +256,29 @@ class DecisionTreeNode(db.Model):
         elif self.feature == Features.QUANTITY:
             mean = 0
             standardDeviation = 0
-            if self.criteria == 'less_than_mean' or self.criteria == 'more_than_mean':
-                mean = statistics.mean([x['derivative']['quantity'] for x in data])
+            if len(data) <= 2:
+                trueSplit = data
+                falseSplit = []
             else:
-                standardDeviation = statistics.stdev([x['derivative']['quantity'] for x in data])
-            trueSplit = filter(lambda x: self.calculateQuantityFeature(x, mean, standardDeviation), data)
-            falseSplit = filter(lambda x: not self.calculateQuantityFeature(x, mean, standardDeviation), data)
+                if self.criteria == 'less_than_mean' or self.criteria == 'more_than_mean':
+                    mean = statistics.mean([x['derivative']['quantity'] for x in data])
+                else:
+                    standardDeviation = statistics.stdev([x['derivative']['quantity'] for x in data])
+                trueSplit = filter(lambda x: self.calculateQuantityFeature(x, mean, standardDeviation), data)
+                falseSplit = filter(lambda x: not self.calculateQuantityFeature(x, mean, standardDeviation), data)
         elif self.feature == Features.STRIKE_PRICE:
             mean = 0
             standardDeviation = 0
-            if self.criteria == 'less_than_mean' or self.criteria == 'more_than_mean':
-                mean = statistics.mean([x['derivative']['strike_price'] for x in data])
+            if len(data) <= 2:
+                trueSplit = data
+                falseSplit = []
             else:
-                standardDeviation = statistics.stdev([x['derivative']['strike_price'] for x in data])
-            trueSplit = filter(lambda x: self.calculateStrikePriceFeature(x, mean, standardDeviation), data)
-            falseSplit = filter(lambda x: not self.calculateStrikePriceFeature(x, mean, standardDeviation), data)
+                if self.criteria == 'less_than_mean' or self.criteria == 'more_than_mean':
+                    mean = statistics.mean([x['derivative']['strike_price'] for x in data])
+                else:
+                    standardDeviation = statistics.stdev([x['derivative']['strike_price'] for x in data])
+                trueSplit = filter(lambda x: self.calculateStrikePriceFeature(x, mean, standardDeviation), data)
+                falseSplit = filter(lambda x: not self.calculateStrikePriceFeature(x, mean, standardDeviation), data)
 
         return list(trueSplit), list(falseSplit)
 
