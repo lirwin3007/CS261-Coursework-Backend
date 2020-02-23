@@ -1,5 +1,6 @@
 # Third party imports
 from flask import Blueprint, abort, jsonify, request
+from sqlalchemy.exc import IntegrityError
 
 # Local application imports
 from backend.managers import derivative_management
@@ -46,9 +47,10 @@ def addDerivative():
         # Create derivative and add it to database
         derivative = Derivative(**body.get('derivative'))
         derivative_management.addDerivative(derivative, user_id)
-
-    except Exception as error:
-        print(error)
+        
+    except IntegrityError as e:
+        return abort(400, f'invalid derivative data: {e.orig}')
+    except Exception:
         return abort(400, 'invalid derivative data')
 
     # Validate the new derivative
