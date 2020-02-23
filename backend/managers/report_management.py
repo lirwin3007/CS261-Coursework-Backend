@@ -60,7 +60,13 @@ def getReport(report_id):
         with open(f'res/reports/{report_id}.csv') as file:
             reader = csv.reader(file, delimiter=",")
             # Create and return list storing derivative data in the report
-            return [row for row in reader]
+            data = []
+            for row in reader:
+                data.append({"id": row[0], "date_of_trade": row[1], "code": row[2], "asset": row[3],
+                        "quantity": row[4], "buying_party": row[5], "selling_party": row[6],
+                        "notional_value": row[7], "notional_curr_code": row[8], "maturity_date": row[9],
+                        "underlying_price": row[10], "underlying_curr_code": row[11], "strike_price": row[12]})
+            return data
     except:
         return
 
@@ -82,7 +88,7 @@ def createCSV(report_id):
             writer = csv.writer(file)
             for row in data:
                 # Get desired data from rows of stored CSV report
-                new_row = [row[0], row[1], row[2]]  # TBC
+                new_row = [row.id, row.date_of_trade, row.code]  # TBC
                 writer.writerow(new_row)
 
         # Make CSV file and return path
@@ -103,7 +109,7 @@ def createPDF(report_id):
     try:
         # Get report derivative rows as list of lists
         data = getReport(report_id)
-        date = data[0][1]
+        date = data[0].date_of_trade
 
         # Creates design for table to be added to PDF
         header = """
@@ -123,9 +129,19 @@ def createPDF(report_id):
         for row in range(0,len(data)):
             html_out += "<tr bgcolor=\"#E1E1E1\"><td>" if grey else "<tr bgcolor=\"#FFFFFF\"><td>"
             grey = not grey
-            html_out += data[row][0]
-            for i in range(1,len(data[row])):
-                html_out += ("</td><td>" + data[row][i])
+            html_out += data[row].id
+            html_out += ("</td><td>" + data.date_of_trade)
+            html_out += ("</td><td>" + data.code)
+            html_out += ("</td><td>" + data.asset)
+            html_out += ("</td><td>" + data.quantity)
+            html_out += ("</td><td>" + data.buying_party)
+            html_out += ("</td><td>" + data.selling_party)
+            html_out += ("</td><td>" + data.notional_value)
+            html_out += ("</td><td>" + data.notional_curr_code)
+            html_out += ("</td><td>" + data.maturity_date)
+            html_out += ("</td><td>" + data.underlying_price)
+            html_out += ("</td><td>" + data.underlying_curr_code)
+            html_out += ("</td><td>" + data.strike_price)
             html_out += "</td></tr>\n"
 
         # Create final html that represents table

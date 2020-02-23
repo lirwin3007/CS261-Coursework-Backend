@@ -56,10 +56,10 @@ def getReport(report_id):
 def downloadReport(format, report_id):
     if format == 'CSV':
         # Generate CSV and return file path
-        path_to_file = report_management.downloadCSV(report_id)
+        path_to_file = report_management.createCSV(report_id)
     else:
         # Generate PDF and return file path
-        path_to_file = report_management.downloadPDF(report_id)
+        path_to_file = report_management.createPDF(report_id)
 
     # Verify file exists
     if path_to_file is None:
