@@ -88,7 +88,7 @@ def createCSV(report_id):
             writer = csv.writer(file)
             for row in data:
                 # Get desired data from rows of stored CSV report
-                new_row = [row.id, row.date_of_trade, row.code]  # TBC
+                new_row = [row["id"], row["date_of_trade"], row["code"]]  # TBC
                 writer.writerow(new_row)
 
         # Make CSV file and return path
@@ -109,7 +109,7 @@ def createPDF(report_id):
     try:
         # Get report derivative rows as list of lists
         data = getReport(report_id)
-        date = data[0].date_of_trade
+        date = data[0]["date_of_trade"]
 
         # Creates design for table to be added to PDF
         header = """
@@ -130,18 +130,18 @@ def createPDF(report_id):
             html_out += "<tr bgcolor=\"#E1E1E1\"><td>" if grey else "<tr bgcolor=\"#FFFFFF\"><td>"
             grey = not grey
             html_out += data[row].id
-            html_out += ("</td><td>" + data.date_of_trade)
-            html_out += ("</td><td>" + data.code)
-            html_out += ("</td><td>" + data.asset)
-            html_out += ("</td><td>" + data.quantity)
-            html_out += ("</td><td>" + data.buying_party)
-            html_out += ("</td><td>" + data.selling_party)
-            html_out += ("</td><td>" + data.notional_value)
-            html_out += ("</td><td>" + data.notional_curr_code)
-            html_out += ("</td><td>" + data.maturity_date)
-            html_out += ("</td><td>" + data.underlying_price)
-            html_out += ("</td><td>" + data.underlying_curr_code)
-            html_out += ("</td><td>" + data.strike_price)
+            html_out += ("</td><td>" + data["date_of_trade"])
+            html_out += ("</td><td>" + data["code"])
+            html_out += ("</td><td>" + data["asset"])
+            html_out += ("</td><td>" + data["quantity"])
+            html_out += ("</td><td>" + data["buying_party"])
+            html_out += ("</td><td>" + data["selling_party"])
+            html_out += ("</td><td>" + data["notional_value"])
+            html_out += ("</td><td>" + data["notional_curr_code"])
+            html_out += ("</td><td>" + data["maturity_date"])
+            html_out += ("</td><td>" + data["underlying_price"])
+            html_out += ("</td><td>" + data["underlying_curr_code"])
+            html_out += ("</td><td>" + data["strike_price"])
             html_out += "</td></tr>\n"
 
         # Create final html that represents table
