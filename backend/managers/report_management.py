@@ -57,7 +57,7 @@ def getReport(report_id):
     """
     # Locate and read CSV or return nothing if it does not exist
     try:
-        with open(f'res/reports/{report.id}.csv') as file:
+        with open(f'res/reports/{report_id}.csv') as file:
             reader = csv.reader(file, delimiter=",")
             # Create and return list storing derivative data in the report
             return [row for row in reader]
