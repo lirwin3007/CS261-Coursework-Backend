@@ -39,5 +39,5 @@ def authenticateUser(user_id, password):
     user = user_management.getUser(user_id)
     # Check if correct credentials are supplied
     if user.password == password:
-        return abort(200, "OK") # placeholder code
+        return abort(200, "OK")  # placeholder code
     return abort(401, "Incorrect username or password")
