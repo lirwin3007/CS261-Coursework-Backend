@@ -132,19 +132,19 @@ def updateDerivative(derivative_id):
 @DerivativeBlueprint.route('/index-derivatives')
 def indexDerivatives():
     # Determine body from request
-    if request.data and request.is_json:
-        body = request.get_json()
-    else:
-        body = {}
+    try:
+        body = derivative_validation.getJSON(request);
 
-    # Determine page parameters
-    page_size = max(body.get('page_size') or 15, 1)
-    page_number = request.args.get('page_number', default=0, type=int)
+        # Determine page parameters
+        page_size = max(body.get('page_size') or 15, 1)
+        page_number = request.args.get('page_number', default=0, type=int)
 
-    # Index derivatives
-    derivatives, page_count = derivative_management.indexDerivatives(body,
+        # Index derivatives
+        derivatives, page_count = derivative_management.indexDerivatives(body,
                                                                      page_size,
                                                                      page_number)
 
-    # Make response
-    return jsonify(page_count=page_count, derivatives=[d.id for d in derivatives])
+        # Make response
+        return jsonify(page_count=page_count, derivatives=[d.id for d in derivatives])
+    except Exception:
+        return abort(400, 'invalid derivative')
