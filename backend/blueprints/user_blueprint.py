@@ -1,5 +1,5 @@
 # Third party imports
-from flask import Blueprint, abort, jsonify
+from flask import Blueprint, abort, jsonify, request
 
 # Local application imports
 from backend.managers import user_management
@@ -13,7 +13,7 @@ UserBlueprint = Blueprint('userAccountControl',
 # Routes
 @UserBlueprint.route('/get-user/<user_id>')
 def getUser(user_id):
-    """ Check if the a valid user id and the correct password for that user id is entered
+    """ Check if the a valid user id and the correc🚧t password for that user id is entered
     Args:
         user_id (int): The ID of the user which needs to be returned
     Returns:
@@ -44,7 +44,6 @@ def indexUsers():
     return jsonify(users=[u.id for u in users])
 
 
-# TODO: implement
 @UserBlueprint.route('/authenticate-user', methods=['POST'])
 def authenticateUser():
     """ Check if the a valid user id and the correct password for that user id is entered
@@ -59,7 +58,11 @@ def authenticateUser():
 
     # Retrieve json body from request
     body = request.get_json()
+
+    # Obtain user_id
     user_id = body.get('user_id')
+
+    # Obtain password
     password = body.get('password')
 
     # Get user from database
@@ -71,6 +74,5 @@ def authenticateUser():
     else:
         # Check if correct credentials are supplied
         if user.password == password:
-            return abort(200, "OK")
+            return 'OK', 200
         return abort(401, "Incorrect username or password")
-        
