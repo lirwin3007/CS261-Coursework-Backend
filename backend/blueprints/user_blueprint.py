@@ -11,7 +11,7 @@ UserBlueprint = Blueprint('userAccountControl',
 
 
 # Routes
-@UserBlueprint.route('/get-user/<user_id>', methods=['GET'])
+@UserBlueprint.route('/get-user/<user_id>')
 def getUser(user_id):
     # Get user from database
     user = user_management.getUser(user_id)
@@ -24,7 +24,7 @@ def getUser(user_id):
     return jsonify(user=user)
 
 
-@UserBlueprint.route('/index-users', methods=['GET'])
+@UserBlueprint.route('/index-users')
 def indexUsers():
     # Get all users from database
     users = user_management.getAllUsers()
