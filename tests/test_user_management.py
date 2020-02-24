@@ -11,6 +11,17 @@ def testGetUser(dummy_user):
     # Assert that getUser returns the user
     assert user_management.getUser(dummy_user.id) == dummy_user
 
+def testGetAllUsers(dummy_user, dummy_user_2):
+    # Add dummy user twice to database session
+    db.session.add(dummy_user)
+    users = [dummy_user]
+    db.session.add(dummy_user_2)
+    users.append(dummy_user_2)
+    db.session.flush()
+
+    # Assert that getAllUsers returns all the users
+    assert user_management.getAllUsers() == users
+
 
 def testGetUserReturnsNoneIfNotFound(free_user_id):
     # Assert that None is returned for the free id

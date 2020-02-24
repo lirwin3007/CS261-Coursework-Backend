@@ -122,6 +122,18 @@ def dummy_user():
         )
     return user
 
+@pytest.fixture
+def dummy_user_2():
+    user = User.query.get(2)
+    if user is None:
+        user = User(
+            f_name='f_name2',
+            l_name='l_name2',
+            email='email2',
+            password='password123'
+        )
+    return user
+
 
 @pytest.fixture
 def dummy_updates():
