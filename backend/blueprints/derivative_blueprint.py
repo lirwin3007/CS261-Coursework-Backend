@@ -143,11 +143,8 @@ def updateDerivative(derivative_id):
 
 @DerivativeBlueprint.route('/index-derivatives')
 def indexDerivatives():
-    # Determine body from request
-    if request.data and request.is_json:
-        body = request.get_json()
-    else:
-        body = {}
+    # Extract body from request
+    body = request.get_json(silent=True) or {}
 
     # Determine page parameters
     page_size = max(body.get('page_size') or 15, 1)
