@@ -71,7 +71,6 @@ def deleteDerivative(derivative_id):
         # Retreive derivative from database
         derivative = derivative_management.getDerivative(derivative_id)
 
-
         # Verify derivative exists
         if derivative is None:
             return abort(404, f'derivative id {derivative_id} does not exist')
@@ -93,47 +92,41 @@ def deleteDerivative(derivative_id):
 
 @DerivativeBlueprint.route('/update-derivative/<derivative_id>', methods=['POST'])
 def updateDerivative(derivative_id):
-    # Verify request
-    if not request.data or not request.is_json:
-        return abort(400, 'empty request body')
 
-    # Retreive json body from request
-    body = request.get_json()
-    user_id = body.get('user_id')
+    if derivative_validation.isValidDerivative(request):
 
-    # Verify user exists
-    if user_management.getUser(user_id) is None:
-        return abort(404, f'user id {user_id} does not exist')
+        body = request.get_json()
 
-    # Obtain updates
-    updates = body.get('updates')
+        user_id = body.get('user_id')
+        # Obtain updates
+        updates = body.get('updates')
 
-    # Retreive the specified derivative
-    derivative = derivative_management.getDerivative(derivative_id)
+        # Retreive the specified derivative
+        derivative = derivative_management.getDerivative(derivative_id)
 
-    # Verify derivative exists
-    if derivative is None:
-        return abort(404, f'derivative id {derivative_id} does not exist')
+        # Verify derivative exists
+        if derivative is None:
+            return abort(404, f'derivative id {derivative_id} does not exist')
 
-    # Update the derivative
-    try:
-        update_log = derivative_management.updateDerivative(derivative, user_id, updates)
-    except AbsoluteDerivativeException:
-        return abort(400, 'derivative is absolute, update denied')
+        # Update the derivative
+        try:
+            update_log = derivative_management.updateDerivative(derivative, user_id, updates)
+        except AbsoluteDerivativeException:
+            return abort(400, 'derivative is absolute, update denied')
 
-    # If no updates were made to the derivative, abort
-    if not update_log:
-        return abort(400, 'no valid updates')
+        # If no updates were made to the derivative, abort
+        if not update_log:
+            return abort(400, 'no valid updates')
 
-    # Validate the updated derivative
-    # if invalid derivative:
-    #     return abort(418)
+        # Validate the updated derivative
+        # if invalid derivative:
+        #     return abort(418)
 
-    # Commit the derivative updates to the database
-    db.session.commit()
+        # Commit the derivative updates to the database
+        db.session.commit()
 
-    # Make response
-    return jsonify(update_log=update_log)
+        # Make response
+        return jsonify(update_log=update_log)
 
 
 @DerivativeBlueprint.route('/index-derivatives')
