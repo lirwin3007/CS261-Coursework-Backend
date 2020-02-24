@@ -16,11 +16,8 @@ ReportBlueprint = Blueprint('reporting',
 # Routes
 @ReportBlueprint.route('/index-reports')
 def indexReports():
-    # Determine body from request
-    if request.data and request.is_json:
-        body = request.get_json()
-    else:
-        body = {}
+    # Extract body from request
+    body = request.get_json(silent=True) or {}
 
     # Retrieve input data
     date_from = request.args.get('date_from', type=str)
@@ -39,31 +36,44 @@ def indexReports():
     return jsonify(page_count=page_count, reports=reports)
 
 
-@ReportBlueprint.route('/get-report/<report_id>')
-def getReport(report_id):
-    # Get report from file system and info from db
-    report = report_management.getReport(report_id)
+@ReportBlueprint.route('/get-report-head/<report_id>')
+def getReportHead(report_id):
+    # Get report head from the database
+    head = report_management.getReportHead(report_id)
 
     # Verify report exists
-    if report is None:
+    if head is None:
         return abort(404, f'report with id {report_id} not found')
 
     # Make response
-    return jsonify(report=report)
+    return jsonify(report=head)
+
+
+@ReportBlueprint.route('/get-report-data/<report_id>')
+def getReportData(report_id):
+    # Get report data from report file
+    data = report_management.getReportData(report_id)
+
+    # Verify report exists
+    if data is None:
+        return abort(404, f'report with id {report_id} not found')
+
+    # Make response
+    return jsonify(report=data)
 
 
 @ReportBlueprint.route('/download-report/<format>/<report_id>')
 def downloadReport(format, report_id):
-    if format == 'CSV':
-        # Generate CSV and return file path
-        path_to_file = report_management.createCSV(report_id)
-    else:
+    # Verify report exists
+    if report_management.getReportHead(report_id) is None:
+        return abort(404, f'report with id {report_id} not found')
+
+    if format.upper() == 'PDF':
         # Generate PDF and return file path
         path_to_file = report_management.createPDF(report_id)
-
-    # Verify file exists
-    if path_to_file is None:
-        return abort(404, f'report with id {report_id} not found')
+    else:
+        # Generate CSV and return file path
+        path_to_file = report_management.createCSV(report_id)
 
     # Set to delete file after it is sent
     @after_this_request
@@ -75,7 +85,7 @@ def downloadReport(format, report_id):
     return send_file(path_to_file)
 
 
-@ReportBlueprint.route('/debug-generate-reports')
-def generateReportsDebugEndpoint():
+@ReportBlueprint.route('/generate-reports')
+def generateReports():
     report_management.generateReports()
     return '', 204

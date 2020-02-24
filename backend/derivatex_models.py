@@ -102,7 +102,7 @@ class Action(db.Model):
         return f'<Action : {self.id}>'
 
 
-class Report(db.Model):
+class ReportHead(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     target_date = db.Column(db.Date, nullable=False)
     creation_date = db.Column(db.Date, nullable=False)
@@ -110,4 +110,4 @@ class Report(db.Model):
     derivative_count = db.Column(db.Integer, nullable=False)
 
     def __str__(self):
-        return f'<Report : {self.id}>'
+        return f'<ReportHead : {self.id}>'
