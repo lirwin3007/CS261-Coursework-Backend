@@ -4,12 +4,12 @@ import csv
 
 # Third party imports
 from sqlalchemy import asc
-from fpdf import FPDF, HTMLMixin
 
 # Local application imports
 from backend.derivatex_models import Report, Derivative
 from backend.db import db
 from backend.util import clamp
+import backend.util.MyFPDF
 
 
 def indexReports(date_from, date_to, page_size, page_number):

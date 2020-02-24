@@ -1,9 +1,20 @@
 # Standard library imports
 import locale
 
+# Third party imports
+from fpdf import FPDF, HTMLMixin
+
 
 class AbsoluteDerivativeException(Exception):
     """Exception raised when a absolute derivative is modified"""
+
+# Add html functionality to fpdf pdf maker and set footer
+class MyFPDF(FPDF, HTMLMixin):
+   def footer(this):
+     this.set_y(-25)  #-25
+     this.set_font('Arial','I',10)
+     this.set_text_color(0,0,0)
+     this.cell(0,10,'PAGE %s OF {nb}' % this.page_no(),0,0,'C')
 
 
 def getCurrencySymbol(currency_code):
