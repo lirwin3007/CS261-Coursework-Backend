@@ -13,7 +13,7 @@ UserBlueprint = Blueprint('userAccountControl',
 # Routes
 @UserBlueprint.route('/get-user/<user_id>')
 def getUser(user_id):
-    """ Check if the a valid user id and the correc🚧t password for that user id is entered
+    """ Check if the a valid user id and the correct password for that user id is entered
     Args:
         user_id (int): The ID of the user which needs to be returned
     Returns:
@@ -70,9 +70,9 @@ def authenticateUser():
 
     # Validate user id
     if user is None:
-        return abort(404, f'user id {user_id} does not exist')
+        return abort(404, f'User id {user_id} does not exist')
     else:
         # Check if correct credentials are supplied
         if user.password == password:
             return 'OK', 200
-        return abort(401, "Incorrect username or password")
+        return abort(401, f'Incorrect password for user id {user_id}')
