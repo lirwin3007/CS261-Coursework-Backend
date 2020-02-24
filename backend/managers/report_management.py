@@ -10,7 +10,7 @@ from sqlalchemy import asc
 from backend.derivatex_models import ReportHead, Derivative
 from backend.db import db
 from backend.util import clamp
-import backend.util.MyFPDF
+from backend.util import MyFPDF
 
 
 def indexReports(date_from, date_to, page_size, page_number):
