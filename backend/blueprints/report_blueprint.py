@@ -1,4 +1,5 @@
 # Standard library imports
+from datetime import date
 import os
 
 from flask import Blueprint, abort, jsonify, request, send_file, after_this_request
@@ -85,7 +86,19 @@ def downloadReport(format, report_id):
     return send_file(path_to_file)
 
 
-@ReportBlueprint.route('/generate-reports')
+@ReportBlueprint.route('/index-pending-reports')
+def indexPendingReports():
+    dates = report_management.getPendingReportDates()
+    return jsonify(dates=dates)
+
+
+@ReportBlueprint.route('/generate-report/<target_date>')
+def generateReport(target_date):
+    id = report_management.generateReport(target_date)
+    return jsonify(id=id)
+
+
+@ReportBlueprint.route('/generate-all-reports')
 def generateReports():
-    report_management.generateReports()
+    report_management.generateAllReports()
     return '', 204
