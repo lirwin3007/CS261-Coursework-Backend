@@ -27,7 +27,7 @@ class Application:
         scheduler = APScheduler()
         scheduler.init_app(app)
         scheduler.start()
-        app.apscheduler.add_job(func=report_management.generateReports,
+        app.apscheduler.add_job(func=report_management.generateAllReports,
                                 trigger='cron', hour='23', minute='59', id='j1')
 
         # Allow cross-origin requests
