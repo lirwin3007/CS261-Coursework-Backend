@@ -59,20 +59,20 @@ def authenticateUser():
     # Retrieve json body from request
     body = request.get_json()
 
-    # Obtain user_id
-    user_id = body.get('user_id')
+    # Obtain username
+    username = body.get('username')
 
     # Obtain password
     password = body.get('password')
 
     # Get user from database
-    user = user_management.getUser(user_id)
+    user = user_management.getUserFromUsername(username)
 
     # Validate user id
     if user is None:
-        return abort(404, f'User id {user_id} does not exist')
+        return abort(404, f'User {username} does not exist')
     else:
         # Check if correct credentials are supplied
         if user.password == password:
             return 'OK', 200
-        return abort(401, f'Incorrect password for user id {user_id}')
+        return abort(401, f'Incorrect password for user {username}')
