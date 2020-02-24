@@ -181,19 +181,20 @@ def generateReports():
     report_dates = [d[0] for d in query.all()]
 
     for target_date in report_dates:
-        # Get next version of report or initialise as 0
-        query = Report.query.filter_by(target_date=target_date)
-        # Execute query
-        reports = query.all()
+        # Get all the existing reports for the given target_date
+        reports = Report.query.filter_by(target_date=target_date).all()
 
-        # Obtain latest version number or default to 0
+        # Obtain latest report version number or default to 0
         version = max([report.version for report in reports], default=0)
 
-        # Create new Report
+        # Get all none-deleted erivatives traded on the target_date
+        derivatives = Derivative.query.filter_by(date_of_trade=target_date,
+                                                 deleted=False).all()
+        # Create new report metadata object
         report = Report(target_date=target_date,
                         creation_date=date.today(),
                         version=version + 1,
-                        derivative_count = 0)
+                        derivative_count=len(derivatives))
 
         # Add report to database session
         db.session.add(report)
@@ -202,31 +203,20 @@ def generateReports():
         # Make CSV and open for writing
         with open(f'res/reports/{report.id}.csv', 'w') as file:
             writer = csv.writer(file)
-            # Get all derivatives traded on the target_date
-            derivatives = Derivative.query.filter_by(date_of_trade=target_date).all()
 
             # Write report header
             # writer.writerow('') TODO
 
-            # Track how many derivatives are added to the report
-            count = 0
-
+            # Append each of the derivative to the report
             for d in derivatives:
-                # Append the derivative to the report if it has not been deleted
-                if not d.deleted:
-                    row = [d.id, d.date_of_trade, d.code, d.asset, d.quantity, d.buying_party,
-                            d.selling_party, d.notional_value, d.notional_curr_code, d.maturity_date,
-                            d.underlying_price, d.underlying_curr_code, d.strike_price]
+                row = [d.id, d.date_of_trade, d.code, d.asset, d.quantity, d.buying_party,
+                        d.selling_party, d.notional_value, d.notional_curr_code, d.maturity_date,
+                        d.underlying_price, d.underlying_curr_code, d.strike_price]
 
-                    # Write the derivative to the file
-                    writer.writerow(row)
-                    count += 1
+                writer.writerow(row)
 
-                # Mark the derivative as reported
-                d.reported = True
-                db.session.add(d)
+        # Mark all derivatives on the target date as reported
+        Derivative.query.filter_by(date_of_trade=target_date).update(dict(reported=True))
 
-        # Set derivative count and commit session
-        report.derivative_count = count
-        db.session.add(report)
+        # Commit the session to the database
         db.session.commit()
