@@ -20,8 +20,6 @@ DerivativeBlueprint = Blueprint('derivativeManagement',
 @DerivativeBlueprint.route('/get-derivative/<derivative_id>')
 def getDerivative(derivative_id):
 
-    if derivative_validation.isValidDerivativeId(derivative_id):
-
         # Get derivative from database
         derivative = derivative_management.getDerivative(derivative_id)
 
@@ -31,8 +29,7 @@ def getDerivative(derivative_id):
 
         # Make response
         return jsonify(derivative=derivative)
-    else:
-        return abort(404, f'MYERORR')
+
 
 
 @DerivativeBlueprint.route('/add-derivative', methods=['POST'])
@@ -54,13 +51,7 @@ def addDerivative():
             return abort(400, 'invalid derivative data')
 
     else:
-        return abort(400, f'MYERORR')
-
-
-
-    # Validate the new derivative
-    # if invalid derivative:
-    #     return abort(418)
+        return abort(400, 'invalid derivative')
 
     # Commit addition to database
     db.session.commit()
@@ -74,6 +65,8 @@ def deleteDerivative(derivative_id):
     # Verify request
     if not request.data or not request.is_json:
         return abort(400, 'empty request body')
+
+    print(request.data, "REQUESTDATA")
 
     # Retreive json body from request
     body = request.get_json()

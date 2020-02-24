@@ -1,4 +1,8 @@
+from flask import abort, jsonify, request
+from sqlalchemy.exc import IntegrityError
+
 from backend.managers import user_management
+
 
 def validateDerivative(derivative):
     return True
@@ -11,16 +15,29 @@ def validateDerivative(derivative):
 
 def isValidDerivative(request):
     # Verify request
-    if not request.data or not request.is_json:
-        return abort(400, 'empty request body')
+    # if not request.data or not request.is_json:
+    #     return abort(400, 'empty request body')
 
     # Retreive json body from request
-    body = request.get_json()
-    user_id = body.get('user_id')
+    # try:
+    #     body = request.get_json()
+    # except:
+    #     return abort(400, 'JSON required')
+    try:
+        body = getJSON(request)
+        user_id = body.get('user_id')
+        print('user_id', user_id)
 
-    # Validate user id
-    if user_management.getUser(user_id) is None:
-        return abort(404, f'user id {user_id} does not exist')
-    # print(derivative, 'derivative')
+        # Validate user id
+        if user_management.getUser(user_id) is None:
+            return abort(404, f'user id {user_id} does not exist')
+        # print(derivative, 'derivative')
+        return True
+    except Exception:
+        return abort(400, 'JSON properties invalid')
 
-    return True
+def getJSON(request):
+    try:
+        return request.get_json()
+    except Exception:
+        return abort(400, 'JSON required')
