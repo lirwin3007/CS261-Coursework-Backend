@@ -1,3 +1,6 @@
+# Standard library imports
+from datetime import date
+
 # Third party imports
 from flask import Flask
 from flask.json import JSONEncoder
@@ -71,6 +74,8 @@ class Application:
 class CustomJSONEncoder(JSONEncoder):
 
     def default(self, o):  # pylint: disable=E0202
+        if isinstance(o, date):
+            return o.isoformat()
         if isinstance(o.__class__, DeclarativeMeta):
             # Gather object attributes
             columns = [c.name for c in o.__table__.columns]
