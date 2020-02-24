@@ -4,7 +4,7 @@ from sqlalchemy.exc import IntegrityError
 from backend.managers import user_management
 
 
-def validateDerivative(derivative):
+def isValidDerivativeID(derivative):
     return True
 
 # def validateDerivativeId(derivative_id):
@@ -15,18 +15,10 @@ def validateDerivative(derivative):
 
 def isValidDerivative(request):
     # Verify request
-    # if not request.data or not request.is_json:
-    #     return abort(400, 'empty request body')
 
-    # Retreive json body from request
-    # try:
-    #     body = request.get_json()
-    # except:
-    #     return abort(400, 'JSON required')
     try:
         body = getJSON(request)
         user_id = body.get('user_id')
-        print('user_id', user_id)
 
         # Validate user id
         if user_management.getUser(user_id) is None:

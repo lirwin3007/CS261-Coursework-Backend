@@ -62,38 +62,33 @@ def addDerivative():
 
 @DerivativeBlueprint.route('/delete-derivative/<derivative_id>', methods=['DELETE'])
 def deleteDerivative(derivative_id):
-    # Verify request
-    if not request.data or not request.is_json:
-        return abort(400, 'empty request body')
 
-    print(request.data, "REQUESTDATA")
+    if derivative_validation.isValidDerivative(request):
 
-    # Retreive json body from request
-    body = request.get_json()
-    user_id = body.get('user_id')
+        body = request.get_json()
+        user_id = body.get('user_id')
 
-    # Verify user exists
-    if user_management.getUser(user_id) is None:
-        return abort(404, f'user id {user_id} does not exist')
+        # Retreive derivative from database
+        derivative = derivative_management.getDerivative(derivative_id)
 
-    # Retreive derivative from database
-    derivative = derivative_management.getDerivative(derivative_id)
 
-    # Verify derivative exists
-    if derivative is None:
-        return abort(404, f'derivative id {derivative_id} does not exist')
+        # Verify derivative exists
+        if derivative is None:
+            return abort(404, f'derivative id {derivative_id} does not exist')
 
-    # Delete the derivative
-    try:
-        derivative_management.deleteDerivative(derivative, user_id)
-    except AbsoluteDerivativeException:
-        return abort(400, 'derivative is absolute, deletion denied')
+        # Delete the derivative
+        try:
+            derivative_management.deleteDerivative(derivative, user_id)
+        except AbsoluteDerivativeException:
+            return abort(400, 'derivative is absolute, deletion denied')
 
-    # Commit the deletion
-    db.session.commit()
+        # Commit the deletion
+        db.session.commit()
 
-    # Return a 204, no content
-    return '', 204
+        # Return a 204, no content
+        return '', 204
+    else:
+        return abort(400, "MYEROR")
 
 
 @DerivativeBlueprint.route('/update-derivative/<derivative_id>', methods=['POST'])
