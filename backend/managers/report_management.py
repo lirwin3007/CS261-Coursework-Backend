@@ -121,11 +121,12 @@ def createPDF(report_id):
 
     # Creates design for table to be added to PDF
     header = """
+    <font size="8" face="Courier New" >
     <table align="center" width="100%">
     <thead><tr>
-    <th width="5%">id</th><th width="8%">Date Of Trade</th><th width="18%">Trade Code</th>
+    <th width="5%">id</th><th width="8%">Date Of Trade</th><th width="15%">Trade Code</th>
     <th width="12%">Asset</th><th width="5%">Quantity</th><th width="6%">Buying Party</th>
-    <th width="6%">Selling Party</th><th width="8%">Notional Value</th><th width="4%">Notional Currency</th>
+    <th width="6%">Selling Party</th><th width="11%">Notional Value</th><th width="4%">Notional Currency</th>
     <th width="8%">Maturity Date</th><th width="6%">Underlying Price</th><th width="4%">Underlying Currency</th>
     <th width="10%">Strike Price</th>
     </tr></thead>
@@ -133,7 +134,7 @@ def createPDF(report_id):
 
     # Adds every row of data to html which will be used to create table
     html_out = ''
-    grey = False
+    grey = True
     for derivative in data:
         html_out += '<tr bgcolor="#E1E1E1"><td>' if grey else '<tr bgcolor="#FFFFFF"><td>'
         grey = not grey
