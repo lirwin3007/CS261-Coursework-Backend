@@ -1,12 +1,13 @@
 # Standard library imports
 from datetime import date
 import csv
+import os
 
 # Third party imports
 from sqlalchemy import asc
 
 # Local application imports
-from backend.derivatex_models import Report, Derivative
+from backend.derivatex_models import ReportHead, Derivative
 from backend.db import db
 from backend.util import clamp
 import backend.util.MyFPDF
@@ -28,12 +29,12 @@ def indexReports(date_from, date_to, page_size, page_number):
             page_count (int): The number of pages all the reports are spread across
     """
     # Create base query
-    query = Report.query
+    query = ReportHead.query
 
     # Filter and order query
-    query.filter(date_from < Report.target_date)
-    query.filter(Report.target_date < date_to)
-    query = query.order_by(asc(Report.target_date))
+    query.filter(date_from < ReportHead.target_date)
+    query.filter(ReportHead.target_date < date_to)
+    query = query.order_by(asc(ReportHead.target_date))
 
     # Paginate query
     page_count = query.count() // page_size + 1
@@ -46,7 +47,19 @@ def indexReports(date_from, date_to, page_size, page_number):
     return reports, page_count
 
 
-def getReport(report_id):
+def getReportHead(report_id):
+    """ Retrieve the report metadata from the database that has the given ID.
+
+    Args:
+        report_id (int): The ID of the desired report.
+
+    Returns:
+        Report: The report in the database with the corrosponding ID.
+    """
+    return ReportHead.query.get(report_id)
+
+
+def getReportData(report_id):
     """ Retrieve the report from the database that has the given ID.
 
     Args:
@@ -56,20 +69,16 @@ def getReport(report_id):
         Report: The report in the database with the corrosponding ID.
     """
     # Locate and read CSV or return nothing if it does not exist
-    try:
-        with open(f'res/reports/{report_id}.csv') as file:
-            reader = csv.reader(file, delimiter=",")
-            # Create and return list storing derivative data in the report
-            data = []
-            for row in reader:
-                data.append({"id": row[0], "date_of_trade": row[1], "code": row[2], "asset": row[3],
-                        "quantity": row[4], "buying_party": row[5], "selling_party": row[6],
-                        "notional_value": row[7], "notional_curr_code": row[8], "maturity_date": row[9],
-                        "underlying_price": row[10], "underlying_curr_code": row[11], "strike_price": row[12]})
-            return data
-    except:
-        return
-
+    with open(f'res/reports/{report_id}.csv') as file:
+        reader = csv.reader(file, delimiter=",")
+        # Create and return list storing derivative data in the report
+        data = []
+        for row in reader:
+            data.append({"id": row[0], "date_of_trade": row[1], "code": row[2], "asset": row[3],
+                    "quantity": row[4], "buying_party": row[5], "selling_party": row[6],
+                    "notional_value": row[7], "notional_curr_code": row[8], "maturity_date": row[9],
+                    "underlying_price": row[10], "underlying_curr_code": row[11], "strike_price": row[12]})
+        return data
 
 
 def createCSV(report_id):
@@ -81,20 +90,20 @@ def createCSV(report_id):
     Returns:
         String: A string corresponding to the path to the generated CSV.
     """
-    try:
-        data = getReport(report_id)
+    # Get report data
+    data = getReportData(report_id)
 
-        with open(f'res/temp/{report_id}.csv', 'w') as file:
-            writer = csv.writer(file)
-            for row in data:
-                # Get desired data from rows of stored CSV report
-                new_row = [row["id"], row["date_of_trade"], row["code"]]  # TBC
-                writer.writerow(new_row)
+    # Open report file and CSV writer
+    with open(f'res/temp/{report_id}.csv', 'w') as file:
+        writer = csv.writer(file)
 
-        # Make CSV file and return path
-        return f'res/temp/{report_id}.csv'
-    except:
-        return
+        for derivative in data:
+            # Get desired data from rows of stored CSV report
+            row = [derivative["id"], derivative["date_of_trade"], derivative["code"]]  # TBC
+            writer.writerow(row)
+
+    # Return path to csv outfile
+    return os.path.realpath(file.name)
 
 
 def createPDF(report_id):
@@ -108,7 +117,7 @@ def createPDF(report_id):
     """
     try:
         # Get report derivative rows as list of lists
-        data = getReport(report_id)
+        data = getReportData(report_id)
         date = data[0]["date_of_trade"]
 
         # Creates design for table to be added to PDF
@@ -126,7 +135,7 @@ def createPDF(report_id):
         # Adds every row of data to html which will be used to create table
         html_out = ""
         grey = False
-        for row in range(0,len(data)):
+        for row in range(0, len(data)):
             html_out += "<tr bgcolor=\"#E1E1E1\"><td>" if grey else "<tr bgcolor=\"#FFFFFF\"><td>"
             grey = not grey
             html_out += data[row].id
@@ -148,19 +157,23 @@ def createPDF(report_id):
         html = header + html_out + "</tbody></table>"
 
         # Create PDF
-        pdfFile=MyFPDF('P','mm','letter')
-        pdfFile.set_top_margin(margin=18)  #18
-        pdfFile.set_auto_page_break(True, 27) #27
-        pdfFile.add_page()
-        pdfFile.alias_nb_pages()
-        pdfFile.set_font("Arial", style="B", size=14)
-        pdfFile.cell(200, 5, txt=f'Derivative Report {date}', ln=1, align="C")
-        pdfFile.write_html(html)
-        pdfFile.output(f'res/temp/{report_id}.pdf')
+        pdf = MyFPDF('P','mm','letter')
+        pdf.set_top_margin(margin=18)  # 18
+        pdf.set_auto_page_break(True, 27)  # 27
+        pdf.add_page()
+        pdf.alias_nb_pages()
+        pdf.set_font("Arial", style="B", size=14)
+        pdf.cell(200, 5, txt=f'Derivative Report {date}', ln=1, align="C")
+        pdf.write_html(html)
+
+        file_path = f'res/temp/{report_id}.pdf'
+
+        pdf.output(file_path)
 
         # Return path to PDF
-        return f'res/temp/{report_id}.pdf'
+        return os.path.realpath(file_path)
     except Exception as e:
+        print(e, '--------------------------------------------------------')
         return
 
 
@@ -181,19 +194,20 @@ def generateReports():
     report_dates = [d[0] for d in query.all()]
 
     for target_date in report_dates:
-        # Get next version of report or initialise as 0
-        query = Report.query.filter_by(target_date=target_date)
-        # Execute query
-        reports = query.all()
+        # Get all the existing reports for the given target_date
+        reports = ReportHead.query.filter_by(target_date=target_date).all()
 
-        # Obtain latest version number or default to 0
+        # Obtain latest report version number or default to 0
         version = max([report.version for report in reports], default=0)
 
-        # Create new Report
-        report = Report(target_date=target_date,
-                        creation_date=date.today(),
-                        version=version + 1,
-                        derivative_count = 0)
+        # Get all none-deleted erivatives traded on the target_date
+        derivatives = Derivative.query.filter_by(date_of_trade=target_date,
+                                                 deleted=False).all()
+        # Create new report metadata object
+        report = ReportHead(target_date=target_date,
+                            creation_date=date.today(),
+                            version=version + 1,
+                            derivative_count=len(derivatives))
 
         # Add report to database session
         db.session.add(report)
@@ -202,31 +216,18 @@ def generateReports():
         # Make CSV and open for writing
         with open(f'res/reports/{report.id}.csv', 'w') as file:
             writer = csv.writer(file)
-            # Get all derivatives traded on the target_date
-            derivatives = Derivative.query.filter_by(date_of_trade=target_date).all()
 
-            # Write report header
-            # writer.writerow('') TODO
-
-            # Track how many derivatives are added to the report
-            count = 0
-
+            # Append each of the derivative to the report
             for d in derivatives:
-                # Append the derivative to the report if it has not been deleted
-                if not d.deleted:
-                    row = [d.id, d.date_of_trade, d.code, d.asset, d.quantity, d.buying_party,
-                            d.selling_party, d.notional_value, d.notional_curr_code, d.maturity_date,
-                            d.underlying_price, d.underlying_curr_code, d.strike_price]
+                row = [d.id, d.date_of_trade, d.code, d.asset, d.quantity,
+                       d.buying_party, d.selling_party, d.notional_value,
+                       d.notional_curr_code, d.maturity_date, d.underlying_price,
+                       d.underlying_curr_code, d.strike_price]
 
-                    # Write the derivative to the file
-                    writer.writerow(row)
-                    count += 1
+                writer.writerow(row)
 
-                # Mark the derivative as reported
-                d.reported = True
-                db.session.add(d)
+        # Mark all derivatives on the target date as reported
+        Derivative.query.filter_by(date_of_trade=target_date).update(dict(reported=True))
 
-        # Set derivative count and commit session
-        report.derivative_count = count
-        db.session.add(report)
+        # Commit the session to the database
         db.session.commit()
