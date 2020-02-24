@@ -172,6 +172,7 @@ def createPDF(report_id):
     # Return path to PDF
     return os.path.realpath(file_path)
 
+
 def getPendingReportDates():
     # Filter the unreported derivatives
     query = Derivative.query.filter_by(reported=False)
@@ -181,58 +182,55 @@ def getPendingReportDates():
     return [d[0] for d in query.all()]
 
 
+def generateAllReports():
+    target_dates = getPendingReportDates()
 
-def generateReports():
-    """ Generates and stores new report CSVs for dates containing unreported derivatives.
+    report_ids = []
 
-    Args:
-        None
+    for target_date in target_dates:
+        report_ids.append(generateReport(target_date))
 
-    Returns:
-        None
-    """
-    # Filter the unreported derivatives
-    query = Derivative.query.filter_by(reported=False)
-    # Query distinct dates with unreported derivatives
-    query = query.with_entities(Derivative.date_of_trade).distinct()
-    # Execute query and extract dates from sqlalchemy.util._collections.result
-    report_dates = [d[0] for d in query.all()]
+    return report_ids
 
-    for target_date in report_dates:
-        # Get all the existing reports for the given target_date
-        reports = ReportHead.query.filter_by(target_date=target_date).all()
 
-        # Obtain latest report version number or default to 0
-        version = max([report.version for report in reports], default=0)
+def generateReport(target_date):
+    # Get all the existing reports for the given target_date
+    reports = ReportHead.query.filter_by(target_date=target_date).all()
 
-        # Get all none-deleted erivatives traded on the target_date
-        derivatives = Derivative.query.filter_by(date_of_trade=target_date,
-                                                 deleted=False).all()
-        # Create new report metadata object
-        report = ReportHead(target_date=target_date,
-                            creation_date=date.today(),
-                            version=version + 1,
-                            derivative_count=len(derivatives))
+    # Obtain latest report version number or default to 0
+    version = max([report.version for report in reports], default=0)
 
-        # Add report to database session
-        db.session.add(report)
-        db.session.flush()
+    # Get all none-deleted erivatives traded on the target_date
+    derivatives = Derivative.query.filter_by(date_of_trade=target_date,
+                                             deleted=False).all()
+    # Create new report metadata object
+    report = ReportHead(target_date=target_date,
+                        creation_date=date.today(),
+                        version=version + 1,
+                        derivative_count=len(derivatives))
 
-        # Make CSV and open for writing
-        with open(f'res/reports/{report.id}.csv', 'w') as file:
-            writer = csv.writer(file)
+    # Add report to database session
+    db.session.add(report)
+    db.session.flush()
 
-            # Append each of the derivative to the report
-            for d in derivatives:
-                row = [d.id, d.date_of_trade, d.code, d.asset, d.quantity,
-                       d.buying_party, d.selling_party, d.notional_value,
-                       d.notional_curr_code, d.maturity_date, d.underlying_price,
-                       d.underlying_curr_code, d.strike_price]
+    # Make CSV and open for writing
+    with open(f'res/reports/{report.id}.csv', 'w') as file:
+        writer = csv.writer(file)
 
-                writer.writerow(row)
+        # Append each of the derivative to the report
+        for d in derivatives:
+            row = [d.id, d.date_of_trade, d.code, d.asset, d.quantity,
+                   d.buying_party, d.selling_party, d.notional_value,
+                   d.notional_curr_code, d.maturity_date, d.underlying_price,
+                   d.underlying_curr_code, d.strike_price]
 
-        # Mark all derivatives on the target date as reported
-        Derivative.query.filter_by(date_of_trade=target_date).update(dict(reported=True))
+            writer.writerow(row)
 
-        # Commit the session to the database
-        db.session.commit()
+    # Mark all derivatives on the target date as reported
+    Derivative.query.filter_by(date_of_trade=target_date).update(dict(reported=True))
+
+    # Commit the session to the database
+    db.session.commit()
+
+    # Return the id of the report
+    return report.id
