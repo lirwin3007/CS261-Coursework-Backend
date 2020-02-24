@@ -11,6 +11,7 @@ def testGetUser(dummy_user):
     # Assert that getUser returns the user
     assert user_management.getUser(dummy_user.id) == dummy_user
 
+
 def testGetAllUsers(dummy_user, dummy_user_2):
     # Add two dmmy users to database session
     db.session.add(dummy_user)

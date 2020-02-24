@@ -122,6 +122,7 @@ def dummy_user():
         )
     return user
 
+
 @pytest.fixture
 def dummy_user_2():
     user = User.query.get(2)
