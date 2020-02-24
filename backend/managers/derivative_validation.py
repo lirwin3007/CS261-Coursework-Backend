@@ -3,19 +3,8 @@ from sqlalchemy.exc import IntegrityError
 
 from backend.managers import user_management
 
-
-def isValidDerivativeID(derivative):
-    return True
-
-# def validateDerivativeId(derivative_id):
-#     if derivative_id is not
-
-# def isValidDerivativeId(derivative_id):
-#     if derivative_id is
-
 def isValidDerivative(request):
     # Verify request
-
     try:
         body = getJSON(request)
         user_id = body.get('user_id')
