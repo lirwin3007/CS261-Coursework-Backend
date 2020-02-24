@@ -115,66 +115,71 @@ def createPDF(report_id):
     Returns:
         String: A string corresponding to the path to the generated PDF.
     """
-    try:
-        # Get report derivative rows as list of lists
-        data = getReportData(report_id)
-        date = data[0]["date_of_trade"]
+    # Get report derivative rows as list of lists
+    data = getReportData(report_id)
+    date = data[0]['date_of_trade']
 
-        # Creates design for table to be added to PDF
-        header = """
-        <table align="center" width="100%">
-        <thead><tr>
-        <th width="5%">id</th><th width="8%">Date Of Trade</th><th width="18%">Trade Code</th>
-        <th width="12%">Asset</th><th width="5%">Quantity</th><th width="6%">Buying Party</th>
-        <th width="6%">Selling Party</th><th width="8%">Notional Value</th><th width="4%">Notional Currency</th>
-        <th width="8%">Maturity Date</th><th width="6%">Underlying Price</th><th width="4%">Underlying Currency</th>
-        <th width="10%">Strike Price</th>
-        </tr></thead>
-        """
+    # Creates design for table to be added to PDF
+    header = """
+    <table align="center" width="100%">
+    <thead><tr>
+    <th width="5%">id</th><th width="8%">Date Of Trade</th><th width="18%">Trade Code</th>
+    <th width="12%">Asset</th><th width="5%">Quantity</th><th width="6%">Buying Party</th>
+    <th width="6%">Selling Party</th><th width="8%">Notional Value</th><th width="4%">Notional Currency</th>
+    <th width="8%">Maturity Date</th><th width="6%">Underlying Price</th><th width="4%">Underlying Currency</th>
+    <th width="10%">Strike Price</th>
+    </tr></thead>
+    """
 
-        # Adds every row of data to html which will be used to create table
-        html_out = ""
-        grey = False
-        for row in range(0, len(data)):
-            html_out += "<tr bgcolor=\"#E1E1E1\"><td>" if grey else "<tr bgcolor=\"#FFFFFF\"><td>"
-            grey = not grey
-            html_out += data[row].id
-            html_out += ("</td><td>" + data["date_of_trade"])
-            html_out += ("</td><td>" + data["code"])
-            html_out += ("</td><td>" + data["asset"])
-            html_out += ("</td><td>" + data["quantity"])
-            html_out += ("</td><td>" + data["buying_party"])
-            html_out += ("</td><td>" + data["selling_party"])
-            html_out += ("</td><td>" + data["notional_value"])
-            html_out += ("</td><td>" + data["notional_curr_code"])
-            html_out += ("</td><td>" + data["maturity_date"])
-            html_out += ("</td><td>" + data["underlying_price"])
-            html_out += ("</td><td>" + data["underlying_curr_code"])
-            html_out += ("</td><td>" + data["strike_price"])
-            html_out += "</td></tr>\n"
+    # Adds every row of data to html which will be used to create table
+    html_out = ''
+    grey = False
+    for derivative in data:
+        html_out += '<tr bgcolor="#E1E1E1"><td>' if grey else '<tr bgcolor="#FFFFFF"><td>'
+        grey = not grey
+        html_out += derivative['id']
+        html_out += ('</td><td>' + derivative['date_of_trade'])
+        html_out += ('</td><td>' + derivative['code'])
+        html_out += ('</td><td>' + derivative['asset'])
+        html_out += ('</td><td>' + derivative['quantity'])
+        html_out += ('</td><td>' + derivative['buying_party'])
+        html_out += ('</td><td>' + derivative['selling_party'])
+        html_out += ('</td><td>' + derivative['notional_value'])
+        html_out += ('</td><td>' + derivative['notional_curr_code'])
+        html_out += ('</td><td>' + derivative['maturity_date'])
+        html_out += ('</td><td>' + derivative['underlying_price'])
+        html_out += ('</td><td>' + derivative['underlying_curr_code'])
+        html_out += ('</td><td>' + derivative['strike_price'])
+        html_out += '</td></tr>\n'
 
-        # Create final html that represents table
-        html = header + html_out + "</tbody></table>"
+    # Create final html that represents table
+    html = header + html_out + '</tbody></table>'
 
-        # Create PDF
-        pdf = MyFPDF('P','mm','letter')
-        pdf.set_top_margin(margin=18)  # 18
-        pdf.set_auto_page_break(True, 27)  # 27
-        pdf.add_page()
-        pdf.alias_nb_pages()
-        pdf.set_font("Arial", style="B", size=14)
-        pdf.cell(200, 5, txt=f'Derivative Report {date}', ln=1, align="C")
-        pdf.write_html(html)
+    # Create PDF
+    pdf = MyFPDF('P','mm','letter')
+    pdf.set_top_margin(margin=18)  # 18
+    pdf.set_auto_page_break(True, 27)  # 27
+    pdf.add_page()
+    pdf.alias_nb_pages()
+    pdf.set_font('Arial', style='B', size=14)
+    pdf.cell(200, 5, txt=f'Derivative Report {date}', ln=1, align='C')
+    pdf.write_html(html)
 
-        file_path = f'res/temp/{report_id}.pdf'
+    file_path = f'res/temp/{report_id}.pdf'
 
-        pdf.output(file_path)
+    pdf.output(file_path)
 
-        # Return path to PDF
-        return os.path.realpath(file_path)
-    except Exception as e:
-        print(e, '--------------------------------------------------------')
-        return
+    # Return path to PDF
+    return os.path.realpath(file_path)
+
+def getPendingReportDates():
+    # Filter the unreported derivatives
+    query = Derivative.query.filter_by(reported=False)
+    # Query distinct dates with unreported derivatives
+    query = query.with_entities(Derivative.date_of_trade).distinct()
+    # Execute query and extract dates from sqlalchemy.util._collections.result
+    return [d[0] for d in query.all()]
+
 
 
 def generateReports():
