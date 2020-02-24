@@ -14,7 +14,7 @@ def getUser(user_id):
 
 
 def getAllUsers():
-     """ Return all the users in the database as a list
+    """ Return all the users in the database as a list
     Args:
         None
     Returns:
@@ -22,3 +22,4 @@ def getAllUsers():
     """
     # Query database for all users
     return User.query.all()
+    
