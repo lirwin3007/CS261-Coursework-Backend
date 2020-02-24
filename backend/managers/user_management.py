@@ -22,4 +22,3 @@ def getAllUsers():
     """
     # Query database for all users
     return User.query.all()
-    
