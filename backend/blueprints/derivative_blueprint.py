@@ -7,7 +7,7 @@ from backend.managers import derivative_management
 from backend.managers import user_management
 from backend.derivatex_models import Derivative
 from backend.db import db
-from backend.util import AbsoluteDerivativeException
+from backend.utils import AbsoluteDerivativeException
 
 # Instantiate new blueprint
 DerivativeBlueprint = Blueprint('derivativeManagement',
