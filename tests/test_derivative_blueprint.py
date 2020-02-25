@@ -3,14 +3,12 @@ import datetime
 
 # Third party imports
 from flask import jsonify
-import pytest
 
 # Local application imports
 from backend.derivatex_models import Derivative
 from backend.db import db
 
 
-@pytest.mark.skip()
 def testGetDerivativeRetrievesDerivative(test_client, dummy_derivative):
     # Add dummy derivative to session
     db.session.add(dummy_derivative)
@@ -24,8 +22,9 @@ def testGetDerivativeRetrievesDerivative(test_client, dummy_derivative):
     assert response.status_code == 200
 
     # Assert that the response body is the serialization of the derivative
-    assert response.is_json()
-    assert response.get_json() == jsonify(derivative=dummy_derivative)
+    assert response.is_json
+    expected_response = jsonify(derivative=dummy_derivative)
+    assert response.get_json() == expected_response.get_json()
 
 
 def testGetDerivativeWillReturn404(test_client, free_derivtive_id):

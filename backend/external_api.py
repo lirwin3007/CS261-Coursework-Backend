@@ -1,4 +1,5 @@
 # Standard library imports
+import math
 from datetime import date
 
 # Local application imports
@@ -21,21 +22,21 @@ def getUSDExchangeRate(currency_code):
     currency = Currency.query.get((currency_code, getCurrentDate()))
     if currency is not None:
         return currency.usd_exchange_rate
-    return 0.0
+    return math.nan
 
 
 def getProductPrice(product_name):
     product = Product.query.get((product_name, getCurrentDate()))
     if product is not None:
         return product.market_price, product.currency_code
-    return 0.0, '?'
+    return math.nan, '?'
 
 
 def getCompanyStockPrice(company_id):
     company_stock = CompanyStock.query.get((company_id, getCurrentDate()))
     if company_stock is not None:
         return company_stock.stock_price, company_stock.currency_code
-    return 0.0, '?'
+    return math.nan, '?'
 
 
 def getAssetPrice(asset_name, selling_party):
