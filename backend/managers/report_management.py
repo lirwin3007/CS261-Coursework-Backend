@@ -177,7 +177,7 @@ def createPDF(report_id):
 def getPendingReportDates():
     # Filter the unreported derivatives
     query = Derivative.query.filter_by(reported=False)
-    # Query distinct dates with unreported derivatives
+    # Query the distinct dates of unreported derivatives
     query = query.with_entities(Derivative.date_of_trade).distinct()
     # Execute query and extract dates from sqlalchemy.util._collections.result
     return [d[0] for d in query.all()]
@@ -185,25 +185,29 @@ def getPendingReportDates():
 
 def generateAllReports():
     target_dates = getPendingReportDates()
-
     report_ids = []
 
     for target_date in target_dates:
-        report_ids.append(generateReport(target_date))
+        id = generateReport(target_date)
+        report_ids.append(id)
 
     return report_ids
 
 
 def generateReport(target_date):
+    # Get all none-deleted erivatives traded on the target_date
+    derivatives = Derivative.query.filter_by(date_of_trade=target_date,
+                                             deleted=False).all()
+    # Return if there are no derivatives to report
+    if not derivatives:
+        return None
+
     # Get all the existing reports for the given target_date
     reports = ReportHead.query.filter_by(target_date=target_date).all()
 
     # Obtain latest report version number or default to 0
     version = max([report.version for report in reports], default=0)
 
-    # Get all none-deleted erivatives traded on the target_date
-    derivatives = Derivative.query.filter_by(date_of_trade=target_date,
-                                             deleted=False).all()
     # Create new report metadata object
     report = ReportHead(target_date=target_date,
                         creation_date=date.today(),

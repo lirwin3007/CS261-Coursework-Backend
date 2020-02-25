@@ -76,7 +76,7 @@ def downloadReport(format, report_id):
         # Generate CSV and return file path
         path_to_file = report_management.createCSV(report_id)
 
-    # Set to delete file after it is sent
+    # Delete the file after it is sent
     @after_this_request
     def deleteFile(response):
         os.remove(path_to_file)
@@ -95,6 +95,10 @@ def indexPendingReports():
 @ReportBlueprint.route('/generate-report/<target_date>')
 def generateReport(target_date):
     id = report_management.generateReport(target_date)
+
+    if id is None:
+        abort(400, f'failed to generate report for: {target_date}')
+
     return jsonify(id=id)
 
 
