@@ -124,11 +124,11 @@ def createPDF(report_id):
     <font size="8" face="Courier New" >
     <table align="center" width="100%">
     <thead><tr>
-    <th width="5%">id</th><th width="8%">Date Of Trade</th><th width="15%">Trade Code</th>
-    <th width="12%">Asset</th><th width="5%">Quantity</th><th width="6%">Buying Party</th>
-    <th width="6%">Selling Party</th><th width="11%">Notional Value</th><th width="4%">Notional Currency</th>
-    <th width="8%">Maturity Date</th><th width="6%">Underlying Price</th><th width="4%">Underlying Currency</th>
-    <th width="10%">Strike Price</th>
+    <th width="5%">id</th><th width="8%">Trade Date</th><th width="15%">Trade Code</th>
+    <th width="13%">Asset</th><th width="6%">QTY</th><th width="7%">Buy PTY</th>
+    <th width="7%">Sell PTY</th><th width="9%">Notional Val</th><th width="4%">Curr</th>
+    <th width="8%">Mat Date</th><th width="6%">Price</th><th width="4%">Curr</th>
+    <th width="8%">Strike Price</th>
     </tr></thead>
     """
 
