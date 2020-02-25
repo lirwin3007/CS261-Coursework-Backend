@@ -52,3 +52,18 @@ def testAuthenticateUserIncorrectPasswordReturn401(test_client, dummy_user):
 
     # Assert that a 401 HTTP error is returned
     assert response.status_code == 401
+
+
+def testAuthenticateUserNoDataReturn400(test_client):
+
+    # Form empty POST request body
+    body = None
+
+    # Form endpoint path
+    endpoint = '/user-account-control/authenticate-user'
+
+    # Make request and retrieve response
+    response = test_client.post(endpoint, json=body)
+
+    # Assert that a 400 HTTP error is returned
+    assert response.status_code == 400
