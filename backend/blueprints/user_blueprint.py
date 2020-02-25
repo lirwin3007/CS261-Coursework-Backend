@@ -13,11 +13,14 @@ UserBlueprint = Blueprint('userAccountControl',
 # Routes
 @UserBlueprint.route('/get-user/<user_id>')
 def getUser(user_id):
-    """ Check if the a valid user id and the correct password for that user id is entered
+    """ Check if the a valid user id and the correct password for that user id
+    is entered.
+
     Args:
-        user_id (int): The ID of the user which needs to be returned
+        user_id (int): The ID of the user which needs to be returned.
+
     Returns:
-        JSON: A JSON object representing user
+        JSON: A JSON object representing user.
     """
     # Get user from database
     user = user_management.getUser(user_id)
@@ -32,11 +35,14 @@ def getUser(user_id):
 
 @UserBlueprint.route('/index-users')
 def indexUsers():
-    """ Check if the a valid user id and the correct password for that user id is entered
+    """ Check if the a valid user id and the correct password for that user id
+    is entered.
+
     Args:
         None
+
     Returns:
-        JSON: A JSON object representing all the user
+        JSON: A JSON object representing all the user.
     """
     # Get all users from database
     users = user_management.getAllUsers()
@@ -46,9 +52,12 @@ def indexUsers():
 
 @UserBlueprint.route('/authenticate-user', methods=['POST'])
 def authenticateUser():
-    """ Check if the a valid user id and the correct password for that user id is entered
+    """ Check if the a valid user id and the correct password for that user
+    id is entered.
+
     Args:
         None
+
     Returns:
         None
     """
