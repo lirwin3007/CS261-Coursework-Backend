@@ -1,7 +1,7 @@
 # pylint: disable=redefined-outer-name
 
 # Standard library imports
-from datetime import datetime
+from datetime import date, timedelta
 
 # Third party imports
 import pytest
@@ -12,7 +12,7 @@ from backend.app import Application
 from backend.db import db
 
 
-@pytest.fixture(scope="session", autouse=True)
+@pytest.fixture(scope='session', autouse=True)
 def test_app():
     # Initialise test app instance
     app = Application.getTestApp()
@@ -21,15 +21,11 @@ def test_app():
     if not app.config['TESTING']:
         raise SystemExit('App must be conifgured for testing')
 
-    # Clean derivatex tables in the test database
-    db.drop_all(bind=None)
-    db.create_all(bind=None)
-
     # Return the flask app
     return app
 
 
-@pytest.fixture
+@pytest.fixture(scope='session', autouse=True)
 def test_client(test_app):
     # Get test client
     testing_client = test_app.test_client()
@@ -44,12 +40,19 @@ def test_client(test_app):
     ctx.pop()
 
 
+@pytest.fixture(autouse=True)
+def clean_database():
+    # Clean the session and all tables in the test database
+    db.session.rollback()
+    db.drop_all(bind=None)
+    db.create_all(bind=None)
+
+
 @pytest.fixture
 def free_derivtive_id(dummy_derivative):
     # Add dummy derivative to database session
     db.session.add(dummy_derivative)
     db.session.flush()
-
     # Store the id of the new derivative
     free_id = dummy_derivative.id
     # Discard the new derivative from the session to free the id
@@ -58,20 +61,66 @@ def free_derivtive_id(dummy_derivative):
     return free_id
 
 
+# TODO: revisit
+@pytest.fixture
+def free_user_id(dummy_user):
+    # Add dummy user to database session
+    db.session.add(dummy_user)
+    db.session.flush()
+
+    # Store the id of the new user
+    free_id = dummy_user.id
+    # Discard the new user from the session to free the id
+    db.session.rollback()
+    # Return the free id
+    return free_id
+
+
 @pytest.fixture
 def dummy_derivative():
+    today = date.today()
+
     return Derivative(
+        code='doe',
         buying_party='foo',
         selling_party='bar',
-        asset='baz',
+        asset='Stocks',
         quantity=1,
         strike_price=20.20,
-        currency_code='USD',
-        date_of_trade=datetime.now(),
-        maturity_date=datetime.now()
+        notional_curr_code='USD',
+        date_of_trade=today,
+        maturity_date=today + timedelta(days=365)
     )
 
 
+# TODO: revisit
+@pytest.fixture
+def dummy_derivative_json(dummy_derivative):
+    return {
+        'code': dummy_derivative.code,
+        'buying_party': dummy_derivative.buying_party,
+        'selling_party': dummy_derivative.selling_party,
+        'asset': dummy_derivative.asset,
+        'quantity': dummy_derivative.quantity,
+        'strike_price': dummy_derivative.strike_price,
+        'notional_curr_code': dummy_derivative.notional_curr_code,
+        'maturity_date': str(dummy_derivative.maturity_date),
+        'date_of_trade': str(dummy_derivative.date_of_trade)
+    }
+
+
+# TODO: revisit
+@pytest.fixture
+def dummy_abs_derivative(dummy_derivative):
+    # Get the current date
+    today = date.today()
+    # Modify the dummy derivatives date of trade to make it absolute
+    dummy_derivative.date_of_trade = today - timedelta(days=365)
+    # Return absolute dummy derivative
+    return dummy_derivative
+
+
+# TODO: revisit
 @pytest.fixture
 def dummy_user():
     user = User.query.first()
@@ -85,10 +134,24 @@ def dummy_user():
     return user
 
 
+# TODO: revisit
+@pytest.fixture
+def dummy_user_2():
+    user = User.query.get(2)
+    if user is None:
+        user = User(
+            f_name='f_name2',
+            l_name='l_name2',
+            email='email2',
+            password='password123'
+        )
+    return user
+
+
 @pytest.fixture
 def dummy_updates():
     return {
-        'buying_party': 'foo',
-        'selling_party': 'bar',
-        'asset': 'baz'
+        'buying_party': 'newfoo',
+        'selling_party': 'newbar',
+        'asset': 'newbaz'
     }
