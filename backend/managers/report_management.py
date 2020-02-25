@@ -69,16 +69,19 @@ def getReportData(report_id):
         Report: The report in the database with the corrosponding ID.
     """
     # Locate and read CSV or return nothing if it does not exist
-    with open(f'res/reports/{report_id}.csv') as file:
-        reader = csv.reader(file, delimiter=",")
-        # Create and return list storing derivative data in the report
-        data = []
-        for row in reader:
-            data.append({"id": row[0], "date_of_trade": row[1], "code": row[2], "asset": row[3],
-                         "quantity": row[4], "buying_party": row[5], "selling_party": row[6],
-                         "notional_value": row[7], "notional_curr_code": row[8], "maturity_date": row[9],
-                         "underlying_price": row[10], "underlying_curr_code": row[11], "strike_price": row[12]})
-        return data
+    try:
+        with open(f'res/reports/{report_id}.csv') as file:
+            reader = csv.reader(file, delimiter=",")
+            # Create and return list storing derivative data in the report
+            data = []
+            for row in reader:
+                data.append({"id": row[0], "date_of_trade": row[1], "code": row[2], "asset": row[3],
+                             "quantity": row[4], "buying_party": row[5], "selling_party": row[6],
+                             "notional_value": row[7], "notional_curr_code": row[8], "maturity_date": row[9],
+                             "underlying_price": row[10], "underlying_curr_code": row[11], "strike_price": row[12]})
+            return data
+    except:
+        return
 
 
 def createCSV(report_id):

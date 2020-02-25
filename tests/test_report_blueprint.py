@@ -8,7 +8,7 @@ def testGetReportWillReturn404(test_client, free_report_id):
 
 def testIndexReportWillReturnCorrectFormat(test_client, date_from, date_to):
     # Make request and retrieve response
-    url = f'/report-management/index-reports/{date_from}/{date_to}'
+    url = f'/report-management/index-reports?date_from={date_from}&date_to={date_to}'
     response = test_client.get(url)
     # Assert that the response body is the correct format
     assert response.is_json

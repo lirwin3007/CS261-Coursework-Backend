@@ -8,7 +8,7 @@ from backend.managers import report_management
 # assert report_management.getReport(free_report_id) == report_data
 
 
-def testGetReporteturnsNoneIfNotFound(free_report_id):
+def testGetReportReturnsNoneIfNotFound(free_report_id):
     # Assert that None is returned for the free id
     assert report_management.getReportData(free_report_id) is None
 
