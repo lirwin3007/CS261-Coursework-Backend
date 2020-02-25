@@ -1,15 +1,14 @@
-from datetime import datetime, timedelta
+from datetime import datetime
 from distutils.dir_util import copy_tree
 import os
 import csv
-import re
 import shutil
-import glob
 import random
 
 # Paths
 dummy_path = './res/dummy/'
 temp_path = './res/temp/'
+
 
 def clearTemp():
     for root, dirs, files in os.walk(temp_path, topdown=False):
@@ -20,6 +19,7 @@ def clearTemp():
             dir_path = os.path.join(root, dir)
             shutil.rmtree(dir_path)
 
+
 # Clear temp
 clearTemp()
 
@@ -27,7 +27,7 @@ clearTemp()
 copy_tree(dummy_path, temp_path)
 
 # Do the thing
-for dir in os.listdir(temp_path):
+for dir in os.listdir(temp_path):  # noqa: C901
     dir_path = os.path.join(temp_path, dir)
     if os.path.isdir(dir_path):
         for root, dirs, files in os.walk(dir_path, topdown=False):
@@ -55,7 +55,7 @@ for dir in os.listdir(temp_path):
                             for k, v in row.items():
                                 if 'date' in k.lower():
                                     year = int(v[6:10])
-                                    row[k] = v.replace(str(year), str(year+1))
+                                    row[k] = v.replace(str(year), str(year + 1))
 
                             writer.writerow(row)
 
