@@ -63,6 +63,20 @@ def free_derivtive_id(dummy_derivative):
 
 # TODO: revisit
 @pytest.fixture
+def free_user_id(dummy_user):
+    # Add dummy user to database session
+    db.session.add(dummy_user)
+    db.session.flush()
+
+    # Store the id of the new user
+    free_id = dummy_user.id
+    # Discard the new user from the session to free the id
+    db.session.rollback()
+    # Return the free id
+    return free_id
+
+
+@pytest.fixture
 def dummy_derivative():
     today = date.today()
 
@@ -121,6 +135,19 @@ def dummy_user():
 
 
 # TODO: revisit
+@pytest.fixture
+def dummy_user_2():
+    user = User.query.get(2)
+    if user is None:
+        user = User(
+            f_name='f_name2',
+            l_name='l_name2',
+            email='email2',
+            password='password123'
+        )
+    return user
+
+
 @pytest.fixture
 def dummy_updates():
     return {

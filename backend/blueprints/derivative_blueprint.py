@@ -47,7 +47,7 @@ def addDerivative():
         # Create derivative and add it to database
         derivative = Derivative(**body.get('derivative'))
         derivative_management.addDerivative(derivative, user_id)
-        
+
     except IntegrityError as e:
         return abort(400, f'invalid derivative data: {e.orig}')
     except Exception:
