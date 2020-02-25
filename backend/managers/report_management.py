@@ -80,7 +80,8 @@ def getReportData(report_id):
                              "notional_value": row[7], "notional_curr_code": row[8], "maturity_date": row[9],
                              "underlying_price": row[10], "underlying_curr_code": row[11], "strike_price": row[12]})
             return data
-    except:
+    except Exception as e:
+        print(e)
         return
 
 

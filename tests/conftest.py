@@ -184,9 +184,9 @@ def dummy_report():
 
 @pytest.fixture
 def date_from():
-    return date.today() - timedelta(days=8)
+    return date(2018, 1, 1)
 
 
 @pytest.fixture
 def date_to():
-    return date.today() - timedelta(days=1)
+    return date(2020, 1, 1)
