@@ -7,7 +7,7 @@ from datetime import date, timedelta
 import pytest
 
 # Local application imports
-from backend.derivatex_models import Derivative, User
+from backend.derivatex_models import Derivative, User, ReportHead
 from backend.app import Application
 from backend.db import db
 
@@ -155,3 +155,38 @@ def dummy_updates():
         'selling_party': 'newbar',
         'asset': 'newbaz'
     }
+
+
+@pytest.fixture
+def free_report_id(dummy_report):
+    # Add dummy report to database session
+    db.session.add(dummy_report)
+    db.session.flush()
+    # Store the id of the new report
+    free_id = dummy_report.id
+    # Discard the new report from the session to free the id
+    db.session.rollback()
+    # Return the free id
+    return free_id
+
+
+@pytest.fixture
+def dummy_report():
+    today = date.today()
+
+    return ReportHead(
+        target_date=today,
+        creation_date=today,
+        version=1,
+        derivative_count=0,
+    )
+
+
+@pytest.fixture
+def date_from():
+    return date(2018, 1, 1)
+
+
+@pytest.fixture
+def date_to():
+    return date(2020, 1, 1)

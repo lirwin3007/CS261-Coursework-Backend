@@ -1,0 +1,4 @@
+# Ignore contents of reports directory
+*
+*/
+!.gitignore
