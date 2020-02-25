@@ -38,7 +38,7 @@ mysql -e "
     (product_name, company_id);"
 
 echo "populating currency table"
-for p in res/temp/currencyValues/**/*.csv; do
+for p in res/temp/currencyValues/*.csv; do
   mysql -e "
      USE external;
      LOAD DATA LOCAL INFILE '${p}'
@@ -50,7 +50,7 @@ for p in res/temp/currencyValues/**/*.csv; do
 done
 
 echo "populating company_stock table"
-for p in res/temp/stockPrices/**/*.csv; do
+for p in res/temp/stockPrices/*.csv; do
   mysql -e "
      USE external;
      LOAD DATA LOCAL INFILE '${p}'
@@ -62,7 +62,7 @@ for p in res/temp/stockPrices/**/*.csv; do
 done
 
 echo "populating product table"
-for p in res/temp/productPrices/**/*.csv; do
+for p in res/temp/productPrices/*.csv; do
   mysql -e "
      USE external;
      LOAD DATA LOCAL INFILE '${p}'
@@ -74,7 +74,7 @@ for p in res/temp/productPrices/**/*.csv; do
 done
 
 echo "populating derivative table"
-for p in res/temp/derivativeTrades/**/*.csv; do
+for p in res/temp/derivativeTrades/*.csv; do
   mysql -e "
      USE derivatex;
      LOAD DATA LOCAL INFILE '${p}'
