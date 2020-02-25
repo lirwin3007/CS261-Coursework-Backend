@@ -2,6 +2,10 @@
 import locale
 
 
+class AbsoluteDerivativeException(Exception):
+    """Exception raised when a absolute derivative is modified"""
+
+
 def getCurrencySymbol(currency_code):
     for l in locale.locale_alias.values():
         try:

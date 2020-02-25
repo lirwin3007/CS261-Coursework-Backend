@@ -1,10 +1,11 @@
 # Standard library imports
-from datetime import datetime
+from datetime import datetime, date
 import enum
 
 # Local application imports
 from backend.db import db
 from backend import util
+from backend import external_api
 
 
 class Derivative(db.Model):
@@ -15,7 +16,7 @@ class Derivative(db.Model):
     asset = db.Column(db.String(128), nullable=False)
     quantity = db.Column(db.Integer, nullable=False)
     strike_price = db.Column(db.Float, nullable=False)
-    currency_code = db.Column(db.CHAR(3), nullable=False)
+    notional_curr_code = db.Column(db.CHAR(3), nullable=False)
     date_of_trade = db.Column(db.Date, nullable=False)
     maturity_date = db.Column(db.Date, nullable=False)
     reported = db.Column(db.Boolean, nullable=False, default=False)
@@ -24,31 +25,51 @@ class Derivative(db.Model):
     @property
     def absolute(self):
         # Determine time diff between date of trade and now
-        delta = datetime.date(datetime.now()) - self.date_of_trade
+        delta = date.today() - self.date_of_trade
         # The derivative is absolute if it was traded over a month ago
-        return delta.days >= 30
+        return self.deleted or delta.days >= 30
 
-    # TODO: revise
     @property
     def associated_actions(self):
-        actions = Action.query.filter_by(derivative_id=self.id).order_by(Action.timestamp.desc()).all()
-        return [action.id for action in actions]
+        # Form query for all associated actions
+        query = Action.query.filter_by(derivative_id=self.id)
+        # Order actions chronologically
+        query = query.order_by(Action.timestamp.desc())
+        # Return the ids of all the actions
+        return [action.id for action in query.all()]
 
-    # TODO: obtain current underlying price
+    # TODO: revisit
     @property
     def underlying_price(self):
-        return 1.0
+        up, _ = external_api.getAssetPrice(self.asset, self.selling_party)
+        return up
 
+    # TODO: revisit
+    @property
+    def underlying_curr_code(self):
+        _, ucc = external_api.getAssetPrice(self.asset, self.selling_party)
+        return ucc
+
+    # TODO: revisit
     @property
     def notional_value(self):
-        return self.quantity * self.underlying_price
+        up = self.underlying_price
+        ucc = self.underlying_curr_code
+        n_ex_rate = external_api.getUSDExchangeRate(self.notional_curr_code)
+        u_ex_rate = external_api.getUSDExchangeRate(ucc)
+
+        return self.quantity * up * u_ex_rate / n_ex_rate
 
     @property
-    def currency_symbol(self):
-        return util.getCurrencySymbol(self.currency_code) or '?'
+    def notional_curr_symbol(self):
+        return util.getCurrencySymbol(self.notional_curr_code) or '?'
+
+    @property
+    def underlying_curr_symbol(self):
+        return util.getCurrencySymbol(self.underlying_curr_code) or '?'
 
     def __str__(self):
-        return '<Derivative : {}>'.format(self.id)
+        return f'<Derivative : {self.id}>'
 
 
 class User(db.Model):
@@ -60,7 +81,7 @@ class User(db.Model):
     profile_image = db.Column(db.String(128))
 
     def __str__(self):
-        return '<User : {}>'.format(self.id)
+        return f'<User : {self.id}>'
 
 
 class ActionType(str, enum.Enum):
@@ -78,7 +99,7 @@ class Action(db.Model):
     update_log = db.Column(db.JSON)
 
     def __str__(self):
-        return '<Action : {}>'.format(self.id)
+        return f'<Action : {self.id}>'
 
 
 class Report(db.Model):
@@ -88,4 +109,4 @@ class Report(db.Model):
     version = db.Column(db.Integer, nullable=False)
 
     def __str__(self):
-        return '<Report : {}>'.format(self.id)
+        return f'<Report : {self.id}>'
