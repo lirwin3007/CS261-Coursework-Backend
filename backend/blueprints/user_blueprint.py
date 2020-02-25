@@ -59,9 +59,11 @@ def authenticateUser():
     Returns:
         None
     """
-    # Verify request
-    if not request.data or not request.is_json:
-        return abort(400)
+    # Bad request cases
+    if not request.data:
+        return abort(400, 'Empty request body')
+    if not request.is_json:
+        return abort(400, 'No application/json header present in request')
 
     # Retrieve json body from request
     body = request.get_json()
