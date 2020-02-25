@@ -4,7 +4,7 @@ import enum
 
 # Local application imports
 from backend.db import db
-from backend import util
+from backend import utils
 from backend import external_api
 
 
@@ -62,11 +62,11 @@ class Derivative(db.Model):
 
     @property
     def notional_curr_symbol(self):
-        return util.getCurrencySymbol(self.notional_curr_code) or '?'
+        return utils.getCurrencySymbol(self.notional_curr_code) or '?'
 
     @property
     def underlying_curr_symbol(self):
-        return util.getCurrencySymbol(self.underlying_curr_code) or '?'
+        return utils.getCurrencySymbol(self.underlying_curr_code) or '?'
 
     def __str__(self):
         return f'<Derivative : {self.id}>'
@@ -102,11 +102,12 @@ class Action(db.Model):
         return f'<Action : {self.id}>'
 
 
-class Report(db.Model):
+class ReportHead(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     target_date = db.Column(db.Date, nullable=False)
     creation_date = db.Column(db.Date, nullable=False)
     version = db.Column(db.Integer, nullable=False)
+    derivative_count = db.Column(db.Integer, nullable=False)
 
     def __str__(self):
-        return f'<Report : {self.id}>'
+        return f'<ReportHead : {self.id}>'

@@ -8,7 +8,7 @@ from sqlalchemy import asc, desc
 # Local application imports
 from backend.derivatex_models import Derivative, Action, ActionType
 from backend.db import db
-from backend.util import clamp, AbsoluteDerivativeException
+from backend.utils import clamp, AbsoluteDerivativeException
 
 
 def getDerivative(derivative_id):
