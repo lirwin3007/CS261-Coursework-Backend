@@ -1,3 +1,6 @@
+import pytest
+
+
 def testGetReportWillReturn404(test_client, free_report_id):
     # Make request and retrieve response
     url = f'/report-management/get-report/{free_report_id}'
@@ -6,6 +9,7 @@ def testGetReportWillReturn404(test_client, free_report_id):
     assert response.status_code == 404
 
 
+@pytest.mark.skip(reason='Test not fully implemented')
 def testIndexReportWillReturnCorrectFormat(test_client):
     # Make request and retrieve response
     url = f'/report-management/index-reports?date_from=2018-01-01&date_to=2020-01-01'
