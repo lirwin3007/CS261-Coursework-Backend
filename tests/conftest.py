@@ -122,6 +122,22 @@ def dummy_abs_derivative(dummy_derivative):
 
 # TODO: revisit
 @pytest.fixture
+def dummy_action():
+    action = Action.query.first()
+    if action is None:
+        action = User(
+            id = 'id',
+            derivative_id = 'derivative_id',
+            user_id = 'user_id',
+            type = 'type',
+            timestamp = 'timestamp',
+            update_log = 'update_log'
+        )
+    return action
+
+
+# TODO: revisit
+@pytest.fixture
 def dummy_user():
     user = User.query.first()
     if user is None:
