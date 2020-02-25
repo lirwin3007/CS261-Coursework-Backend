@@ -69,20 +69,20 @@ def downloadReport(format, report_id):
         return abort(404, f'report with id {report_id} not found')
 
     if format.upper() == 'PDF':
-        # Generate PDF and return file path
-        path_to_file = report_management.createPDF(report_id)
-    else:
-        # Generate CSV and return file path
-        path_to_file = report_management.createCSV(report_id)
+        # Generate PDF file and return path
+        file_path = report_management.createPDF(report_id)
 
-    # Delete the file after it is sent
-    @after_this_request
-    def deleteFile(response):
-        os.remove(path_to_file)
-        return response
+        # Delete the pdf after it is sent
+        @after_this_request
+        def deleteFile(response):
+            os.remove(file_path)
+            return response
+    else:
+        # Default to the report CSV
+        file_path = os.path.realpath(f'res/reports/{report_id}.csv')
 
     # Return the file
-    return send_file(path_to_file)
+    return send_file(file_path)
 
 
 @ReportBlueprint.route('/index-pending-reports')

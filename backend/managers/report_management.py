@@ -79,31 +79,6 @@ def getReportData(report_id):
         print(e)
 
 
-def createCSV(report_id):
-    """ Create a temporary CSV file containing the data required by the trade repository.
-
-    Args:
-        report_id (int): The ID of the report which a CSV is required for.
-
-    Returns:
-        String: A string corresponding to the path to the generated CSV.
-    """
-    # Get report data
-    data = getReportData(report_id)
-
-    # Open report file and CSV writer
-    with open(f'res/temp/{report_id}.csv', 'w') as file:
-        writer = csv.writer(file)
-
-        for derivative in data:
-            # Get desired data from rows of stored CSV report
-            row = [derivative["id"], derivative["date_of_trade"], derivative["code"]]  # TBC
-            writer.writerow(row)
-
-    # Return path to csv outfile
-    return os.path.realpath(file.name)
-
-
 def createPDF(report_id):
     """ Create a temporary PDF file containing the data required by the trade repository.
 
