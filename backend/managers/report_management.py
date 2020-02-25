@@ -71,18 +71,12 @@ def getReportData(report_id):
     # Locate and read CSV or return nothing if it does not exist
     try:
         with open(f'res/reports/{report_id}.csv') as file:
-            reader = csv.reader(file, delimiter=",")
-            # Create and return list storing derivative data in the report
-            data = []
-            for row in reader:
-                data.append({"id": row[0], "date_of_trade": row[1], "code": row[2], "asset": row[3],
-                             "quantity": row[4], "buying_party": row[5], "selling_party": row[6],
-                             "notional_value": row[7], "notional_curr_code": row[8], "maturity_date": row[9],
-                             "underlying_price": row[10], "underlying_curr_code": row[11], "strike_price": row[12]})
-            return data
+            reader = csv.DictReader(file)
+
+            # Return list of dictionaries
+            return list(reader)
     except Exception as e:
         print(e)
-        return
 
 
 def createCSV(report_id):
@@ -191,6 +185,7 @@ def generateAllReports():
     target_dates = getPendingReportDates()
     report_ids = []
 
+    # Generate a report for each of the target_dates
     for target_date in target_dates:
         id = generateReport(target_date)
         report_ids.append(id)
@@ -224,16 +219,22 @@ def generateReport(target_date):
 
     # Make CSV and open for writing
     with open(f'res/reports/{report.id}.csv', 'w') as file:
-        writer = csv.writer(file)
+        # Derivative fields to include in report
+        fieldnames = ['id', 'date_of_trade', 'code', 'asset', 'quantity',
+                      'buying_party', 'selling_party', 'notional_value',
+                      'notional_curr_code', 'maturity_date', 'underlying_price',
+                      'underlying_curr_code', 'strike_price']
 
-        # Append each of the derivative to the report
+        # Create CSV writer
+        writer = csv.DictWriter(file, fieldnames, extrasaction='ignore')
+
+        # Write fieldname header to the report
+        writer.writeheader()
+
+        # Append the values of each derivative to the report
         for d in derivatives:
-            row = [d.id, d.date_of_trade, d.code, d.asset, d.quantity,
-                   d.buying_party, d.selling_party, d.notional_value,
-                   d.notional_curr_code, d.maturity_date, d.underlying_price,
-                   d.underlying_curr_code, d.strike_price]
-
-            writer.writerow(row)
+            data = {a: getattr(d, a) for a in vars(d.__class__) if a in fieldnames}
+            writer.writerow(data)
 
     # Mark all derivatives on the target date as reported
     Derivative.query.filter_by(date_of_trade=target_date).update(dict(reported=True))
