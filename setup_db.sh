@@ -12,13 +12,17 @@ echo "setup sql objects"
 python3 ./wsgi.py
 echo "schemas initialised"
 
+# Run mod_dummy_data
+echo "modifying dummy data"
+python3 ./mod_dummy_data.py
+
 # Enable recurse
 shopt -s globstar
 
 echo "populating company table"
 mysql -e "
    USE external;
-   LOAD DATA LOCAL INFILE 'res/dummy/companyCodes.csv'
+   LOAD DATA LOCAL INFILE 'res/temp/companyCodes.csv'
    INTO TABLE company
    FIELDS TERMINATED BY ',' ENCLOSED BY '\"' LINES TERMINATED BY '\n'
    IGNORE 1 ROWS
@@ -27,14 +31,14 @@ mysql -e "
  echo "populating product_seller table"
  mysql -e "
     USE external;
-    LOAD DATA LOCAL INFILE 'res/dummy/productSellers.csv'
+    LOAD DATA LOCAL INFILE 'res/temp/productSellers.csv'
     INTO TABLE product_seller
     FIELDS TERMINATED BY ',' ENCLOSED BY '\"' LINES TERMINATED BY '\n'
     IGNORE 1 ROWS
     (product_name, company_id);"
 
 echo "populating currency table"
-for p in res/dummy/currencyValues/**/*.csv; do
+for p in res/temp/currencyValues/**/*.csv; do
   mysql -e "
      USE external;
      LOAD DATA LOCAL INFILE '${p}'
@@ -46,7 +50,7 @@ for p in res/dummy/currencyValues/**/*.csv; do
 done
 
 echo "populating company_stock table"
-for p in res/dummy/stockPrices/**/*.csv; do
+for p in res/temp/stockPrices/**/*.csv; do
   mysql -e "
      USE external;
      LOAD DATA LOCAL INFILE '${p}'
@@ -58,7 +62,7 @@ for p in res/dummy/stockPrices/**/*.csv; do
 done
 
 echo "populating product table"
-for p in res/dummy/productPrices/**/*.csv; do
+for p in res/temp/productPrices/**/*.csv; do
   mysql -e "
      USE external;
      LOAD DATA LOCAL INFILE '${p}'
@@ -70,7 +74,7 @@ for p in res/dummy/productPrices/**/*.csv; do
 done
 
 echo "populating derivative table"
-for p in res/dummy/derivativeTrades/**/*.csv; do
+for p in res/temp/derivativeTrades/**/*.csv; do
   mysql -e "
      USE derivatex;
      LOAD DATA LOCAL INFILE '${p}'
@@ -99,6 +103,11 @@ mysql -e "
     (SELECT id FROM user ORDER BY RAND () LIMIT 1),
   'ADD', date_of_trade FROM derivative;
 "
+
+# Clear temp directory
+echo "clearing temp"
+rm -rf res/temp/*
+
 # Restart mysql server
 echo "restarting mysql server"
 systemctl restart mysql
