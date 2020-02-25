@@ -49,7 +49,7 @@ for dir in os.listdir(temp_path):
                         writer = csv.DictWriter(file_new, reader.fieldnames)
 
                         for i, row in enumerate(reader):
-                            if dir == 'derivativeTrades' and i == 100:
+                            if dir == 'derivativeTrades' and i > 100 and random.random() < 0.5:
                                 break
 
                             for k, v in row.items():
