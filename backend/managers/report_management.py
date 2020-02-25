@@ -75,9 +75,9 @@ def getReportData(report_id):
         data = []
         for row in reader:
             data.append({"id": row[0], "date_of_trade": row[1], "code": row[2], "asset": row[3],
-                    "quantity": row[4], "buying_party": row[5], "selling_party": row[6],
-                    "notional_value": row[7], "notional_curr_code": row[8], "maturity_date": row[9],
-                    "underlying_price": row[10], "underlying_curr_code": row[11], "strike_price": row[12]})
+                         "quantity": row[4], "buying_party": row[5], "selling_party": row[6],
+                         "notional_value": row[7], "notional_curr_code": row[8], "maturity_date": row[9],
+                         "underlying_price": row[10], "underlying_curr_code": row[11], "strike_price": row[12]})
         return data
 
 
@@ -157,9 +157,9 @@ def createPDF(report_id):
     html = header + html_out + '</tbody></table>'
 
     # Create PDF
-    pdf = MyFPDF('P','mm','letter')
-    pdf.set_top_margin(margin=18)  # 18
-    pdf.set_auto_page_break(True, 27)  # 27
+    pdf = MyFPDF('P', 'mm', 'letter')
+    pdf.set_top_margin(margin=18)
+    pdf.set_auto_page_break(True, 27)
     pdf.add_page()
     pdf.alias_nb_pages()
     pdf.set_font('Arial', style='B', size=14)

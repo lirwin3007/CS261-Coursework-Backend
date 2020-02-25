@@ -1,5 +1,4 @@
 # Standard library imports
-from datetime import date
 import os
 
 from flask import Blueprint, abort, jsonify, request, send_file, after_this_request

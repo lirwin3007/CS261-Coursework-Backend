@@ -12,7 +12,7 @@ class AbsoluteDerivativeException(Exception):
 # Add html functionality to fpdf pdf maker and set footer
 class MyFPDF(FPDF, HTMLMixin):
     def footer(self):
-        self.set_y(-25)  #-25
+        self.set_y(-25)
         self.set_font('Arial', 'I', 10)
         self.set_text_color(0, 0, 0)
         self.cell(0, 10, 'PAGE %s OF {nb}' % self.page_no(), 0, 0, 'C')
