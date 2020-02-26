@@ -5,7 +5,7 @@ import pytest
 from backend.derivatex_models import Derivative, Action, ActionType
 from backend.managers import derivative_management
 from backend.db import db
-from backend.util import AbsoluteDerivativeException
+from backend.utils import AbsoluteDerivativeException
 
 
 def testGetDerivativeRetrievesDerivative(dummy_derivative):

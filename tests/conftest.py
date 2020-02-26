@@ -7,7 +7,7 @@ from datetime import date, timedelta
 import pytest
 
 # Local application imports
-from backend.derivatex_models import Derivative, User
+from backend.derivatex_models import Derivative, User, ReportHead
 from backend.app import Application
 from backend.db import db
 
@@ -49,19 +49,23 @@ def clean_database():
 
 
 @pytest.fixture
-def free_derivtive_id(dummy_derivative):
-    # Add dummy derivative to database session
-    db.session.add(dummy_derivative)
-    db.session.flush()
-    # Store the id of the new derivative
-    free_id = dummy_derivative.id
-    # Discard the new derivative from the session to free the id
-    db.session.rollback()
-    # Return the free id
-    return free_id
+def free_derivtive_id():
+    # Return an invalid id
+    return -1
 
 
-# TODO: revisit
+@pytest.fixture
+def free_user_id():
+    # Return an invalid id
+    return -1
+
+
+@pytest.fixture
+def free_report_id():
+    # Return an invalid id
+    return -1
+
+
 @pytest.fixture
 def dummy_derivative():
     today = date.today()
@@ -95,7 +99,6 @@ def dummy_derivative_json(dummy_derivative):
     }
 
 
-# TODO: revisit
 @pytest.fixture
 def dummy_abs_derivative(dummy_derivative):
     # Get the current date
@@ -106,7 +109,6 @@ def dummy_abs_derivative(dummy_derivative):
     return dummy_derivative
 
 
-# TODO: revisit
 @pytest.fixture
 def dummy_user():
     user = User.query.first()
@@ -120,7 +122,19 @@ def dummy_user():
     return user
 
 
-# TODO: revisit
+@pytest.fixture
+def dummy_user_2():
+    user = User.query.get(2)
+    if user is None:
+        user = User(
+            f_name='f_name2',
+            l_name='l_name2',
+            email='email2',
+            password='password123'
+        )
+    return user
+
+
 @pytest.fixture
 def dummy_updates():
     return {
@@ -128,3 +142,25 @@ def dummy_updates():
         'selling_party': 'newbar',
         'asset': 'newbaz'
     }
+
+
+@pytest.fixture
+def dummy_report():
+    today = date.today()
+
+    return ReportHead(
+        target_date=today,
+        creation_date=today,
+        version=1,
+        derivative_count=0,
+    )
+
+
+@pytest.fixture
+def date_from():
+    return date(2018, 1, 1)
+
+
+@pytest.fixture
+def date_to():
+    return date(2020, 1, 1)
