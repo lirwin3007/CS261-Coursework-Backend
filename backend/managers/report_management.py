@@ -64,13 +64,13 @@ def getReportHead(report_id):
 
 
 def getReportData(report_id):
-    """ Retrieve the report from the database that has the given ID.
+    """ Retrieve the report contents from the CSV file of the report that has the given ID.
 
     Args:
         report_id (int): The ID of the desired report.
 
     Returns:
-        Report: The report in the database with the corrosponding ID.
+        Report: A list of dictionaries which represent each derivative in the report
     """
     # Locate and read CSV or return nothing if it does not exist
     try:
@@ -101,8 +101,8 @@ def createPDF(report_id):
     <font size="8" face="Courier New" >
     <table align="center" width="100%">
     <thead><tr>
-    <th width="5%">id</th><th width="8%">Trade Date</th><th width="15%">Trade Code</th>
-    <th width="13%">Asset</th><th width="6%">QTY</th><th width="7%">Buy PTY</th>
+    <th width="15%">Trade Code</th><th width="8%">Trade Date</th>
+    <th width="18%">Asset</th><th width="6%">QTY</th><th width="7%">Buy PTY</th>
     <th width="7%">Sell PTY</th><th width="9%">Notional Val</th><th width="4%">Curr</th>
     <th width="8%">Mat Date</th><th width="6%">Price</th><th width="4%">Curr</th>
     <th width="8%">Strike Price</th>
@@ -115,19 +115,18 @@ def createPDF(report_id):
     for derivative in data:
         html_out += '<tr bgcolor="#E1E1E1"><td>' if grey else '<tr bgcolor="#FFFFFF"><td>'
         grey = not grey
-        html_out += derivative['id']
+        html_out += derivative['code']
         html_out += ('</td><td>' + derivative['date_of_trade'])
-        html_out += ('</td><td>' + derivative['code'])
         html_out += ('</td><td>' + derivative['asset'])
         html_out += ('</td><td>' + derivative['quantity'])
         html_out += ('</td><td>' + derivative['buying_party'])
         html_out += ('</td><td>' + derivative['selling_party'])
-        html_out += ('</td><td>' + derivative['notional_value'])
+        html_out += ('</td><td>' + "{:.2f}".format(float(derivative['notional_value'])))
         html_out += ('</td><td>' + derivative['notional_curr_code'])
         html_out += ('</td><td>' + derivative['maturity_date'])
         html_out += ('</td><td>' + derivative['underlying_price'])
         html_out += ('</td><td>' + derivative['underlying_curr_code'])
-        html_out += ('</td><td>' + derivative['strike_price'])
+        html_out += ('</td><td>' + "{:.2f}".format(float(derivative['strike_price'])))
         html_out += '</td></tr>\n'
 
     # Create final html that represents table
@@ -152,6 +151,14 @@ def createPDF(report_id):
 
 
 def getPendingReportDates():
+    """ Creates a list containing all dates that contain unreported derivatives.
+
+    Args:
+        None
+
+    Returns:
+        Dates: A list of distinct date objects that have unreported derivatives in the database.
+    """
     # Filter the unreported derivatives
     query = Derivative.query.filter_by(reported=False)
     # Query the distinct dates of unreported derivatives
@@ -161,6 +168,14 @@ def getPendingReportDates():
 
 
 def generateAllReports():
+    """ Create a new report for each date that contains unreported derivatives
+
+    Args:
+        None
+
+    Returns:
+        report_ids: A list containing the ids of all the newly generated reports
+    """
     target_dates = getPendingReportDates()
     report_ids = []
 
@@ -173,6 +188,14 @@ def generateAllReports():
 
 
 def generateReport(target_date):
+    """ Create a new report for the specified date
+
+    Args:
+        target_date (date): The date for which a new report is required
+
+    Returns:
+        id: The id of the newly generated report for the requested date
+    """
     # Get all none-deleted erivatives traded on the target_date
     derivatives = Derivative.query.filter_by(date_of_trade=target_date,
                                              deleted=False).all()
@@ -199,7 +222,7 @@ def generateReport(target_date):
     # Make CSV and open for writing
     with open(f'res/reports/{report.id}.csv', 'w') as file:
         # Derivative fields to include in report
-        fieldnames = ['id', 'date_of_trade', 'code', 'asset', 'quantity',
+        fieldnames = ['code', 'date_of_trade', 'asset', 'quantity',
                       'buying_party', 'selling_party', 'notional_value',
                       'notional_curr_code', 'maturity_date', 'underlying_price',
                       'underlying_curr_code', 'strike_price']
