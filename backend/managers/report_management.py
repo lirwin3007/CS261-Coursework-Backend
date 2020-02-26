@@ -72,16 +72,17 @@ def getReportData(report_id):
     Returns:
         Report: A list of dictionaries which represent each derivative in the report
     """
-    # Locate and read CSV or return nothing if it does not exist
-    try:
-        with open(f'res/reports/{report_id}.csv') as file:
-            reader = csv.DictReader(file)
+    # Form report CSV path
+    path = f'res/reports/{report_id}.csv'
 
-            # Return list of dictionaries
-            return list(reader)
-    except Exception as e:
-        print(e)
+    if os.path.isfile(path):
+        # Open report file if it exists
+        with open(path) as file:
+            # Read report using dictionary reader
+            return list(csv.DictReader(file))
 
+    # Report does not exist
+    return None
 
 def createPDF(report_id):
     """ Create a temporary PDF file containing the data required by the trade repository.
