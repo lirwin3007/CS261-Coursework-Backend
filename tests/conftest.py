@@ -49,31 +49,21 @@ def clean_database():
 
 
 @pytest.fixture
-def free_derivtive_id(dummy_derivative):
-    # Add dummy derivative to database session
-    db.session.add(dummy_derivative)
-    db.session.flush()
-    # Store the id of the new derivative
-    free_id = dummy_derivative.id
-    # Discard the new derivative from the session to free the id
-    db.session.rollback()
-    # Return the free id
-    return free_id
+def free_derivtive_id():
+    # Return an invalid id
+    return -1
 
 
-# TODO: revisit
 @pytest.fixture
-def free_user_id(dummy_user):
-    # Add dummy user to database session
-    db.session.add(dummy_user)
-    db.session.flush()
+def free_user_id():
+    # Return an invalid id
+    return -1
 
-    # Store the id of the new user
-    free_id = dummy_user.id
-    # Discard the new user from the session to free the id
-    db.session.rollback()
-    # Return the free id
-    return free_id
+
+@pytest.fixture
+def free_report_id():
+    # Return an invalid id
+    return -1
 
 
 @pytest.fixture
@@ -109,7 +99,6 @@ def dummy_derivative_json(dummy_derivative):
     }
 
 
-# TODO: revisit
 @pytest.fixture
 def dummy_abs_derivative(dummy_derivative):
     # Get the current date
@@ -120,7 +109,6 @@ def dummy_abs_derivative(dummy_derivative):
     return dummy_derivative
 
 
-# TODO: revisit
 @pytest.fixture
 def dummy_user():
     user = User.query.first()
@@ -134,7 +122,6 @@ def dummy_user():
     return user
 
 
-# TODO: revisit
 @pytest.fixture
 def dummy_user_2():
     user = User.query.get(2)
@@ -155,19 +142,6 @@ def dummy_updates():
         'selling_party': 'newbar',
         'asset': 'newbaz'
     }
-
-
-@pytest.fixture
-def free_report_id(dummy_report):
-    # Add dummy report to database session
-    db.session.add(dummy_report)
-    db.session.flush()
-    # Store the id of the new report
-    free_id = dummy_report.id
-    # Discard the new report from the session to free the id
-    db.session.rollback()
-    # Return the free id
-    return free_id
 
 
 @pytest.fixture
