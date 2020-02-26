@@ -13,13 +13,13 @@ from backend.utils import clamp
 from backend.utils import MyFPDF
 
 
-def indexReports(date_from, date_to, page_size, page_number):
+def indexReports(from_date, to_date, page_size, page_number):
     """ Enumerates a page of reports from a date range filtered subset of
     all reports in the database.
 
     Args:
-        date_from (date): The earliest date a returned report can be for.
-        date_to (date): The latest date a returned report can be for.
+        from_date (date): The earliest date a returned report can be for.
+        to_date (date): The latest date a returned report can be for.
         page_size (int): The number of reports that form a page.
         page_number (int): The page number offset of the index list.
 
@@ -32,8 +32,12 @@ def indexReports(date_from, date_to, page_size, page_number):
     query = ReportHead.query
 
     # Filter and order query
-    query.filter(date_from < ReportHead.target_date)
-    query.filter(ReportHead.target_date < date_to)
+    if from_date is not None:
+        query = query.filter(ReportHead.target_date >= from_date)
+
+    if to_date is not None:
+        query = query.filter(ReportHead.target_date <= to_date)
+
     query = query.order_by(asc(ReportHead.target_date))
 
     # Paginate query
