@@ -1,20 +1,37 @@
+# Third party imports
+import pytest
+
+# Local application imports
 from backend.managers import report_management
+from backend.db import db
 
 
-# def testGetReportRetrievesReport(free_report_id):
-# Add dummy CSV to correct path
-# report_data = Extract dummy CSV data
-# Assert that getReport returns the report
-# assert report_management.getReport(free_report_id) == report_data
+def testGetReportHeadRetrievesReportHead(dummy_report_head):
+    # Add dummy report to database session
+    db.session.add(dummy_report_head)
+    db.session.flush()
+
+    # Assert that getReportHead returns the report
+    assert report_management.getReportHead(dummy_report_head.id) == dummy_report_head
 
 
-def testGetReportReturnsNoneIfNotFound(free_report_id):
+def testGetReportHeadReturnsNoneIfNotFound(free_report_id):
+    # Assert that None is returned for the free id
+    assert report_management.getReportHead(free_report_id) is None
+
+
+@pytest.mark.skip
+def testGetReportDataRetrievesReportData():
+    # Assert that
+    assert True
+
+
+def testGetReportDataReturnsNoneIfNotFound(free_report_id):
     # Assert that None is returned for the free id
     assert report_management.getReportData(free_report_id) is None
 
 
-def testGenerateReportsCreatesReportFile():
-    # Check next report id
-    report_management.generateAllReports()
-    # Assert that file with found id now exists
+@pytest.mark.skip
+def testGenerateReportCreatesReportFile():
+    # Assert that
     assert True
