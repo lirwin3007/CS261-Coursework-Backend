@@ -1,6 +1,6 @@
 # Standard library imports
 import locale
-from datetime import date
+from datetime import datetime, date
 
 # Third party imports
 from sqlalchemy.ext.declarative import DeclarativeMeta
@@ -28,6 +28,15 @@ class MyJSONEncoder(JSONEncoder):
         return super(MyJSONEncoder, self).default(o)
 
 
+# Add html functionality to fpdf pdf maker and set footer
+class MyFPDF(FPDF, HTMLMixin):
+    def footer(self):
+        self.set_y(-25)
+        self.set_font('Arial', 'I', 10)
+        self.set_text_color(0, 0, 0)
+        self.cell(0, 10, 'PAGE %s OF {nb}' % self.page_no(), 0, 0, 'C')
+
+
 def getCurrencySymbol(currency_code):
     for l in locale.locale_alias.values():
         try:
@@ -44,13 +53,11 @@ def getCurrencySymbol(currency_code):
     return None
 
 
-# Add html functionality to fpdf pdf maker and set footer
-class MyFPDF(FPDF, HTMLMixin):
-    def footer(self):
-        self.set_y(-25)
-        self.set_font('Arial', 'I', 10)
-        self.set_text_color(0, 0, 0)
-        self.cell(0, 10, 'PAGE %s OF {nb}' % self.page_no(), 0, 0, 'C')
+def to_date(date_string):
+    try:
+        return datetime.strptime(date_string, "%Y-%m-%d").date()
+    except ValueError:
+        raise ValueError(f'{date_string} is not a valid date in the format yyyy-mm-dd')
 
 
 def clamp(val, min_val, max_val):

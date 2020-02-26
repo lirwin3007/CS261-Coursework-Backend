@@ -1,11 +1,12 @@
 # Standard library imports
 import os
 
-from flask import Blueprint, abort, jsonify, request, send_file, after_this_request
 # Third party imports
+from flask import Blueprint, abort, jsonify, request, send_file, after_this_request
 
 # Local application imports
 from backend.managers import report_management
+from backend import utils
 
 # Instantiate new blueprint
 ReportBlueprint = Blueprint('reporting',
@@ -19,17 +20,17 @@ def indexReports():
     # Extract body from request
     body = request.get_json(silent=True) or {}
 
-    # Retrieve input data
-    date_from = request.args.get('date_from', type=str)
-    date_to = request.args.get('date_to', type=str)
+    # Obtain index filters
+    from_date = request.args.get('from_date', default=None, type=utils.to_date)
+    to_date = request.args.get('to_date', default=None, type=utils.to_date)
 
     # Determine page parameters
     page_size = max(body.get('page_size') or 15, 1)
     page_number = request.args.get('page_number', default=0, type=int)
 
     # Index reports
-    reports, page_count = report_management.indexReports(date_from,
-                                                         date_to,
+    reports, page_count = report_management.indexReports(from_date,
+                                                         to_date,
                                                          page_size,
                                                          page_number)
     # Make response
@@ -69,20 +70,20 @@ def downloadReport(format, report_id):
         return abort(404, f'report with id {report_id} not found')
 
     if format.upper() == 'PDF':
-        # Generate PDF and return file path
-        path_to_file = report_management.createPDF(report_id)
-    else:
-        # Generate CSV and return file path
-        path_to_file = report_management.createCSV(report_id)
+        # Generate PDF file and return path
+        file_path = report_management.createPDF(report_id)
 
-    # Delete the file after it is sent
-    @after_this_request
-    def deleteFile(response):
-        os.remove(path_to_file)
-        return response
+        # Delete the pdf after it is sent
+        @after_this_request
+        def deleteFile(response):
+            os.remove(file_path)
+            return response
+    else:
+        # Default to the report CSV
+        file_path = os.path.realpath(f'res/reports/{report_id}.csv')
 
     # Return the file
-    return send_file(path_to_file)
+    return send_file(file_path)
 
 
 @ReportBlueprint.route('/index-pending-reports')

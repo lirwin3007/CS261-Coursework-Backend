@@ -13,13 +13,13 @@ from backend.utils import clamp
 from backend.utils import MyFPDF
 
 
-def indexReports(date_from, date_to, page_size, page_number):
+def indexReports(from_date, to_date, page_size, page_number):
     """ Enumerates a page of reports from a date range filtered subset of
     all reports in the database.
 
     Args:
-        date_from (date): The earliest date a returned report can be for.
-        date_to (date): The latest date a returned report can be for.
+        from_date (date): The earliest date a returned report can be for.
+        to_date (date): The latest date a returned report can be for.
         page_size (int): The number of reports that form a page.
         page_number (int): The page number offset of the index list.
 
@@ -32,8 +32,12 @@ def indexReports(date_from, date_to, page_size, page_number):
     query = ReportHead.query
 
     # Filter and order query
-    query.filter(date_from < ReportHead.target_date)
-    query.filter(ReportHead.target_date < date_to)
+    if from_date is not None:
+        query = query.filter(ReportHead.target_date >= from_date)
+
+    if to_date is not None:
+        query = query.filter(ReportHead.target_date <= to_date)
+
     query = query.order_by(asc(ReportHead.target_date))
 
     # Paginate query
@@ -60,54 +64,23 @@ def getReportHead(report_id):
 
 
 def getReportData(report_id):
-    """ Retrieve the report from the database that has the given ID.
+    """ Retrieve the report contents from the CSV file of the report that has the given ID.
 
     Args:
         report_id (int): The ID of the desired report.
 
     Returns:
-        Report: The report in the database with the corrosponding ID.
+        Report: A list of dictionaries which represent each derivative in the report
     """
     # Locate and read CSV or return nothing if it does not exist
     try:
         with open(f'res/reports/{report_id}.csv') as file:
-            reader = csv.reader(file, delimiter=",")
-            # Create and return list storing derivative data in the report
-            data = []
-            for row in reader:
-                data.append({"id": row[0], "date_of_trade": row[1], "code": row[2], "asset": row[3],
-                             "quantity": row[4], "buying_party": row[5], "selling_party": row[6],
-                             "notional_value": row[7], "notional_curr_code": row[8], "maturity_date": row[9],
-                             "underlying_price": row[10], "underlying_curr_code": row[11], "strike_price": row[12]})
-            return data
+            reader = csv.DictReader(file)
+
+            # Return list of dictionaries
+            return list(reader)
     except Exception as e:
         print(e)
-        return
-
-
-def createCSV(report_id):
-    """ Create a temporary CSV file containing the data required by the trade repository.
-
-    Args:
-        report_id (int): The ID of the report which a CSV is required for.
-
-    Returns:
-        String: A string corresponding to the path to the generated CSV.
-    """
-    # Get report data
-    data = getReportData(report_id)
-
-    # Open report file and CSV writer
-    with open(f'res/temp/{report_id}.csv', 'w') as file:
-        writer = csv.writer(file)
-
-        for derivative in data:
-            # Get desired data from rows of stored CSV report
-            row = [derivative["id"], derivative["date_of_trade"], derivative["code"]]  # TBC
-            writer.writerow(row)
-
-    # Return path to csv outfile
-    return os.path.realpath(file.name)
 
 
 def createPDF(report_id):
@@ -128,8 +101,8 @@ def createPDF(report_id):
     <font size="8" face="Courier New" >
     <table align="center" width="100%">
     <thead><tr>
-    <th width="5%">id</th><th width="8%">Trade Date</th><th width="15%">Trade Code</th>
-    <th width="13%">Asset</th><th width="6%">QTY</th><th width="7%">Buy PTY</th>
+    <th width="15%">Trade Code</th><th width="8%">Trade Date</th>
+    <th width="18%">Asset</th><th width="6%">QTY</th><th width="7%">Buy PTY</th>
     <th width="7%">Sell PTY</th><th width="9%">Notional Val</th><th width="4%">Curr</th>
     <th width="8%">Mat Date</th><th width="6%">Price</th><th width="4%">Curr</th>
     <th width="8%">Strike Price</th>
@@ -142,19 +115,18 @@ def createPDF(report_id):
     for derivative in data:
         html_out += '<tr bgcolor="#E1E1E1"><td>' if grey else '<tr bgcolor="#FFFFFF"><td>'
         grey = not grey
-        html_out += derivative['id']
+        html_out += derivative['code']
         html_out += ('</td><td>' + derivative['date_of_trade'])
-        html_out += ('</td><td>' + derivative['code'])
         html_out += ('</td><td>' + derivative['asset'])
         html_out += ('</td><td>' + derivative['quantity'])
         html_out += ('</td><td>' + derivative['buying_party'])
         html_out += ('</td><td>' + derivative['selling_party'])
-        html_out += ('</td><td>' + derivative['notional_value'])
+        html_out += ('</td><td>' + "{:.2f}".format(float(derivative['notional_value'])))
         html_out += ('</td><td>' + derivative['notional_curr_code'])
         html_out += ('</td><td>' + derivative['maturity_date'])
         html_out += ('</td><td>' + derivative['underlying_price'])
         html_out += ('</td><td>' + derivative['underlying_curr_code'])
-        html_out += ('</td><td>' + derivative['strike_price'])
+        html_out += ('</td><td>' + "{:.2f}".format(float(derivative['strike_price'])))
         html_out += '</td></tr>\n'
 
     # Create final html that represents table
@@ -179,6 +151,14 @@ def createPDF(report_id):
 
 
 def getPendingReportDates():
+    """ Creates a list containing all dates that contain unreported derivatives.
+
+    Args:
+        None
+
+    Returns:
+        Dates: A list of distinct date objects that have unreported derivatives in the database.
+    """
     # Filter the unreported derivatives
     query = Derivative.query.filter_by(reported=False)
     # Query the distinct dates of unreported derivatives
@@ -188,9 +168,18 @@ def getPendingReportDates():
 
 
 def generateAllReports():
+    """ Create a new report for each date that contains unreported derivatives
+
+    Args:
+        None
+
+    Returns:
+        report_ids: A list containing the ids of all the newly generated reports
+    """
     target_dates = getPendingReportDates()
     report_ids = []
 
+    # Generate a report for each of the target_dates
     for target_date in target_dates:
         id = generateReport(target_date)
         report_ids.append(id)
@@ -199,6 +188,14 @@ def generateAllReports():
 
 
 def generateReport(target_date):
+    """ Create a new report for the specified date
+
+    Args:
+        target_date (date): The date for which a new report is required
+
+    Returns:
+        id: The id of the newly generated report for the requested date
+    """
     # Get all none-deleted erivatives traded on the target_date
     derivatives = Derivative.query.filter_by(date_of_trade=target_date,
                                              deleted=False).all()
@@ -224,16 +221,22 @@ def generateReport(target_date):
 
     # Make CSV and open for writing
     with open(f'res/reports/{report.id}.csv', 'w') as file:
-        writer = csv.writer(file)
+        # Derivative fields to include in report
+        fieldnames = ['code', 'date_of_trade', 'asset', 'quantity',
+                      'buying_party', 'selling_party', 'notional_value',
+                      'notional_curr_code', 'maturity_date', 'underlying_price',
+                      'underlying_curr_code', 'strike_price']
 
-        # Append each of the derivative to the report
+        # Create CSV writer
+        writer = csv.DictWriter(file, fieldnames, extrasaction='ignore')
+
+        # Write fieldname header to the report
+        writer.writeheader()
+
+        # Append the values of each derivative to the report
         for d in derivatives:
-            row = [d.id, d.date_of_trade, d.code, d.asset, d.quantity,
-                   d.buying_party, d.selling_party, d.notional_value,
-                   d.notional_curr_code, d.maturity_date, d.underlying_price,
-                   d.underlying_curr_code, d.strike_price]
-
-            writer.writerow(row)
+            data = {a: getattr(d, a) for a in vars(d.__class__) if a in fieldnames}
+            writer.writerow(data)
 
     # Mark all derivatives on the target date as reported
     Derivative.query.filter_by(date_of_trade=target_date).update(dict(reported=True))
