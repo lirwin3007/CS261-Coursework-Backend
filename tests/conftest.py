@@ -7,7 +7,7 @@ from datetime import date, timedelta
 import pytest
 
 # Local application imports
-from backend.derivatex_models import Derivative, User
+from backend.derivatex_models import Derivative, User, Action
 from backend.app import Application
 from backend.db import db
 
@@ -81,13 +81,12 @@ def dummy_derivative():
     today = date.today()
 
     return Derivative(
-        code='doe',
         buying_party='foo',
         selling_party='bar',
         asset='Stocks',
         quantity=1,
         strike_price=20.20,
-        notional_curr_code='USD',
+        currency_code='USD',
         date_of_trade=today,
         maturity_date=today + timedelta(days=365)
     )
@@ -97,13 +96,12 @@ def dummy_derivative():
 @pytest.fixture
 def dummy_derivative_json(dummy_derivative):
     return {
-        'code': dummy_derivative.code,
         'buying_party': dummy_derivative.buying_party,
         'selling_party': dummy_derivative.selling_party,
         'asset': dummy_derivative.asset,
         'quantity': dummy_derivative.quantity,
         'strike_price': dummy_derivative.strike_price,
-        'notional_curr_code': dummy_derivative.notional_curr_code,
+        'currency_code': dummy_derivative.currency_code,
         'maturity_date': str(dummy_derivative.maturity_date),
         'date_of_trade': str(dummy_derivative.date_of_trade)
     }
@@ -123,17 +121,12 @@ def dummy_abs_derivative(dummy_derivative):
 # TODO: revisit
 @pytest.fixture
 def dummy_action():
-    action = Action.query.first()
-    if action is None:
-        action = User(
-            id = 'id',
-            derivative_id = 'derivative_id',
-            user_id = 'user_id',
-            type = 'type',
-            timestamp = 'timestamp',
-            update_log = 'update_log'
-        )
-    return action
+    today = date.today()
+    return Action(
+        type='ADD',
+        timestamp=today,
+        update_log='null',
+    )
 
 
 # TODO: revisit
