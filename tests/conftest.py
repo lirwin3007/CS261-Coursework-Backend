@@ -7,7 +7,7 @@ from datetime import date, timedelta
 import pytest
 
 # Local application imports
-from backend.derivatex_models import Derivative, User, ReportHead
+from backend.derivatex_models import Derivative, User, ReportHead, Action
 from backend.app import Application
 from backend.db import db
 
@@ -50,12 +50,6 @@ def clean_database():
 
 @pytest.fixture
 def free_derivtive_id():
-    # Return an invalid id
-    return -1
-
-
-@pytest.fixture
-def free_user_id():
     # Return an invalid id
     return -1
 
@@ -150,19 +144,6 @@ def dummy_user():
 
 
 # TODO: revisit
-@pytest.fixture
-def dummy_user_2():
-    user = User.query.get(2)
-    if user is None:
-        user = User(
-            f_name='f_name2',
-            l_name='l_name2',
-            email='email2',
-            password='password123'
-        )
-    return user
-
-
 @pytest.fixture
 def dummy_user_2():
     user = User.query.get(2)

@@ -36,11 +36,6 @@ def testGetDerivativeWillReturn404(test_client, free_derivtive_id):
 
 
 def testAddDerivativeWillReturn404ForInvalidUser(test_client):
-    # Form POST request body
-    body = {
-        'user_id': None
-    }
-
     # Make request and retrieve response
     url = '/derivative-management/add-derivative'
     response = test_client.post(url, json={'user_id': None})
