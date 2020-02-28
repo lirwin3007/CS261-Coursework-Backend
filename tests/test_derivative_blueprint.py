@@ -43,7 +43,7 @@ def testAddDerivativeWillReturn404ForInvalidUser(test_client):
 
     # Make request and retrieve response
     url = '/derivative-management/add-derivative'
-    response = test_client.post(url, json={'user_id': None})
+    response = test_client.post(url, json=body)
     # Assert that a 404 HTTP error is returned
     assert response.status_code == 404
 
