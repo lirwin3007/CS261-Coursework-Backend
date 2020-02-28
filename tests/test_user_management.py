@@ -13,7 +13,7 @@ def testGetUser(dummy_user):
 
 
 def testGetAllUsers(dummy_user, dummy_user_2):
-    # Add two dmmy users to database session
+    # Add two dummy users to database session
     db.session.add(dummy_user)
     users = [dummy_user]
     db.session.add(dummy_user_2)
@@ -22,6 +22,15 @@ def testGetAllUsers(dummy_user, dummy_user_2):
 
     # Assert that getAllUsers returns all the users
     assert user_management.getAllUsers() == users
+
+
+def testGetUserFromUsername(dummy_user):
+    # Add dummy user to database session
+    db.session.add(dummy_user)
+    db.session.flush()
+
+    # Assert that getUserFromUsername returns the user
+    assert user_management.getUserFromUsername(dummy_user.email) == dummy_user
 
 
 def testGetUserReturnsNoneIfNotFound(free_user_id):

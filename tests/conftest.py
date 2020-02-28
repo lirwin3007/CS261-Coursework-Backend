@@ -132,29 +132,23 @@ def dummy_action():
 # TODO: revisit
 @pytest.fixture
 def dummy_user():
-    user = User.query.first()
-    if user is None:
-        user = User(
-            f_name='f_name',
-            l_name='l_name',
-            email='email',
-            password='password'
-        )
-    return user
+    return User(
+        f_name='f_name',
+        l_name='l_name',
+        email='email',
+        password='password'
+    )
 
 
 # TODO: revisit
 @pytest.fixture
 def dummy_user_2():
-    user = User.query.get(2)
-    if user is None:
-        user = User(
-            f_name='f_name2',
-            l_name='l_name2',
-            email='email2',
-            password='password123'
-        )
-    return user
+    return User(
+        f_name='f_name2',
+        l_name='l_name2',
+        email='email2',
+        password='password123'
+    )
 
 
 @pytest.fixture
@@ -167,22 +161,10 @@ def dummy_updates():
 
 
 @pytest.fixture
-def dummy_report():
-    today = date.today()
-
+def dummy_report_head():
     return ReportHead(
-        target_date=today,
-        creation_date=today,
+        target_date=date.today(),
+        creation_date=date.today(),
         version=1,
         derivative_count=0,
     )
-
-
-@pytest.fixture
-def date_from():
-    return date(2018, 1, 1)
-
-
-@pytest.fixture
-def date_to():
-    return date(2020, 1, 1)
