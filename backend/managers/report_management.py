@@ -84,6 +84,7 @@ def getReportData(report_id):
     # Report does not exist
     return None
 
+
 def createPDF(report_id):
     """ Create a temporary PDF file containing the data required by the trade repository.
 

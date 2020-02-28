@@ -146,11 +146,3 @@ def dummy_report_head():
         version=1,
         derivative_count=0,
     )
-
-
-@pytest.fixture
-def dummy_report_path():
-    with open('res/temp/dummy_report.csv', 'w') as file:
-        file.write('foobar')
-
-    return os.path.realpath(file)
