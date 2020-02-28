@@ -1,6 +1,3 @@
-# Third party imports
-import pytest
-
 # Local application imports
 from backend.managers import report_management
 from backend.db import db
@@ -20,18 +17,6 @@ def testGetReportHeadReturnsNoneIfNotFound(free_report_id):
     assert report_management.getReportHead(free_report_id) is None
 
 
-@pytest.mark.skip
-def testGetReportDataRetrievesReportData():
-    # Assert that
-    assert True
-
-
 def testGetReportDataReturnsNoneIfNotFound(free_report_id):
     # Assert that None is returned for the free id
     assert report_management.getReportData(free_report_id) is None
-
-
-@pytest.mark.skip
-def testGenerateReportCreatesReportFile():
-    # Assert that
-    assert True
