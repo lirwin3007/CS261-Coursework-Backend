@@ -1,3 +1,8 @@
+# Resources
+res/temp/
+res/dummy/
+res/reports/
+
 # Python gitignore
 
 # Byte-compiled / optimized / DLL files
@@ -72,6 +77,7 @@ instance/
 
 # Sphinx documentation
 docs/_build/
+api-docs/_build/
 
 # PyBuilder
 target/
