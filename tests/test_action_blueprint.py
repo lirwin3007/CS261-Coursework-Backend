@@ -4,6 +4,7 @@ from flask import jsonify
 # Local application imports
 from backend.db import db
 
+
 def testGetAction(test_client, dummy_action):
     # Add dummy action to session
     db.session.add(dummy_action)
