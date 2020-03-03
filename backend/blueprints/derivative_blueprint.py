@@ -145,17 +145,16 @@ def updateDerivative(derivative_id):
 
 @DerivativeBlueprint.route('/index-derivatives')
 def indexDerivatives():
-    # Extract body from request
-    body = request.get_json(silent=True) or {}
-
     # Determine page parameters
-    page_size = max(body.get('page_size') or 15, 1)
+    page_size = request.args.get('page_size', default=15, type=int)
     page_number = request.args.get('page_number', default=0, type=int)
 
+    # Convert args Multidict to dictionary
+    filter_dict = request.args.to_dict(flat=True)
+
     # Index derivatives
-    derivatives, page_count = derivative_management.indexDerivatives(body,
+    derivatives, page_count = derivative_management.indexDerivatives(filter_dict,
                                                                      page_size,
                                                                      page_number)
-
     # Make response
-    return jsonify(page_count=page_count, derivatives=[d.id for d in derivatives])
+    return jsonify(page_count=page_count, derivatives=derivatives)
