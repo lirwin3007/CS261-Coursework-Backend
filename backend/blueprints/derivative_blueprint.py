@@ -157,4 +157,4 @@ def indexDerivatives():
                                                                      page_size,
                                                                      page_number)
     # Make response
-    return jsonify(page_count=page_count, derivatives=derivatives)
+    return jsonify(page_count=page_count, derivatives=[d.id for d in derivatives])
