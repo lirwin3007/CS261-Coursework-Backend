@@ -95,7 +95,7 @@ class Action(db.Model):
     derivative_id = db.Column(db.BigInteger, db.ForeignKey('derivative.id'))
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     type = db.Column(db.Enum(ActionType), nullable=False)
-    timestamp = db.Column(db.DateTime, nullable=False, default=datetime.now())
+    timestamp = db.Column(db.DateTime, nullable=False, default=datetime.now)
     update_log = db.Column(db.JSON)
 
     def __str__(self):
