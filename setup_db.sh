@@ -111,6 +111,14 @@ mysql -e "
   'ADD', date_of_trade FROM derivative;
 "
 
+# Clear report directory
+echo "clearing reports"
+if [[ -e res/reports/ ]]; then
+    rm -rf res/reports/*
+else
+    mkdir -p res/reports
+fi
+
 # Clear temp directory
 echo "clearing temp"
 rm -rf res/temp/*
