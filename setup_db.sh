@@ -8,6 +8,15 @@ echo "started mysql server"
 sudo mysql < setup_sql.sql
 echo "setup sql objects"
 
+# Clear report directory
+echo "clearing reports"
+if [[ -e res/reports/ ]]; then
+    rm -rf res/reports/*
+else
+    echo "ERROR: reports directory not found"
+    exit -1
+fi
+
 # Let SQL Alchemy generate schema from models
 python3 ./wsgi.py
 echo "schemas initialised"
@@ -110,14 +119,6 @@ mysql -e "
     (SELECT id FROM user ORDER BY RAND () LIMIT 1),
   'ADD', date_of_trade FROM derivative;
 "
-
-# Clear report directory
-echo "clearing reports"
-if [[ -e res/reports/ ]]; then
-    rm -rf res/reports/*
-else
-    mkdir -p res/reports
-fi
 
 # Clear temp directory
 echo "clearing temp"
