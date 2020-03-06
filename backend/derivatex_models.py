@@ -78,7 +78,7 @@ class User(db.Model):
     l_name = db.Column(db.String(32), nullable=False)
     email = db.Column(db.String(32), nullable=False, unique=True)
     password = db.Column(db.String(128), nullable=False, unique=True)
-    profile_image = db.Column(db.String(128))
+    profile_image = db.Column(db.String(30000))
 
     def __str__(self):
         return f'<User : {self.id}>'
