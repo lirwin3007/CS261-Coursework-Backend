@@ -7,8 +7,8 @@ from backend import utils
 
 # Instantiate new blueprint
 ExternalBlueprint = Blueprint('external',
-                            __name__,
-                            url_prefix='/external')
+                              __name__,
+                              url_prefix='/external')
 
 
 @ExternalBlueprint.route('/index-companies')

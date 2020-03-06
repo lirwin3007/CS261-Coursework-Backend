@@ -66,7 +66,7 @@ class Derivative(db.Model):
 
     @property
     def underlying_curr_symbol(self):
-        return utils.getCurrencySymbol(self.underlying_curr_code) 
+        return utils.getCurrencySymbol(self.underlying_curr_code)
 
     def __str__(self):
         return f'<Derivative : {self.id}>'
