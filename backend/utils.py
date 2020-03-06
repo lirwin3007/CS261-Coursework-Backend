@@ -38,18 +38,24 @@ class MyFPDF(FPDF, HTMLMixin):
 
 
 def getCurrencySymbol(code, default='?'):
-    for l in locale.locale_alias.values():
-        try:
-            locale.setlocale(locale.LC_ALL, l)
-        except locale.Error:
-            continue
+    if not hasattr(getCurrencySymbol, "lookup"):
+        # Generate currency symbol lookup table
+        getCurrencySymbol.lookup = {}
 
-        conv = locale.localeconv()
+        for l in locale.locale_alias.values():
+            try:
+                locale.setlocale(locale.LC_ALL, l)
+            except locale.Error:
+                continue
 
-        if conv['int_curr_symbol'].strip().upper() == code.upper():
-            return conv['currency_symbol']
+            conv = locale.localeconv()
+            code = conv['int_curr_symbol'].strip().upper()
+            symbol = conv['currency_symbol']
 
-    return default
+            getCurrencySymbol.lookup[code] = symbol
+
+    # Return the lookup result else the default value
+    return getCurrencySymbol.lookup.get(code) or default
 
 
 def to_date(date_string):
