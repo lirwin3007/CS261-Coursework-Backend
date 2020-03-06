@@ -94,11 +94,17 @@ for p in res/temp/derivativeTrades/*.csv; do
      SET date_of_trade = STR_TO_DATE(@date_of_trade, '%d/%m/%Y'), maturity_date = STR_TO_DATE(@maturity_date, '%d/%m/%Y');"
 done
 
-echo "correcting strike price"
+echo "correcting strike price" # Nice one James
 mysql -e "
     UPDATE derivatex.derivative d JOIN external.currency c
     ON d.notional_curr_code = c.code AND d.date_of_trade = c.valuation_date
     SET strike_price = strike_price / usd_exchange_rate;
+"
+
+echo "deleting company QETH27" # And again ...
+mysql -e "
+    DELETE FROM derivatex.derivative WHERE selling_party = 'QETH27' OR buying_party = 'QETH27';
+    DELETE FROM external.company WHERE id = 'QETH27';
 "
 
 echo "correcting derivative codes"
