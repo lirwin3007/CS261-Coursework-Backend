@@ -37,7 +37,7 @@ class MyFPDF(FPDF, HTMLMixin):
         self.cell(0, 10, 'PAGE %s OF {nb}' % self.page_no(), 0, 0, 'C')
 
 
-def getCurrencySymbol(currency_code):
+def getCurrencySymbol(code, default='?'):
     for l in locale.locale_alias.values():
         try:
             locale.setlocale(locale.LC_ALL, l)
@@ -45,12 +45,11 @@ def getCurrencySymbol(currency_code):
             continue
 
         conv = locale.localeconv()
-        code = conv['int_curr_symbol'].strip()
 
-        if code.upper() == currency_code.upper():
+        if conv['int_curr_symbol'].strip().upper() == code.upper():
             return conv['currency_symbol']
 
-    return None
+    return default
 
 
 def to_date(date_string):

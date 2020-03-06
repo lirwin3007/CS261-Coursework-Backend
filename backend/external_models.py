@@ -1,5 +1,6 @@
 # Local application imports
 from backend.db import db
+from backend import utils
 
 
 class Company(db.Model):
@@ -25,6 +26,10 @@ class Currency(db.Model):
     code = db.Column(db.CHAR(3), nullable=False, primary_key=True)
     valuation_date = db.Column(db.Date, primary_key=True)
     usd_exchange_rate = db.Column(db.Float, nullable=False)
+
+    @property
+    def symbol(self):
+        return utils.getCurrencySymbol(self.code) or '?'
 
 
 class CompanyStock(db.Model):

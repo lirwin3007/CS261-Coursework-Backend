@@ -9,6 +9,7 @@ from backend.blueprints.derivative_blueprint import DerivativeBlueprint
 from backend.blueprints.user_blueprint import UserBlueprint
 from backend.blueprints.action_blueprint import ActionBlueprint
 from backend.blueprints.report_blueprint import ReportBlueprint
+from backend.blueprints.external_blueprint import ExternalBlueprint
 from backend.managers import report_management
 from backend.utils import MyJSONEncoder
 
@@ -44,6 +45,7 @@ class Application:
         app.register_blueprint(UserBlueprint)
         app.register_blueprint(ActionBlueprint)
         app.register_blueprint(ReportBlueprint)
+        app.register_blueprint(ExternalBlueprint)
 
         # Return app reference
         return app
