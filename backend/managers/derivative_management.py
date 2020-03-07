@@ -165,18 +165,11 @@ def indexDerivatives(page_size, page_number, order_key, reverse_order, search_te
             if search_term in company.id.upper() or search_term in company.name.upper():
                 companies_fuz.append(company.id)
 
-        # Search for matching notional currency codes
-        currencies_fuz = []
-        for code in external_management.indexCurrencyCodes():
-            if search_term in code.upper():
-                currencies_fuz.append(code)
-
         # Apply fuzzy search to query
         query = query.filter(or_(
             Derivative.asset.in_(assets_fuz),
             Derivative.buying_party.in_(companies_fuz),
             Derivative.selling_party.in_(companies_fuz),
-            Derivative.notional_curr_code.in_(currencies_fuz)
         ))
 
     # Apply query filters
