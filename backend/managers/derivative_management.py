@@ -199,9 +199,9 @@ def indexDerivatives(page_size, page_number, order_key, reverse_order, search_te
     if assets:
         query = query.filter(Derivative.asset.in_(assets))
     if not show_deleted:
-        query = query.filter(Derivative.deleted == 0)
+        query = query.filter_by(deleted=False)
     if hide_not_deleted:
-        query = query.filter(Derivative.deleted != 0)
+        query = query.filter_by(deleted=True)
 
     # Order the query if the order key is a field in the schema
     if order_key in Derivative.__table__.columns:
