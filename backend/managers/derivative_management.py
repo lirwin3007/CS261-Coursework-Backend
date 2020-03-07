@@ -137,14 +137,10 @@ def updateDerivative(derivative, user_id, updates):
     return update_log
 
 
-def indexDerivatives(page_size, page_number,  # noqa: C901
-                     order_key, reverse_order,
-                     min_notional, max_notional,
-                     min_strike, max_strike,
-                     min_maturity, max_maturity,
-                     min_trade_date, max_trade_date,
+def indexDerivatives(page_size, page_number, order_key, reverse_order,  # noqa: C901
+                     min_notional, max_notional, min_strike, max_strike,
+                     min_maturity, max_maturity, min_trade_date, max_trade_date,
                      buyers, sellers, assets):
-
     # Enforce a minimum page size
     page_size = max(page_size, 3)
 
@@ -175,11 +171,11 @@ def indexDerivatives(page_size, page_number,  # noqa: C901
     if order_key in Derivative.__table__.columns:
         query = query.order_by(desc(order_key) if reverse_order else asc(order_key))
 
-    # Determine if there is a post ordering
+    # Determine if there is any post query processing
     post_filters = min_notional is not None or max_notional is not None
     post_ordering = isinstance(getattr(Derivative, order_key, None), property)
 
-    # If there is a post query ordering or filters execute the query and apply
+    # If there is a post query processing, execute the query and apply afterwards
     if post_filters or post_ordering:
         # Execute sql query
         derivatives = query.all()
@@ -188,24 +184,20 @@ def indexDerivatives(page_size, page_number,  # noqa: C901
         if post_ordering:
             derivatives.sort(key=lambda d: getattr(d, order_key), reverse=reverse_order)
 
-        # Apply all post-query filters to derivatives
+        # Apply post query filters
         if min_notional is not None:
             derivatives = [d for d in derivatives if d.notional_value >= min_notional]
         if max_notional is not None:
             derivatives = [d for d in derivatives if d.notional_value <= max_notional]
 
-        # Determine page count
-        page_count = len(derivatives) // page_size + 1
-        # Calculate index offset
-        offset = page_size * (clamp(page_number, 1, page_count) - 1)
         # Paginate derivatives
+        page_count = len(derivatives) // page_size + 1
+        offset = page_size * (clamp(page_number, 1, page_count) - 1)
         derivatives = derivatives[offset:offset + page_size]
     else:
-        # Determine page count
-        page_count = query.count() // page_size + 1
-        # Calculate index offset
-        offset = page_size * (clamp(page_number, 1, page_count) - 1)
         # Paginate query
+        page_count = query.count() // page_size + 1
+        offset = page_size * (clamp(page_number, 1, page_count) - 1)
         query = query.limit(page_size).offset(offset)
         # Execute sql query
         derivatives = query.all()
