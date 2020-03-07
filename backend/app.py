@@ -10,6 +10,7 @@ from backend.managers import report_management
 from backend.blueprints.user_blueprint import UserBlueprint
 from backend.blueprints.action_blueprint import ActionBlueprint
 from backend.blueprints.report_blueprint import ReportBlueprint
+from backend.blueprints.external_blueprint import ExternalBlueprint
 from backend.blueprints.derivative_blueprint import DerivativeBlueprint
 from backend.blueprints.learned_behaviour_blueprint import LearnedBehaviourBlueprint
 
@@ -44,6 +45,7 @@ class Application:
         app.register_blueprint(UserBlueprint)
         app.register_blueprint(ActionBlueprint)
         app.register_blueprint(ReportBlueprint)
+        app.register_blueprint(ExternalBlueprint)
         app.register_blueprint(DerivativeBlueprint)
         app.register_blueprint(LearnedBehaviourBlueprint)
 

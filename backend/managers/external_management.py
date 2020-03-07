@@ -6,15 +6,18 @@ from datetime import date
 from backend.external_models import Company, Currency, Product, CompanyStock
 
 
-def getAllCompanies():
+def indexCompanies():
     return Company.query.all()
 
 
-def getCompanyName(company_id):
-    company = Company.query.get(company_id)
-    if company is not None:
-        return company.name
-    return None
+def indexAssets():
+    assets = Product.query.with_entities(Product.name).distinct().all()
+    return [asset[0] for asset in assets] + ['Stocks']
+
+
+def indexCurrencyCodes():
+    currency_codes = Currency.query.with_entities(Currency.code).distinct().all()
+    return [code[0] for code in currency_codes]
 
 
 def getUSDExchangeRate(currency_code):
@@ -36,10 +39,6 @@ def getCompanyStockPrice(company_id):
     if company_stock is not None:
         return company_stock.stock_price, company_stock.currency_code
     return math.nan, '?'
-
-
-def getAllProducts():
-    return Product.query.with_entities(Product.name).distinct(Product.name).all()
 
 
 def getAssetPrice(asset_name, selling_party):

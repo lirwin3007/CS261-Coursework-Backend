@@ -6,7 +6,7 @@ import statistics
 # Local application imports
 from backend.db import db
 from backend import utils
-from backend import external_api
+from backend.managers import external_management
 
 
 class Derivative(db.Model):
@@ -43,13 +43,13 @@ class Derivative(db.Model):
     # TODO: revisit
     @property
     def underlying_price(self):
-        up, _ = external_api.getAssetPrice(self.asset, self.selling_party)
+        up, _ = external_management.getAssetPrice(self.asset, self.selling_party)
         return up
 
     # TODO: revisit
     @property
     def underlying_curr_code(self):
-        _, ucc = external_api.getAssetPrice(self.asset, self.selling_party)
+        _, ucc = external_management.getAssetPrice(self.asset, self.selling_party)
         return ucc
 
     # TODO: revisit
@@ -57,18 +57,18 @@ class Derivative(db.Model):
     def notional_value(self):
         up = self.underlying_price
         ucc = self.underlying_curr_code
-        n_ex_rate = external_api.getUSDExchangeRate(self.notional_curr_code)
-        u_ex_rate = external_api.getUSDExchangeRate(ucc)
+        n_ex_rate = external_management.getUSDExchangeRate(self.notional_curr_code)
+        u_ex_rate = external_management.getUSDExchangeRate(ucc)
 
         return self.quantity * up * u_ex_rate / n_ex_rate
 
     @property
     def notional_curr_symbol(self):
-        return utils.getCurrencySymbol(self.notional_curr_code) or '?'
+        return utils.getCurrencySymbol(self.notional_curr_code)
 
     @property
     def underlying_curr_symbol(self):
-        return utils.getCurrencySymbol(self.underlying_curr_code) or '?'
+        return utils.getCurrencySymbol(self.underlying_curr_code)
 
     def __str__(self):
         return f'<Derivative : {self.id}>'
@@ -80,7 +80,7 @@ class User(db.Model):
     l_name = db.Column(db.String(32), nullable=False)
     email = db.Column(db.String(32), nullable=False, unique=True)
     password = db.Column(db.String(128), nullable=False, unique=True)
-    profile_image = db.Column(db.String(128))
+    profile_image = db.Column(db.String(30000))
 
     def __str__(self):
         return f'<User : {self.id}>'
@@ -97,7 +97,7 @@ class Action(db.Model):
     derivative_id = db.Column(db.BigInteger, db.ForeignKey('derivative.id'))
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     type = db.Column(db.Enum(ActionType), nullable=False)
-    timestamp = db.Column(db.DateTime, nullable=False, default=datetime.now())
+    timestamp = db.Column(db.DateTime, nullable=False, default=datetime.now)
     update_log = db.Column(db.JSON)
 
     def __str__(self):

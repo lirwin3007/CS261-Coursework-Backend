@@ -11,7 +11,6 @@ def getUser(user_id):
     Returns:
         User: A user object.
     """
-    # Query database for the user
     return User.query.get(user_id)
 
 
@@ -24,7 +23,6 @@ def getUserFromUsername(username):
     Returns:
         User: A user object.
     """
-    # Query database for the user
     return User.query.filter_by(email=username).first()
 
 
@@ -37,5 +35,4 @@ def getAllUsers():
     Returns:
         list: The list of all users.
     """
-    # Query database for all users
     return User.query.all()

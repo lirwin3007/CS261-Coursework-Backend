@@ -37,20 +37,25 @@ class MyFPDF(FPDF, HTMLMixin):
         self.cell(0, 10, 'PAGE %s OF {nb}' % self.page_no(), 0, 0, 'C')
 
 
-def getCurrencySymbol(currency_code):
-    for l in locale.locale_alias.values():
-        try:
-            locale.setlocale(locale.LC_ALL, l)
-        except locale.Error:
-            continue
+def getCurrencySymbol(code, default='?'):
+    if not hasattr(getCurrencySymbol, "lookup"):
+        # Generate currency symbol lookup table
+        getCurrencySymbol.lookup = {}
 
-        conv = locale.localeconv()
-        code = conv['int_curr_symbol'].strip()
+        for l in locale.locale_alias.values():
+            try:
+                locale.setlocale(locale.LC_ALL, l)
+            except locale.Error:
+                continue
 
-        if code.upper() == currency_code.upper():
-            return conv['currency_symbol']
+            conv = locale.localeconv()
+            code = conv['int_curr_symbol'].strip().upper()
+            symbol = conv['currency_symbol']
 
-    return None
+            getCurrencySymbol.lookup[code] = symbol
+
+    # Return the lookup result else the default value
+    return getCurrencySymbol.lookup.get(code) or default
 
 
 def to_date(date_string):
