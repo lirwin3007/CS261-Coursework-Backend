@@ -7,6 +7,7 @@ from backend.managers import derivative_management
 from backend.managers import user_management
 from backend.derivatex_models import Derivative
 from backend.db import db
+from backend import utils
 from backend.utils import AbsoluteDerivativeException
 
 # Instantiate new blueprint
@@ -154,10 +155,14 @@ def indexDerivatives():
     reverse_order = request.args.get('reverse_order', default=False, type=bool)
 
     # Determine index filters
-    min_notional = request.args.get('min_notional', default=None, type=float)
-    max_notional = request.args.get('max_notional', default=None, type=float)
-    min_strike = request.args.get('min_strike', default=None, type=float)
-    max_strike = request.args.get('max_strike', default=None, type=float)
+    min_notional = request.args.get('min_notional_value', default=None, type=float)
+    max_notional = request.args.get('max_notional_value', default=None, type=float)
+    min_strike = request.args.get('min_strike_price', default=None, type=float)
+    max_strike = request.args.get('max_strike_price', default=None, type=float)
+    min_maturity = request.args.get('min_maturity_date', default=None, type=utils.to_date)
+    max_maturity = request.args.get('max_maturity_date', default=None, type=utils.to_date)
+    min_trade_date = request.args.get('min_date_of_trade', default=None, type=utils.to_date)
+    max_trade_date = request.args.get('max_date_of_trade', default=None, type=utils.to_date)
     buyers = request.args.getlist('buyers', type=str)
     sellers = request.args.getlist('sellers', type=str)
     assets = request.args.getlist('assets', type=str)
@@ -165,7 +170,8 @@ def indexDerivatives():
     # Index derivatives
     derivatives, page_count = derivative_management.indexDerivatives(
         page_size, page_number, order_key, reverse_order, min_notional,
-        max_notional, min_strike, max_strike, buyers, sellers, assets)
+        max_notional, min_strike, max_strike, min_maturity, max_maturity,
+        min_trade_date, max_trade_date, buyers, sellers, assets)
 
     # Make response
     return jsonify(page_count=page_count, derivatives=[d.id for d in derivatives])

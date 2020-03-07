@@ -141,6 +141,8 @@ def indexDerivatives(page_size, page_number,  # noqa: C901
                      order_key, reverse_order,
                      min_notional, max_notional,
                      min_strike, max_strike,
+                     min_maturity, max_maturity,
+                     min_trade_date, max_trade_date,
                      buyers, sellers, assets):
 
     # Enforce a minimum page size
@@ -154,6 +156,14 @@ def indexDerivatives(page_size, page_number,  # noqa: C901
         query = query.filter(Derivative.strike_price >= min_strike)
     if max_strike is not None:
         query = query.filter(Derivative.strike_price <= max_strike)
+    if min_maturity is not None:
+        query = query.filter(Derivative.maturity_date >= min_maturity)
+    if max_maturity is not None:
+        query = query.filter(Derivative.maturity_date <= max_maturity)
+    if min_trade_date is not None:
+        query = query.filter(Derivative.date_of_trade >= min_trade_date)
+    if max_trade_date is not None:
+        query = query.filter(Derivative.date_of_trade <= max_trade_date)
     if buyers:
         query = query.filter(Derivative.buying_party.in_(buyers))
     if sellers:
