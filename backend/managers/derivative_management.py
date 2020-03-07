@@ -1,6 +1,5 @@
 # Standard library imports
 import datetime
-import operator
 
 # Third party imports
 from sqlalchemy import asc, desc
@@ -138,67 +137,36 @@ def updateDerivative(derivative, user_id, updates):
     return update_log
 
 
-def indexDerivatives(filter_dict, page_size, page_number):  # noqa: C901
-    """ Enumerates a page of derivatives from filtered and sorted subset of
-    all derivatives in the database.
+def indexDerivatives(page_size, page_number,  # noqa: C901
+                     order_key, reverse_order,
+                     min_notional, max_notional,
+                     min_strike, max_strike,
+                     buyers, sellers, assets):
 
-    Args:
-        filter_dict (dict): A dictionary of filtering and ordering keys.
-        page_size (int): The number of derivatives that form a page.
-        page_number (int): The page number offset of the index list.
+    # Enforce a minimum page size
+    page_size = max(page_size, 3)
 
-    Returns:
-        (tuple): tuple containing:
-            derivatives (list): The list of derivatives that make up the page
-            page_count (int): The number of pages all the derivatives are spread across
-    """
     # Create base query
     query = Derivative.query
 
-    # Initialise pre and post query filter sets
-    pre_filters = set()
-    post_filters = set()
-
-    # Create filters from the filter dictionary
-    for filter_name, value in filter_dict.items():
-        # Determine filter comparison operation from the filter name prefix
-        if filter_name.startswith('min_'):
-            # Select >= operator and extract filter name
-            filter_name = filter_name[4:]
-            op = operator.ge
-        elif filter_name.startswith('max_'):
-            # Select <= operator and extract filter name
-            filter_name = filter_name[4:]
-            op = operator.le
-        else:
-            # Default to equality
-            op = operator.eq
-
-        # The filter attribute is a member of the Derivative schema
-        if filter_name in Derivative.__table__.columns:
-            # Create and add filter to pre-filters
-            filter = op(Derivative.__table__.columns[filter_name], value)
-            pre_filters.add(filter)
-
-        # The filter attribute is a property of the Derivative class
-        elif isinstance(getattr(Derivative, filter_name, None), property):
-            # Create and add filter to post-filters
-            filter = lambda d: op(getattr(d, filter_name), value)  # noqa: E731
-            post_filters.add(filter)
-
-    # Apply all pre-filters to the base query
-    for f in pre_filters:
-        query = query.filter(f)
-
-    # Determine derivative ordering key
-    order_key = filter_dict.get('order_key') or ''
-    reverse_order = filter_dict.get('reverse_order') or False
+    # Apply query filters
+    if min_strike is not None:
+        query = query.filter(Derivative.strike_price >= min_strike)
+    if max_strike is not None:
+        query = query.filter(Derivative.strike_price <= max_strike)
+    if buyers:
+        query = query.filter(Derivative.buying_party.in_(buyers))
+    if sellers:
+        query = query.filter(Derivative.selling_party.in_(sellers))
+    if assets:
+        query = query.filter(Derivative.asset.in_(assets))
 
     # Order the query if the order key is a field in the schema
     if order_key in Derivative.__table__.columns:
         query = query.order_by(desc(order_key) if reverse_order else asc(order_key))
 
     # Determine if there is a post ordering
+    post_filters = min_notional is not None or max_notional is not None
     post_ordering = isinstance(getattr(Derivative, order_key, None), property)
 
     # If there is a post query ordering or filters execute the query and apply
@@ -211,8 +179,10 @@ def indexDerivatives(filter_dict, page_size, page_number):  # noqa: C901
             derivatives.sort(key=lambda d: getattr(d, order_key), reverse=reverse_order)
 
         # Apply all post-query filters to derivatives
-        for f in post_filters:
-            derivatives = [d for d in derivatives if f(d)]
+        if min_notional is not None:
+            derivatives = [d for d in derivatives if d.notional_value >= min_notional]
+        if max_notional is not None:
+            derivatives = [d for d in derivatives if d.notional_value <= max_notional]
 
         # Determine page count
         page_count = len(derivatives) // page_size + 1

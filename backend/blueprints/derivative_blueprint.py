@@ -145,16 +145,27 @@ def updateDerivative(derivative_id):
 
 @DerivativeBlueprint.route('/index-derivatives')
 def indexDerivatives():
-    # Determine page parameters
+    # Determine index page parameters
     page_size = request.args.get('page_size', default=15, type=int)
     page_number = request.args.get('page_number', default=0, type=int)
 
-    # Convert args Multidict to dictionary
-    filter_dict = request.args.to_dict(flat=True)
+    # Determine index order
+    order_key = request.args.get('order_key', default='id', type=str)
+    reverse_order = request.args.get('reverse_order', default=False, type=bool)
+
+    # Determine index filters
+    min_notional = request.args.get('min_notional', default=None, type=float)
+    max_notional = request.args.get('max_notional', default=None, type=float)
+    min_strike = request.args.get('min_strike', default=None, type=float)
+    max_strike = request.args.get('max_strike', default=None, type=float)
+    buyers = request.args.getlist('buyers', type=str)
+    sellers = request.args.getlist('sellers', type=str)
+    assets = request.args.getlist('assets', type=str)
 
     # Index derivatives
-    derivatives, page_count = derivative_management.indexDerivatives(filter_dict,
-                                                                     page_size,
-                                                                     page_number)
+    derivatives, page_count = derivative_management.indexDerivatives(
+        page_size, page_number, order_key, reverse_order, min_notional,
+        max_notional, min_strike, max_strike, buyers, sellers, assets)
+
     # Make response
     return jsonify(page_count=page_count, derivatives=[d.id for d in derivatives])
