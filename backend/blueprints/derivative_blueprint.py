@@ -167,15 +167,15 @@ def indexDerivatives():
     buyers = request.args.getlist('buyers', type=str)
     sellers = request.args.getlist('sellers', type=str)
     assets = request.args.getlist('assets', type=str)
-    showDeleted = request.args.get('show_deleted', default=False, type=bool)
-    hideNotDeleted = request.args.get('hide_not_deleted', default=False, type=bool)
+    show_deleted = request.args.get('show_deleted', default=False, type=bool)
+    hide_not_deleted = request.args.get('hide_not_deleted', default=False, type=bool)
 
     # Index derivatives
     derivatives, page_count = derivative_management.indexDerivatives(
         page_size, page_number, order_key, reverse_order, search_term,
         min_notional, max_notional, min_strike, max_strike, min_maturity,
         max_maturity, min_trade_date, max_trade_date, buyers, sellers, assets,
-        showDeleted, hideNotDeleted)
+        show_deleted, hide_not_deleted)
 
     # Make response
     return jsonify(page_count=page_count, derivatives=[d.id for d in derivatives])

@@ -141,7 +141,7 @@ def updateDerivative(derivative, user_id, updates):
 def indexDerivatives(page_size, page_number, order_key, reverse_order, search_term,  # noqa: C901
                      min_notional, max_notional, min_strike, max_strike,
                      min_maturity, max_maturity, min_trade_date, max_trade_date,
-                     buyers, sellers, assets, showDeleted, hideNotDeleted):
+                     buyers, sellers, assets, show_deleted, hide_not_deleted):
     # Enforce a minimum page size
     page_size = max(page_size, 3)
 
@@ -198,9 +198,9 @@ def indexDerivatives(page_size, page_number, order_key, reverse_order, search_te
         query = query.filter(Derivative.selling_party.in_(sellers))
     if assets:
         query = query.filter(Derivative.asset.in_(assets))
-    if not showDeleted:
+    if not show_deleted:
         query = query.filter(Derivative.deleted == 0)
-    if hideNotDeleted:
+    if hide_not_deleted:
         query = query.filter(Derivative.deleted != 0)
 
     # Order the query if the order key is a field in the schema
