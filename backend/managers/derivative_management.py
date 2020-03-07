@@ -20,7 +20,7 @@ def getDerivative(derivative_id):
     Returns:
         Derivative: The derivative in the database with the corrosponding ID.
     """
-    return Derivative.query.filter_by(deleted=False, id=derivative_id).first()
+    return Derivative.query.filter_by(id=derivative_id).first()
 
 
 def addDerivative(derivative, user_id):
@@ -141,7 +141,7 @@ def updateDerivative(derivative, user_id, updates):
 def indexDerivatives(page_size, page_number, order_key, reverse_order, search_term,  # noqa: C901
                      min_notional, max_notional, min_strike, max_strike,
                      min_maturity, max_maturity, min_trade_date, max_trade_date,
-                     buyers, sellers, assets):
+                     buyers, sellers, assets, showDeleted, hideNotDeleted):
     # Enforce a minimum page size
     page_size = max(page_size, 3)
 
@@ -198,6 +198,10 @@ def indexDerivatives(page_size, page_number, order_key, reverse_order, search_te
         query = query.filter(Derivative.selling_party.in_(sellers))
     if assets:
         query = query.filter(Derivative.asset.in_(assets))
+    if not showDeleted:
+        query = query.filter(Derivative.deleted == 0)
+    if hideNotDeleted:
+        query = query.filter(Derivative.deleted != 0)
 
     # Order the query if the order key is a field in the schema
     if order_key in Derivative.__table__.columns:
