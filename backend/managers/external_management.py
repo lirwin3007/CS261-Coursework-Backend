@@ -12,7 +12,7 @@ def indexCompanies():
 
 def indexAssets():
     assets = Product.query.with_entities(Product.name).distinct().all()
-    return [asset[0] for asset in assets]
+    return [asset[0] for asset in assets] + ['Stocks']
 
 
 def indexCurrencyCodes():
