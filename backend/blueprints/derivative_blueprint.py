@@ -155,6 +155,7 @@ def indexDerivatives():
     reverse_order = request.args.get('reverse_order', default=False, type=bool)
 
     # Determine index filters
+    search_term = request.args.get('search_term', default=None, type=str)
     min_notional = request.args.get('min_notional_value', default=None, type=float)
     max_notional = request.args.get('max_notional_value', default=None, type=float)
     min_strike = request.args.get('min_strike_price', default=None, type=float)
@@ -169,9 +170,9 @@ def indexDerivatives():
 
     # Index derivatives
     derivatives, page_count = derivative_management.indexDerivatives(
-        page_size, page_number, order_key, reverse_order, min_notional,
-        max_notional, min_strike, max_strike, min_maturity, max_maturity,
-        min_trade_date, max_trade_date, buyers, sellers, assets)
+        page_size, page_number, order_key, reverse_order, search_term,
+        min_notional, max_notional, min_strike, max_strike, min_maturity,
+        max_maturity, min_trade_date, max_trade_date, buyers, sellers, assets)
 
     # Make response
     return jsonify(page_count=page_count, derivatives=[d.id for d in derivatives])

@@ -2,11 +2,12 @@
 import datetime
 
 # Third party imports
-from sqlalchemy import asc, desc
+from sqlalchemy import asc, desc, or_
 
 # Local application imports
 from backend.derivatex_models import Derivative, Action, ActionType
 from backend.db import db
+from backend.managers import external_management
 from backend.utils import clamp, AbsoluteDerivativeException
 
 
@@ -137,7 +138,7 @@ def updateDerivative(derivative, user_id, updates):
     return update_log
 
 
-def indexDerivatives(page_size, page_number, order_key, reverse_order,  # noqa: C901
+def indexDerivatives(page_size, page_number, order_key, reverse_order, search_term,  # noqa: C901
                      min_notional, max_notional, min_strike, max_strike,
                      min_maturity, max_maturity, min_trade_date, max_trade_date,
                      buyers, sellers, assets):
@@ -146,6 +147,37 @@ def indexDerivatives(page_size, page_number, order_key, reverse_order,  # noqa: 
 
     # Create base query
     query = Derivative.query
+
+    # Fuzzy search
+    if search_term is not None:
+        # Standardise the search term
+        search_term = search_term.strip().upper()
+
+        # Search for matching asset names
+        assets_fuz = []
+        for asset in external_management.indexAssets():
+            if search_term in asset.upper():
+                assets_fuz.append(asset)
+
+        # Search for matching company ids or names
+        companies_fuz = []
+        for company in external_management.indexCompanies():
+            if search_term in company.id.upper() or search_term in company.name.upper():
+                companies_fuz.append(company.id)
+
+        # Search for matching notional currency codes
+        currencies_fuz = []
+        for code in external_management.indexCurrencyCodes():
+            if search_term in code.upper():
+                currencies_fuz.append(code)
+
+        # Apply fuzzy search to query
+        query = query.filter(or_(
+            Derivative.asset.in_(assets_fuz),
+            Derivative.buying_party.in_(companies_fuz),
+            Derivative.selling_party.in_(companies_fuz),
+            Derivative.notional_curr_code.in_(currencies_fuz)
+        ))
 
     # Apply query filters
     if min_strike is not None:
