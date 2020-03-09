@@ -141,7 +141,7 @@ def updateDerivative(derivative, user_id, tree_id, updates):
 def indexDerivatives(page_size, page_number, order_key, reverse_order, search_term,  # noqa: C901
                      min_notional, max_notional, min_strike, max_strike,
                      min_maturity, max_maturity, min_trade_date, max_trade_date,
-                     buyers, sellers, assets, showDeleted, hideNotDeleted):
+                     buyers, sellers, assets, show_deleted, hide_not_deleted):
     # Enforce a minimum page size
     page_size = max(page_size, 3)
 
@@ -165,18 +165,11 @@ def indexDerivatives(page_size, page_number, order_key, reverse_order, search_te
             if search_term in company.id.upper() or search_term in company.name.upper():
                 companies_fuz.append(company.id)
 
-        # Search for matching notional currency codes
-        currencies_fuz = []
-        for code in external_management.indexCurrencyCodes():
-            if search_term in code.upper():
-                currencies_fuz.append(code)
-
         # Apply fuzzy search to query
         query = query.filter(or_(
             Derivative.asset.in_(assets_fuz),
             Derivative.buying_party.in_(companies_fuz),
             Derivative.selling_party.in_(companies_fuz),
-            Derivative.notional_curr_code.in_(currencies_fuz)
         ))
 
     # Apply query filters
@@ -198,10 +191,10 @@ def indexDerivatives(page_size, page_number, order_key, reverse_order, search_te
         query = query.filter(Derivative.selling_party.in_(sellers))
     if assets:
         query = query.filter(Derivative.asset.in_(assets))
-    if not showDeleted:
-        query = query.filter(Derivative.deleted == 0)
-    if hideNotDeleted:
-        query = query.filter(Derivative.deleted != 0)
+    if not show_deleted:
+        query = query.filter_by(deleted=False)
+    if hide_not_deleted:
+        query = query.filter_by(deleted=True)
 
     # Order the query if the order key is a field in the schema
     if order_key in Derivative.__table__.columns:

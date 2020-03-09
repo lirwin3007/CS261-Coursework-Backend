@@ -20,11 +20,21 @@ def testGetDerivativeRetrievesDerivative(test_client, dummy_derivative):
 
     # Assert that the response status is 200 OK
     assert response.status_code == 200
+    assert response.is_json
 
     # Assert that the response body is the serialization of the derivative
-    assert response.is_json
+    response_json = response.get_json().get('derivative')
     expected_response = jsonify(derivative=dummy_derivative)
-    assert response.get_json() == expected_response.get_json()
+    expected_json = expected_response.get_json().get('derivative')
+
+    # Compare json bodies
+    for key, expected_val in expected_json.items():
+        # Skip nan values
+        if key in ['underlying_price', 'notional_value', 'notional_curr_symbol']:
+            continue
+
+        # Assert the value is as expected
+        assert response_json.get(key) == expected_val
 
 
 def testGetDerivativeWillReturn404(test_client, free_derivtive_id):

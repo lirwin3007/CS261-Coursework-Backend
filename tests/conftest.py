@@ -7,7 +7,7 @@ from datetime import date, timedelta
 import pytest
 
 # Local application imports
-from backend.derivatex_models import Derivative, User, ReportHead
+from backend.derivatex_models import Derivative, User, ReportHead, Action, ActionType
 from backend.app import Application
 from backend.db import db
 
@@ -136,6 +136,15 @@ def dummy_updates():
         'selling_party': 'newbar',
         'asset': 'newbaz'
     }
+
+
+@pytest.fixture
+def dummy_action():
+    return Action(
+        type=ActionType.ADD,
+        timestamp=date.today(),
+        update_log=None,
+    )
 
 
 @pytest.fixture
