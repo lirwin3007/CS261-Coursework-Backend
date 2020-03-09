@@ -57,7 +57,7 @@ def authenticateUser():
         None
 
     Returns:
-        None
+        JSON: A JSON object representing the user.
     """
     # Bad request cases
     if not request.data:
@@ -83,5 +83,5 @@ def authenticateUser():
     else:
         # Check if correct credentials are supplied
         if user.password == password:
-            return 'OK', 200
+            return jsonify(user=user), 200
         return abort(401, f'Incorrect password for user {username}')

@@ -5,12 +5,14 @@ from flask_apscheduler import APScheduler
 
 # Local application imports
 from backend.db import db
-from backend.blueprints.derivative_blueprint import DerivativeBlueprint
+from backend.utils import MyJSONEncoder
+from backend.managers import report_management
 from backend.blueprints.user_blueprint import UserBlueprint
 from backend.blueprints.action_blueprint import ActionBlueprint
 from backend.blueprints.report_blueprint import ReportBlueprint
-from backend.managers import report_management
-from backend.utils import MyJSONEncoder
+from backend.blueprints.external_blueprint import ExternalBlueprint
+from backend.blueprints.derivative_blueprint import DerivativeBlueprint
+from backend.blueprints.learned_behaviour_blueprint import LearnedBehaviourBlueprint
 
 
 class Application:
@@ -40,10 +42,12 @@ class Application:
         db.create_all()
 
         # Register route blueprints
-        app.register_blueprint(DerivativeBlueprint)
         app.register_blueprint(UserBlueprint)
         app.register_blueprint(ActionBlueprint)
         app.register_blueprint(ReportBlueprint)
+        app.register_blueprint(ExternalBlueprint)
+        app.register_blueprint(DerivativeBlueprint)
+        app.register_blueprint(LearnedBehaviourBlueprint)
 
         # Return app reference
         return app

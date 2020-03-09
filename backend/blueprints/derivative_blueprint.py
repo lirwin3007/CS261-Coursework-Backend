@@ -7,6 +7,7 @@ from backend.managers import derivative_management
 from backend.managers import user_management
 from backend.derivatex_models import Derivative
 from backend.db import db
+from backend import utils
 from backend.utils import AbsoluteDerivativeException
 
 # Instantiate new blueprint
@@ -50,12 +51,8 @@ def addDerivative():
 
     except IntegrityError as e:
         return abort(400, f'invalid derivative data: {e.orig}')
-    except Exception:
-        return abort(400, 'invalid derivative data')
-
-    # Validate the new derivative
-    # if invalid derivative:
-    #     return abort(418)
+    except Exception as e:
+        return abort(400, f'invalid derivative data: {e}')
 
     # Commit addition to database
     db.session.commit()
@@ -107,6 +104,7 @@ def updateDerivative(derivative_id):
     # Retreive json body from request
     body = request.get_json()
     user_id = body.get('user_id')
+    tree_id = body.get('tree_id')
 
     # Verify user exists
     if user_management.getUser(user_id) is None:
@@ -124,17 +122,13 @@ def updateDerivative(derivative_id):
 
     # Update the derivative
     try:
-        update_log = derivative_management.updateDerivative(derivative, user_id, updates)
+        update_log = derivative_management.updateDerivative(derivative, user_id, tree_id, updates)
     except AbsoluteDerivativeException:
         return abort(400, 'derivative is absolute, update denied')
 
     # If no updates were made to the derivative, abort
     if not update_log:
         return abort(400, 'no valid updates')
-
-    # Validate the updated derivative
-    # if invalid derivative:
-    #     return abort(418)
 
     # Commit the derivative updates to the database
     db.session.commit()
@@ -145,17 +139,36 @@ def updateDerivative(derivative_id):
 
 @DerivativeBlueprint.route('/index-derivatives')
 def indexDerivatives():
-    # Extract body from request
-    body = request.get_json(silent=True) or {}
-
-    # Determine page parameters
-    page_size = max(body.get('page_size') or 15, 1)
+    # Determine index page parameters
+    page_size = request.args.get('page_size', default=15, type=int)
     page_number = request.args.get('page_number', default=0, type=int)
 
+    # Determine index order
+    order_key = request.args.get('order_key', default='id', type=str)
+    reverse_order = request.args.get('reverse_order', default=False, type=bool)
+
+    # Determine index filters
+    search_term = request.args.get('search_term', default=None, type=str)
+    min_notional = request.args.get('min_notional_value', default=None, type=float)
+    max_notional = request.args.get('max_notional_value', default=None, type=float)
+    min_strike = request.args.get('min_strike_price', default=None, type=float)
+    max_strike = request.args.get('max_strike_price', default=None, type=float)
+    min_maturity = request.args.get('min_maturity_date', default=None, type=utils.to_date)
+    max_maturity = request.args.get('max_maturity_date', default=None, type=utils.to_date)
+    min_trade_date = request.args.get('min_date_of_trade', default=None, type=utils.to_date)
+    max_trade_date = request.args.get('max_date_of_trade', default=None, type=utils.to_date)
+    buyers = request.args.getlist('buyers', type=str)
+    sellers = request.args.getlist('sellers', type=str)
+    assets = request.args.getlist('assets', type=str)
+    show_deleted = request.args.get('show_deleted', default=False, type=bool)
+    hide_not_deleted = request.args.get('hide_not_deleted', default=False, type=bool)
+
     # Index derivatives
-    derivatives, page_count = derivative_management.indexDerivatives(body,
-                                                                     page_size,
-                                                                     page_number)
+    derivatives, page_count = derivative_management.indexDerivatives(
+        page_size, page_number, order_key, reverse_order, search_term,
+        min_notional, max_notional, min_strike, max_strike, min_maturity,
+        max_maturity, min_trade_date, max_trade_date, buyers, sellers, assets,
+        show_deleted, hide_not_deleted)
 
     # Make response
     return jsonify(page_count=page_count, derivatives=[d.id for d in derivatives])
