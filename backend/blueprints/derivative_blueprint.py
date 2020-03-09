@@ -54,10 +54,6 @@ def addDerivative():
     except Exception as e:
         return abort(400, f'invalid derivative data: {e}')
 
-    # Validate the new derivative
-    # if invalid derivative:
-    #     return abort(418)
-
     # Commit addition to database
     db.session.commit()
 
@@ -133,10 +129,6 @@ def updateDerivative(derivative_id):
     # If no updates were made to the derivative, abort
     if not update_log:
         return abort(400, 'no valid updates')
-
-    # Validate the updated derivative
-    # if invalid derivative:
-    #     return abort(418)
 
     # Commit the derivative updates to the database
     db.session.commit()

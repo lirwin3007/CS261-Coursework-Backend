@@ -25,6 +25,7 @@ def growTrees():
     # Return the result
     return jsonify(result=result)
 
+
 @LearnedBehaviourBlueprint.route('/index-trees')
 def indexTrees():
     # Index all trees
@@ -34,6 +35,7 @@ def indexTrees():
 
     # Return the result
     return jsonify(trees=trees, actions=actions)
+
 
 @LearnedBehaviourBlueprint.route('/get-flags/<tree_id>')
 def getFlags(tree_id):
@@ -47,6 +49,7 @@ def getFlags(tree_id):
 
     # Return the result
     return {'flags': flags}
+
 
 @LearnedBehaviourBlueprint.route('/verify-derivative', methods=['POST'])
 def verifyDerivative():

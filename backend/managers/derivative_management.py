@@ -122,7 +122,12 @@ def updateDerivative(derivative, user_id, tree_id, updates):
         }
 
         # Register update action
-        action = Action(derivative_id=derivative.id, user_id=user_id, tree_id=tree_id, type=ActionType.UPDATE, update_log=log)
+        action = Action(derivative_id=derivative.id,
+                        user_id=user_id,
+                        tree_id=tree_id,
+                        type=ActionType.UPDATE,
+                        update_log=log)
+
         db.session.add(action)
         update_log.append(log)
 

@@ -8,6 +8,7 @@ from backend.managers import external_management
 from backend.db import db
 from backend.derivatex_models import DecisionTreeNode, Label, Derivative, Action, ActionType, Features
 
+
 def indexTrees():
     """Index all the decision trees.
 
@@ -30,6 +31,7 @@ def getNode(node_id):
 
     return DecisionTreeNode.query.get(node_id)
 
+
 def getFlags(node_id):
     """Gets the flags for a give tree.
 
@@ -40,6 +42,7 @@ def getFlags(node_id):
     """
 
     return splitOnTree(getNode(node_id))[Label.ERRONEOUS]
+
 
 def verifyDerivative(derivative):
     data = [{'derivative': derivative}]
@@ -75,6 +78,7 @@ def splitOnTree(root_node):
 
     return result
 
+
 def splitOnNode(node, data):
     result = {
         Label.VALID: [],
@@ -98,6 +102,7 @@ def splitOnNode(node, data):
         result[Label.ERRONEOUS] += falseChildResult[Label.ERRONEOUS]
 
     return result
+
 
 def updateNode(node, updates):
     """ Updates the attributes of the given node with new values.
@@ -133,6 +138,7 @@ def indexNodeActions(tree_id):
     that have been taken by a tree of a given id
     """
     return Action.query.filter(Action.tree_id == tree_id).all()
+
 
 def removeTree(root_node):
     all_nodes = []
@@ -200,6 +206,7 @@ def growTrees():
 
     return 1
 
+
 def growTree(trainingData):
 
     potentialNodeCriteria = generatePotentialNodeCriteria()
@@ -217,16 +224,16 @@ def growTree(trainingData):
         currentNode = currentNodeData[0]
         trueData = currentNodeData[1]
         falseData = currentNodeData[2]
-        #Check for the tree being complete
+        # Check for the tree being complete
 
         trueNodeData = growNode(potentialNodeCriteria, trueData)
         trueLabel, falseLabel = getNodeLabel(trueNodeData[1], trueNodeData[2])
         impurity = calculateGiniImpurity(trueNodeData[1], trueNodeData[2])
-        #print(f"trueNode: {trueNodeData[0]}")
-        #print(f"truelabel: {trueLabel}")
-        #print(f"falselabel: {falseLabel}")
-        #print(f"impurity: {calculateGiniImpurity(trueNodeData[1], trueNodeData[2])}")
-        #print()
+        # print(f"trueNode: {trueNodeData[0]}")
+        # print(f"truelabel: {trueLabel}")
+        # print(f"falselabel: {falseLabel}")
+        # print(f"impurity: {calculateGiniImpurity(trueNodeData[1], trueNodeData[2])}")
+        # print()
         trueNodeData[0].parent_id = currentNode.id
         trueNodeData[0].true_label = trueLabel
         trueNodeData[0].false_label = falseLabel
@@ -244,12 +251,12 @@ def growTree(trainingData):
         if not finished:
             falseNodeData = growNode(potentialNodeCriteria, falseData)
             trueLabel, falseLabel = getNodeLabel(falseNodeData[1], falseNodeData[2])
-            impurity = calculateGiniImpurity(falseNodeData[1], falseNodeData[2])
-            #print(f"trueNode: {falseNodeData[0]}")
-            #print(f"truelabel: {trueLabel}")
-            #print(f"falselabel: {falseLabel}")
-            #print(f"impurity: {calculateGiniImpurity(trueNodeData[1], trueNodeData[2])}")
-            #print()
+            # impurity = calculateGiniImpurity(falseNodeData[1], falseNodeData[2])
+            # print(f"trueNode: {falseNodeData[0]}")
+            # print(f"truelabel: {trueLabel}")
+            # print(f"falselabel: {falseLabel}")
+            # print(f"impurity: {calculateGiniImpurity(trueNodeData[1], trueNodeData[2])}")
+            # print()
             falseNodeData[0].parent_id = currentNode.id
             falseNodeData[0].true_label = trueLabel
             falseNodeData[0].false_label = falseLabel
@@ -300,6 +307,7 @@ def growTree(trainingData):
     db.session.commit()
     return getNode(rootNodeId)
 
+
 def pruneNode(node):
     if (node.true_node_id is not None):
         pruneNode(DecisionTreeNode.query.get(node.true_node_id))
@@ -321,6 +329,7 @@ def pruneNode(node):
 
     db.session.flush()
 
+
 def getNodeLabel(trueSplit, falseSplit):
     trueValid = len([x for x in trueSplit if x['label'] == Label.VALID])
     trueErroneous = len([x for x in trueSplit if x['label'] == Label.ERRONEOUS])
@@ -338,12 +347,13 @@ def getNodeLabel(trueSplit, falseSplit):
 
     return trueLabel, falseLabel
 
+
 def growNode(potentialNodeCriteria, trainingData):
     bestNode = None
     bestImpurity = 1.1
     for nodeCriteria in potentialNodeCriteria:
-        potentialNode = DecisionTreeNode(feature = nodeCriteria[0],
-                                         criteria = nodeCriteria[1])
+        potentialNode = DecisionTreeNode(feature=nodeCriteria[0],
+                                         criteria=nodeCriteria[1])
 
         trueSplit, falseSplit = potentialNode.split(trainingData)
         impurity = calculateGiniImpurity(trueSplit, falseSplit)
@@ -353,6 +363,7 @@ def growNode(potentialNodeCriteria, trainingData):
 
     trueSplit, falseSplit = bestNode.split(trainingData)
     return bestNode, trueSplit, falseSplit
+
 
 def calculateGiniImpurity(trueSplit, falseSplit):
     if (len(trueSplit) + len(falseSplit)) == 0:
@@ -378,19 +389,21 @@ def calculateGiniImpurity(trueSplit, falseSplit):
     impurity = alpha * trueImpurity + (1 - alpha) * falseImpurity
     return impurity
 
+
 def generatePotentialNodeCriteria():
     statisticalCriteria = ['less_than_mean', 'more_than_mean', '0_to_1_std', '1_to_2_std', '2_to_3_std', '3_to_inf_std']
 
-    potentialNodes =  [(Features.BUYING_PARTY, x.id) for x in external_management.indexCompanies()]
+    potentialNodes = [(Features.BUYING_PARTY, x.id) for x in external_management.indexCompanies()]
     potentialNodes += [(Features.SELLING_PARTY, x.id) for x in external_management.indexCompanies()]
     potentialNodes += [(Features.ASSET, x) for x in external_management.indexAssets()]
     potentialNodes += [(Features.QUANTITY, x) for x in statisticalCriteria]
     potentialNodes += [(Features.STRIKE_PRICE, x) for x in statisticalCriteria]
     return potentialNodes
 
+
 def compileData():
     # Get all of the data
-    derivatives = Derivative.query.filter(Derivative.id <= 25000, Derivative.deleted == False).all()
+    derivatives = Derivative.query.filter(Derivative.id <= 25000, Derivative.deleted == False).all() # noqa E712
 
     # Calculate the features and label of each derivative
     validData = []

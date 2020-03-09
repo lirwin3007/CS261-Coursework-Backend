@@ -244,7 +244,7 @@ class DecisionTreeNode(db.Model):
             result = deviation > 3 * standardDeviation
         return result
 
-    def split(self, data):
+    def split(self, data):  # noqa: C901
         """ Split given data on this node.
 
         Args:
