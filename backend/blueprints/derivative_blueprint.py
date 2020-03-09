@@ -108,6 +108,7 @@ def updateDerivative(derivative_id):
     # Retreive json body from request
     body = request.get_json()
     user_id = body.get('user_id')
+    tree_id = body.get('tree_id')
 
     # Verify user exists
     if user_management.getUser(user_id) is None:
@@ -125,7 +126,7 @@ def updateDerivative(derivative_id):
 
     # Update the derivative
     try:
-        update_log = derivative_management.updateDerivative(derivative, user_id, updates)
+        update_log = derivative_management.updateDerivative(derivative, user_id, tree_id, updates)
     except AbsoluteDerivativeException:
         return abort(400, 'derivative is absolute, update denied')
 

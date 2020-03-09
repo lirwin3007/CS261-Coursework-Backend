@@ -11,7 +11,7 @@ from backend.managers import external_management
 
 class Derivative(db.Model):
     id = db.Column(db.BigInteger, primary_key=True)
-    code = db.Column(db.String(16), nullable=False, unique=True)
+    code = db.Column(db.String(16), nullable=False)
     buying_party = db.Column(db.String(6), nullable=False)
     selling_party = db.Column(db.String(6), nullable=False)
     asset = db.Column(db.String(128), nullable=False)
@@ -25,7 +25,6 @@ class Derivative(db.Model):
 
     @property
     def absolute(self):
-        return False
         # Determine time diff between date of trade and now
         delta = date.today() - self.date_of_trade
         # The derivative is absolute if it was traded over a month ago
@@ -96,6 +95,7 @@ class Action(db.Model):
     id = db.Column(db.BigInteger, primary_key=True)
     derivative_id = db.Column(db.BigInteger, db.ForeignKey('derivative.id'))
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    tree_id = db.Column(db.Integer)
     type = db.Column(db.Enum(ActionType), nullable=False)
     timestamp = db.Column(db.DateTime, nullable=False, default=datetime.now)
     update_log = db.Column(db.JSON)
@@ -130,12 +130,28 @@ class Label(str, enum.Enum):
 
 class DecisionTreeNode(db.Model):
     id = db.Column(db.BigInteger, primary_key=True)
-    parent_id = db.Column(db.BigInteger, db.ForeignKey('decision_tree_node.id'))
-    true_node_id = db.Column(db.BigInteger, db.ForeignKey('decision_tree_node.id'))
-    false_node_id = db.Column(db.BigInteger, db.ForeignKey('decision_tree_node.id'))
+    parent_id = db.Column(db.BigInteger)
+    true_node_id = db.Column(db.BigInteger)
+    false_node_id = db.Column(db.BigInteger)
     feature = db.Column(db.Enum(Features))
     criteria = db.Column(db.Text)
-    label = db.Column(db.Enum(Label))
+    true_label = db.Column(db.Enum(Label))
+    false_label = db.Column(db.Enum(Label))
+    approved = db.Column(db.Boolean, nullable=False, default=False)
+    automated = db.Column(db.Boolean, nullable=False, default=False)
+    description = db.Column(db.String(500))
+    confidence = db.Column(db.Integer)
+    last_flag_count = db.Column(db.Integer)
+    suggested_feature = db.Column(db.String(100))
+    suggested_value = db.Column(db.String(100))
+
+    @property
+    def true_node(self):
+        return self.query.get(self.true_node_id)
+
+    @property
+    def false_node(self):
+        return self.query.get(self.false_node_id)
 
     def calculateBuyingPartyFeature(self, item):
         """ Calculate the buying party feature of a given item.
@@ -260,10 +276,14 @@ class DecisionTreeNode(db.Model):
                 trueSplit = data
                 falseSplit = []
             else:
-                if self.criteria == 'less_than_mean' or self.criteria == 'more_than_mean':
-                    mean = statistics.mean([x['derivative']['quantity'] for x in data])
+                if 'label' in data[0]:
+                    statsData = [x for x in data if x['label'] == Label.VALID]
                 else:
-                    standardDeviation = statistics.stdev([x['derivative']['quantity'] for x in data])
+                    statsData = data
+                if self.criteria == 'less_than_mean' or self.criteria == 'more_than_mean':
+                    mean = statistics.mean([x['derivative']['quantity'] for x in statsData])
+                else:
+                    standardDeviation = statistics.stdev([x['derivative']['quantity'] for x in statsData])
                 trueSplit = filter(lambda x: self.calculateQuantityFeature(x, mean, standardDeviation), data)
                 falseSplit = filter(lambda x: not self.calculateQuantityFeature(x, mean, standardDeviation), data)
         elif self.feature == Features.STRIKE_PRICE:
@@ -273,10 +293,14 @@ class DecisionTreeNode(db.Model):
                 trueSplit = data
                 falseSplit = []
             else:
-                if self.criteria == 'less_than_mean' or self.criteria == 'more_than_mean':
-                    mean = statistics.mean([x['derivative']['strike_price'] for x in data])
+                if 'label' in data[0]:
+                    statsData = [x for x in data if x['label'] == Label.VALID]
                 else:
-                    standardDeviation = statistics.stdev([x['derivative']['strike_price'] for x in data])
+                    statsData = data
+                if self.criteria == 'less_than_mean' or self.criteria == 'more_than_mean':
+                    mean = statistics.mean([x['derivative']['strike_price'] for x in statsData])
+                else:
+                    standardDeviation = statistics.stdev([x['derivative']['strike_price'] for x in statsData])
                 trueSplit = filter(lambda x: self.calculateStrikePriceFeature(x, mean, standardDeviation), data)
                 falseSplit = filter(lambda x: not self.calculateStrikePriceFeature(x, mean, standardDeviation), data)
 
