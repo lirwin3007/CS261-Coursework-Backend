@@ -444,12 +444,12 @@ def compileData():
     trainingData = []
     testData = []
     for item in validData:
-        if random.random() > 0.5:
+        if random.random() > 0.5:  # nosec B311
             testData.append(item)
         else:
             trainingData.append(item)
     for item in erroneousData:
-        if random.random() > 0.5:
+        if random.random() > 0.5:  # nosec B311
             testData.append(item)
         else:
             trainingData.append(item)
