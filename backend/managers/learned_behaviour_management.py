@@ -1,3 +1,5 @@
+# flake8: noqa
+
 # Standard library imports
 import random
 import datetime

@@ -1,7 +1,11 @@
 # flake8: noqa
+
+# Standard library imports
 import json
-import mysql.connector
 import random
+
+# Third party imports
+import mysql.connector
 
 
 # Constants
