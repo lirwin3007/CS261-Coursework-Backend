@@ -105,6 +105,7 @@ def testUpdateDerivativeUpdatesAttributes(dummy_derivative, dummy_user, dummy_up
     # Execute updateDerivative
     derivative_management.updateDerivative(dummy_derivative,
                                            dummy_user.id,
+                                           -1,
                                            dummy_updates)
 
     # Assert that all attribute values have been correctly updated
@@ -132,6 +133,7 @@ def testUpdateDerivativeLogsUpdates(dummy_derivative, dummy_user, dummy_updates)
     # Execute updateDerivative
     update_log = derivative_management.updateDerivative(dummy_derivative,
                                                         dummy_user.id,
+                                                        -1,
                                                         dummy_updates)
 
     # Assert that updateDerivative returns the correct update log
@@ -147,6 +149,7 @@ def testUpdateDerivativeRegistersActions(dummy_derivative, dummy_user, dummy_upd
     # Execute updateDerivative
     update_log = derivative_management.updateDerivative(dummy_derivative,
                                                         dummy_user.id,
+                                                        -1,
                                                         dummy_updates)
 
     # Query the database for the actions that corrosponds to the update
@@ -175,6 +178,7 @@ def testUpdateDerivativeHandlesAbsoluteDerivatives(dummy_abs_derivative, dummy_u
     with pytest.raises(AbsoluteDerivativeException):
         derivative_management.updateDerivative(dummy_abs_derivative,
                                                dummy_user.id,
+                                               -1,
                                                dummy_updates)
 
     # Assert that the derivative remains unchanged by comparing value dictionary

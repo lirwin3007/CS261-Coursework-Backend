@@ -111,18 +111,7 @@ echo "correcting derivative codes"
 mysql -e "
   UPDATE derivatex.derivative
 
-  JOIN
-  (
-    SELECT derivative.id as id, COUNT(below.id) + 1 as count FROM derivatex.derivative
-
-    LEFT JOIN derivatex.derivative below
-      ON below.id < derivative.id
-      AND LEFT(below.selling_party, 3) = LEFT(derivative.selling_party, 3)
-
-    GROUP BY derivative.id
-  ) counts ON counts.id = derivative.id
-
-  SET code = CONCAT(LEFT(derivative.selling_party, 3), '-', counts.count);
+  SET code = CONCAT(LEFT(derivative.selling_party, 3), '-', FLOOR(RAND()*1000));
 "
 
 echo "creating users"
@@ -143,6 +132,9 @@ mysql -e "
     (SELECT id FROM user ORDER BY RAND () LIMIT 1),
   'ADD', date_of_trade FROM derivative;
 "
+
+echo "introducing errors"
+python3 introduceErrors.py
 
 # Clear temp directory
 echo "clearing temp"
