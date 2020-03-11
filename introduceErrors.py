@@ -15,7 +15,7 @@ idLimit = 25000
 
 # Connect to database
 cnx = mysql.connector.connect(user='derivatex_backend', password='qwerty123',
-                              host='127.0.0.1',
+                              host='localhost',
                               database='derivatex')
 cursor = cnx.cursor()
 
