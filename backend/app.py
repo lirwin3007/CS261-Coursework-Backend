@@ -49,6 +49,10 @@ class Application:
         app.register_blueprint(DerivativeBlueprint)
         app.register_blueprint(LearnedBehaviourBlueprint)
 
+        @app.teardown_request
+        def shutdown_session(exception=None):
+            db.session.close()
+
         # Return app reference
         return app
 
