@@ -199,11 +199,12 @@ def growTrees():
         rootNode.confidence = (len(truePositives) / (len(truePositives) + len(falsePositives))) * 100
         if len(truePositives) / total_starting_errors < 0.05:
             removeTree(rootNode)
+        else:
+            splitOnTree(rootNode)
         db.session.flush()
         errorsLeftToFind = [x for x in result[Label.VALID] if x['label'] == Label.ERRONEOUS]
         if len(errorsLeftToFind) / total_starting_errors < 0.1:
             finished = True
-        splitOnTree(rootNode)
 
     db.session.commit()
 
