@@ -25,11 +25,11 @@ class Application:
         app.config.from_object(config)
 
         # Create scheduler for generating reports
-        #scheduler = APScheduler()
-        #scheduler.init_app(app)
-        #scheduler.start()
-        #app.apscheduler.add_job(func=report_management.generateAllReports,
-        #                        trigger='cron', hour='23', minute='59', id='j1')
+        scheduler = APScheduler()
+        scheduler.init_app(app)
+        scheduler.start()
+        app.apscheduler.add_job(func=report_management.generateAllReports,
+                                trigger='cron', hour='23', minute='59', id='j1')
 
         # Allow cross-origin requests
         CORS(app)
