@@ -158,6 +158,13 @@ def indexDerivatives(page_size, page_number, order_key, reverse_order, search_te
         # Standardise the search term
         search_term = search_term.strip().upper()
 
+        # Search for matching derivative codes
+        code_fuz = []
+        all_codes = Derivative.query.with_entities(Derivative.code).all()
+        for code in [c[0] for c in all_codes]:
+            if search_term in code.upper():
+                code_fuz.append(code)
+
         # Search for matching asset names
         assets_fuz = []
         for asset in external_management.indexAssets():
@@ -172,6 +179,7 @@ def indexDerivatives(page_size, page_number, order_key, reverse_order, search_te
 
         # Apply fuzzy search to query
         query = query.filter(or_(
+            Derivative.code.in_(code_fuz),
             Derivative.asset.in_(assets_fuz),
             Derivative.buying_party.in_(companies_fuz),
             Derivative.selling_party.in_(companies_fuz),
