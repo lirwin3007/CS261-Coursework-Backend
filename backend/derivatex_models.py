@@ -78,7 +78,7 @@ class User(db.Model):
     f_name = db.Column(db.String(32), nullable=False)
     l_name = db.Column(db.String(32), nullable=False)
     email = db.Column(db.String(32), nullable=False, unique=True)
-    password = db.Column(db.String(128), nullable=False, unique=True)
+    password = db.Column(db.String(128), nullable=False)
     profile_image = db.Column(db.String(30000))
 
     def __str__(self):
