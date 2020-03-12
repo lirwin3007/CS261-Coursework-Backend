@@ -7,6 +7,7 @@ from sqlalchemy import asc, desc, or_
 # Local application imports
 from backend.derivatex_models import Derivative, Action, ActionType
 from backend.db import db
+from backend import utils
 from backend.managers import external_management
 from backend.utils import clamp, AbsoluteDerivativeException
 
@@ -179,6 +180,8 @@ def indexDerivatives(page_size, page_number, order_key, reverse_order, search_te
 
         # Apply fuzzy search to query
         query = query.filter(or_(
+            Derivative.date_of_trade.contains(search_term),
+            Derivative.maturity_date.contains(search_term),
             Derivative.code.in_(code_fuz),
             Derivative.asset.in_(assets_fuz),
             Derivative.buying_party.in_(companies_fuz),
